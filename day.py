@@ -16,7 +16,7 @@ class Day(object):
         part1 = self.part1()
         out1 = "NYI" if part1 == -1 else str(part1)
         print("\tPart 1: " + out1)
-        part2 = self.part1()
+        part2 = self.part2()
         out2 = "NYI" if part2 == -1 else str(part2)
         print("\tPart 2: " + out2)
 
