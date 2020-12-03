@@ -1,6 +1,6 @@
 from day import Day
 
-class Day1(Day):
+class Day01(Day):
     day = 1
     title = "Report Repair"
 
@@ -30,6 +30,6 @@ class Day1(Day):
 
 
 if __name__ == "__main__":
-    d = Day1()
+    d = Day01()
     d.run()
 

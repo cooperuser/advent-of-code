@@ -1,7 +1,7 @@
 from day import Day
 from re import match
 
-class Day2(Day):
+class Day02(Day):
     day = 2
     title = "Password Philosophy"
 
@@ -32,6 +32,6 @@ class Day2(Day):
 
 
 if __name__ == "__main__":
-    d = Day2()
+    d = Day02()
     d.run()
 

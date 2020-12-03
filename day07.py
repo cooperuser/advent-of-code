@@ -1,7 +1,7 @@
 from day import Day
 
-class Day6(Day):
-    day = 6
+class Day07(Day):
+    day = 7
     title = ""
 
     def setup(self, lines) -> None:
@@ -15,6 +15,6 @@ class Day6(Day):
 
 
 if __name__ == "__main__":
-    d = Day6()
+    d = Day07()
     d.run()
 

@@ -1,12 +1,12 @@
-from day1 import Day1
-from day2 import Day2
-from day3 import Day3
-from day4 import Day4
-from day5 import Day5
-from day6 import Day6
-from day7 import Day7
-from day8 import Day8
-from day9 import Day9
+from day01 import Day01
+from day02 import Day02
+from day03 import Day03
+from day04 import Day04
+from day05 import Day05
+from day06 import Day06
+from day07 import Day07
+from day08 import Day08
+from day09 import Day09
 from day10 import Day10
 from day11 import Day11
 from day12 import Day12
@@ -25,15 +25,15 @@ from day24 import Day24
 from day25 import Day25
 
 if __name__ == "__main__":
-    Day1().run()
-    Day2().run()
-    Day3().run()
-    Day4().run()
-    Day5().run()
-    Day6().run()
-    Day7().run()
-    Day8().run()
-    Day9().run()
+    Day01().run()
+    Day02().run()
+    Day03().run()
+    Day04().run()
+    Day05().run()
+    Day06().run()
+    Day07().run()
+    Day08().run()
+    Day09().run()
     Day10().run()
     Day11().run()
     Day12().run()
