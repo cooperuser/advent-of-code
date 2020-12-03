@@ -1,20 +1,20 @@
 from day import Day
 
 class Day23(Day):
-    day = 23
-    title = ""
+	day = 23
+	title = ""
 
-    def setup(self, lines) -> None:
-        pass
+	def setup(self, lines) -> None:
+		pass
 
-    def part1(self) -> int:
-        return -1
+	def part1(self) -> int:
+		return -1
 
-    def part2(self) -> int:
-        return -1
+	def part2(self) -> int:
+		return -1
 
 
 if __name__ == "__main__":
-    d = Day23()
-    d.run()
+	d = Day23()
+	d.run()
 
