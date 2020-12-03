@@ -3,6 +3,9 @@ class Day(object):
     title = ""
 
     def run(self) -> None:
+        if not self.__class__.title:
+            return
+
         print("Day {}: {}".format(self.__class__.day, self.__class__.title))
 
         file = open("data/day" + str(self.__class__.day), 'r')
@@ -10,8 +13,12 @@ class Day(object):
         file.close()
         self.setup(lines)
 
-        print("\tPart 1: " + str(self.part1()))
-        print("\tPart 2: " + str(self.part2()))
+        part1 = self.part1()
+        out1 = "NYI" if part1 == -1 else str(part1)
+        print("\tPart 1: " + out1)
+        part2 = self.part1()
+        out2 = "NYI" if part2 == -1 else str(part2)
+        print("\tPart 2: " + out2)
 
     def setup(self, lines) -> None:
         pass
