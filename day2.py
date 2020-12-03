@@ -14,7 +14,17 @@ def part1():
     return valid
 
 def part2():
-    pass
+    valid = 0
+    for line in lines:
+        g = match(pattern, line).groups()
+        a = int(g[0]) - 1
+        b = int(g[1]) - 1
+        character = g[2]
+        password = g[3]
+        if (password[a] == character) != (password[b] == character):
+            valid += 1
+    return valid
+
 
 if __name__ == "__main__":
     print(part1())
