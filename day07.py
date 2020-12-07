@@ -12,18 +12,18 @@ class Bag(object):
 	def addBag(self, name, count):
 		self.bags[name] = count
 
-	def canHold(self, name):
+	def canHold(self, name, bags):
 		if name in self.bags:
 			return True
 		for bag in self.bags:
-			if bags[bag].canHold(name):
+			if bags[bag].canHold(name, bags):
 				return True
 		return False
 
-	def countBags(self):
+	def countBags(self, bags):
 		total = 1
 		for bag in self.bags:
-			total += self.bags[bag] * bags[bag].countBags()
+			total += self.bags[bag] * bags[bag].countBags(bags)
 		return total
 
 
@@ -36,11 +36,12 @@ class Day07(Day):
 	target = "shiny gold"
 
 	def setup(self, lines) -> None:
+		self.bags = {}
 		for line in lines:
 			g = match(Day07.pattern, line.strip()).groups()
 			contents = g[1]
 			bag = Bag(g[0])
-			bags[g[0]] = bag
+			self.bags[g[0]] = bag
 			if contents == "no other bags":
 				continue
 			for bagString in contents.split(", "):
@@ -49,14 +50,13 @@ class Day07(Day):
 
 	def part1(self) -> int:
 		able = set()
-		queue = []
-		for bag in bags:
-			if bags[bag].canHold(Day07.target):
+		for bag in self.bags:
+			if self.bags[bag].canHold(Day07.target, self.bags):
 				able.add(bag)
 		return len(able)
 
 	def part2(self) -> int:
-		return bags[Day07.target].countBags() - 1
+		return self.bags[Day07.target].countBags(self.bags) - 1
 
 
 if __name__ == "__main__":
