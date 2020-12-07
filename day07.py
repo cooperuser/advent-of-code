@@ -1,8 +1,6 @@
 from day import Day
 from re import match
 
-bags = {}
-
 class Bag(object):
 	def __init__(self, name):
 		self.name = name
@@ -27,25 +25,24 @@ class Bag(object):
 		return total
 
 
-
 class Day07(Day):
 	day = 7
 	title = "Handy Haversacks"
-	pattern = "([a-z]+ [a-z]+) bags contain (.+)."
-	bagPattern = "([0-9]+) ([a-z]+ [a-z]+)"
+	patternLine = "([a-z]+ [a-z]+) bags contain (.+)."
+	patternBag = "([0-9]+) ([a-z]+ [a-z]+)"
 	target = "shiny gold"
 
 	def setup(self, lines) -> None:
 		self.bags = {}
 		for line in lines:
-			g = match(Day07.pattern, line.strip()).groups()
+			g = match(Day07.patternLine, line.strip()).groups()
 			contents = g[1]
 			bag = Bag(g[0])
 			self.bags[g[0]] = bag
 			if contents == "no other bags":
 				continue
 			for bagString in contents.split(", "):
-				b = match(Day07.bagPattern, bagString).groups()
+				b = match(Day07.patternBag, bagString).groups()
 				bag.addBag(b[1], int(b[0]))
 
 	def part1(self) -> int:
