@@ -10,22 +10,20 @@ class Day01(Day):
 
 	def part1(self) -> int:
 		for i in range(self.length):
-			for j in range(i + 1, self.length):
-				a = self.numbers[i]
-				b = self.numbers[j]
-				if a + b == 2020:
-					return a * b
+			a = self.numbers[i]
+			b = 2020 - a
+			if b in self.numbers:
+				return a * b
 		return -1
 
 	def part2(self) -> int:
 		for i in range(self.length):
 			for j in range(i + 1, self.length):
-				for k in range(j + 1, self.length):
-					a = self.numbers[i]
-					b = self.numbers[j]
-					c = self.numbers[k]
-					if a + b + c == 2020:
-						return a * b * c
+				a = self.numbers[i]
+				b = self.numbers[j]
+				c = 2020 - a - b
+				if c in self.numbers:
+					return a * b * c
 		return -1
 
 
