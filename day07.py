@@ -1,16 +1,15 @@
-from day import Day
+from day import *
 from re import match
 
 class Bag(object):
-	def __init__(self, name):
-		self.name = name
-		self.bags = {}
-		self.checked = False
+	def __init__(self, name: str):
+		self.name: str = name
+		self.bags: dict[str, int] = {}
 
-	def addBag(self, name, count):
+	def addBag(self, name: str, count: int):
 		self.bags[name] = count
 
-	def canHold(self, name, bags):
+	def canHold(self, name: str, bags: dict):
 		if name in self.bags:
 			return True
 		for bag in self.bags:
@@ -18,7 +17,7 @@ class Bag(object):
 				return True
 		return False
 
-	def countBags(self, bags):
+	def countBags(self, bags: dict):
 		total = 1
 		for bag in self.bags:
 			total += self.bags[bag] * bags[bag].countBags(bags)
@@ -32,8 +31,8 @@ class Day07(Day):
 	patternBag = "([0-9]+) ([a-z]+ [a-z]+)"
 	target = "shiny gold"
 
-	def setup(self, lines) -> None:
-		self.bags = {}
+	def setup(self, lines: List[str]) -> None:
+		self.bags: dict[str, Bag] = {}
 		for line in lines:
 			g = match(Day07.patternLine, line.strip()).groups()
 			contents = g[1]
@@ -46,11 +45,11 @@ class Day07(Day):
 				bag.addBag(b[1], int(b[0]))
 
 	def part1(self) -> int:
-		able = set()
-		for bag in self.bags:
-			if self.bags[bag].canHold(Day07.target, self.bags):
-				able.add(bag)
-		return len(able)
+		able = 0
+		for name in self.bags:
+			if self.bags[name].canHold(Day07.target, self.bags):
+				able += 1
+		return able
 
 	def part2(self) -> int:
 		return self.bags[Day07.target].countBags(self.bags) - 1

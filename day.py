@@ -1,3 +1,5 @@
+from typing import List
+
 class Day(object):
 	day = 0
 	title = ""
@@ -20,7 +22,7 @@ class Day(object):
 		out2 = "NYI" if part2 == -1 else str(part2)
 		print("\tPart 2: " + out2)
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		pass
 
 	def part1(self) -> int:
