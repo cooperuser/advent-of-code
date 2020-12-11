@@ -57,5 +57,5 @@ class Day07(Day):
 
 if __name__ == "__main__":
 	d = Day07()
-	d.run()
+	d.test()
 

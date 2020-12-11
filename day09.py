@@ -5,6 +5,9 @@ class Day09(Day):
 	title = "Encoding Error"
 
 	def setup(self, lines: List[str]) -> None:
+		self.preamble = 25
+		if self.parameters:
+			self.preamble = int(self.parameters[0])
 		self.lines = [int(line.strip()) for line in lines]
 	
 	def find_error(self, preamble: int):
@@ -22,7 +25,7 @@ class Day09(Day):
 		return -1
 
 	def part1(self) -> int:
-		self.index = self.find_error(25)
+		self.index = self.find_error(self.preamble)
 		self.answer = self.lines[self.index]
 		return self.answer
 
@@ -42,7 +45,7 @@ class Day09(Day):
 		return -1
 
 	@staticmethod
-	def is_sum(number: int, queue: List[int]):
+	def is_sum(number: int, queue: List[int]) -> bool:
 		for i in range(len(queue) - 1):
 			if number - queue[i] in queue:
 				return True
@@ -51,5 +54,5 @@ class Day09(Day):
 
 if __name__ == "__main__":
 	d = Day09()
-	d.run()
+	d.test()
 

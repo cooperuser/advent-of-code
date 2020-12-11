@@ -1,11 +1,11 @@
-from day import Day
+from day import *
 from re import match
 
 class Day02(Day):
 	day = 2
 	title = "Password Philosophy"
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		self.lines = lines
 		self.pattern = "([0-9]+)-([0-9]+) ([a-z]): ([a-z]+)"
 
@@ -33,5 +33,5 @@ class Day02(Day):
 
 if __name__ == "__main__":
 	d = Day02()
-	d.run()
+	d.test()
 

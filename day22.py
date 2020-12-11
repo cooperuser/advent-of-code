@@ -1,10 +1,10 @@
-from day import Day
+from day import *
 
 class Day22(Day):
 	day = 22
 	title = ""
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		pass
 
 	def part1(self) -> int:
@@ -16,5 +16,5 @@ class Day22(Day):
 
 if __name__ == "__main__":
 	d = Day22()
-	d.run()
+	d.test()
 

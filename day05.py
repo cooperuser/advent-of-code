@@ -1,4 +1,4 @@
-from day import Day
+from day import *
 from re import match
 
 class Day05(Day):
@@ -6,7 +6,7 @@ class Day05(Day):
 	title = "Binary Boarding"
 	pattern = "([BF]{7})([LR]{3})"
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		self.lines = lines
 		self.min = -1
 		self.max = 0
@@ -40,5 +40,5 @@ class Day05(Day):
 
 if __name__ == "__main__":
 	d = Day05()
-	d.run()
+	d.test()
 

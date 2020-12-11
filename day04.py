@@ -1,4 +1,4 @@
-from day import Day
+from day import *
 from re import match
 
 class Day04(Day):
@@ -6,7 +6,7 @@ class Day04(Day):
 	title = "Passport Processing"
 	eye_colors = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		self.passports = []
 		passport = {}
 		for line in lines:
@@ -98,5 +98,5 @@ class Day04(Day):
 
 if __name__ == "__main__":
 	d = Day04()
-	d.run()
+	d.test()
 

@@ -1,11 +1,11 @@
-from day import Day
+from day import *
 
 class Day06(Day):
 	day = 6
 	title = "Custom Customs"
 	alphabet = "abcdefghijklmnopqrstuvwxyz"
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		self.groups = []
 		group = []
 		for line in lines:
@@ -43,5 +43,5 @@ class Day06(Day):
 
 if __name__ == "__main__":
 	d = Day06()
-	d.run()
+	d.test()
 

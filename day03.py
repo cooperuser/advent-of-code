@@ -1,17 +1,17 @@
-from day import Day
+from day import *
 
 class Day03(Day):
 	day = 3
 	title = "Toboggan Trajectory"
 
-	def setup(self, lines) -> None:
+	def setup(self, lines: List[str]) -> None:
 		self.map = []
 		for line in lines:
 			self.map.append([c == '#' for c in line.strip()])
 		self.width = len(self.map[0])
 		self.height = len(self.map)
 
-	def countTrees(self, slope):
+	def countTrees(self, slope) -> int:
 		count = 0
 		x = 0
 		dx = slope[0]
@@ -36,5 +36,5 @@ class Day03(Day):
 
 if __name__ == "__main__":
 	d = Day03()
-	d.run()
+	d.test()
 

@@ -95,5 +95,5 @@ class Day11(Day):
 
 if __name__ == "__main__":
 	d = Day11()
-	d.run()
+	d.test()
 
