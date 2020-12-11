@@ -1,98 +1,95 @@
+from typing_extensions import TypeAlias, Tuple
 from day import *
 from copy import deepcopy
+
+SeatingChart: TypeAlias = "List[List[int]]"
+Neighborhood: TypeAlias = "List[List[List[Tuple[int]]]]"
+IDS = {'.': 0, 'L': 1, '#': 2}
+DIRECTIONS = [
+	[-1, -1], [0, -1], [1, -1],
+	[-1,  0],          [1,  0],
+	[-1,  1], [0,  1], [1,  1]
+]
 
 class Day11(Day):
 	day = 11
 	title = "Seating System"
 
 	def setup(self, lines: List[str]) -> None:
-		self.original = []
+		self.seats = []
 		for line in lines:
-			row = []
-			for c in line.strip():
-				if c == ".":
-					row.append(0)
-				elif c == "L":
-					row.append(1)
-				elif c == "#":
-					row.append(2)
-			self.original.append(row)
-		self.seats = deepcopy(self.original)
+			self.seats.append([IDS[c] for c in line.strip()])
 		self.width = len(self.seats[0])
 		self.height = len(self.seats)
+		self.adjacencies = []
+		self.sightlines = []
+		self.set_neighbors()
+	
+	def out_of_bounds(self, x, y) -> bool:
+		return x < 0 or x >= self.width or y < 0 or y >= self.height
 
+	def set_neighbors(self) -> None:
+		for y in range(self.height):
+			adjacencies_row = []
+			sightlines_row = []
+			for x in range(self.width):
+				adjacencies = []
+				sightlines = []
+				for dir in DIRECTIONS:
+					for distance in range(1, max(self.width, self.height)):
+						dx = x + dir[0] * distance
+						dy = y + dir[1] * distance
+						if self.out_of_bounds(dx, dy):
+							break
+						if self.seats[dy][dx]:
+							spot = (dx, dy)
+							sightlines.append(spot)
+							if distance == 1:
+								adjacencies.append(spot)
+							break
+				adjacencies_row.append(adjacencies)
+				sightlines_row.append(sightlines)
+			self.adjacencies.append(adjacencies_row)
+			self.sightlines.append(sightlines_row)
+	
+	def get_seats(self, neighbors: Neighborhood, limit: int) -> SeatingChart:
+		seats = deepcopy(self.seats)
+		changed = True
+		while changed:
+			changed = False
+			new = []
+			for y in range(self.height):
+				new.append([])
+				for x in range(self.width):
+					old = seats[y][x]
+					new[y].append(old)
+					if not old:
+						continue
+					count = 0
+					for spot in neighbors[y][x]:
+						if seats[spot[1]][spot[0]] == 2:
+							count += 1
+					if old == 1 and count == 0:
+						new[y][x] = 2
+						changed = True
+					elif old == 2 and count >= limit:
+						new[y][x] = 1
+						changed = True
+			seats = new
+		return seats
+	
 	def part1(self) -> int:
-		changes = 1
-		while changes != 0:
-			changes = 0
-			new = []
-			for y in range(self.height):
-				new.append([])
-				for x in range(self.width):
-					new[y].append(self.seats[y][x])
-					adjacent = 0
-					for j in range(-1, 2):
-						for i in range(-1, 2):
-							if j == 0 and i == 0:
-								continue
-							dy = y + j
-							dx = x + i
-							if dy < 0 or dy >= self.height or dx < 0 or dx >= self.width:
-								continue
-							adjacent += 1 if self.seats[dy][dx] == 2 else 0
-					if self.seats[y][x] == 1 and adjacent == 0:
-						new[y][x] = 2
-						changes += 1
-					elif self.seats[y][x] == 2 and adjacent >= 4:
-						new[y][x] = 1
-						changes += 1
-			self.seats = new
-		occupied = 0
-		for y in range(self.height):
-			for x in range(self.width):
-				if self.seats[y][x] == 2:
-					occupied += 1
-		return occupied
-
+		return Day11.count_occupied(self.get_seats(self.adjacencies, 4))
+	
 	def part2(self) -> int:
-		self.seats = deepcopy(self.original)
-		changes = 1
-		while changes != 0:
-			changes = 0
-			new = []
-			for y in range(self.height):
-				new.append([])
-				for x in range(self.width):
-					new[y].append(self.seats[y][x])
-					adjacent = 0
-					for j in range(-1, 2):
-						for i in range(-1, 2):
-							if j == 0 and i == 0:
-								continue
-							distance = 1
-							while True:
-								dy = y + j * distance
-								dx = x + i * distance
-								if dy < 0 or dy >= self.height or dx < 0 or dx >= self.width:
-									break
-								if self.seats[dy][dx] == 1:
-									break
-								if self.seats[dy][dx] == 2:
-									adjacent += 1
-									break
-								distance += 1
-					if self.seats[y][x] == 1 and adjacent == 0:
-						new[y][x] = 2
-						changes += 1
-					elif self.seats[y][x] == 2 and adjacent >= 5:
-						new[y][x] = 1
-						changes += 1
-			self.seats = new
+		return Day11.count_occupied(self.get_seats(self.sightlines, 5))
+
+	@staticmethod
+	def count_occupied(seats: SeatingChart) -> int:
 		occupied = 0
-		for y in range(self.height):
-			for x in range(self.width):
-				if self.seats[y][x] == 2:
-					occupied += 1
+		for row in seats:
+			for seat in row:
+				occupied += seat == 2
 		return occupied
 
 
