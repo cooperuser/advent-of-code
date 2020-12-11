@@ -83,7 +83,8 @@ class Day(object):
 			self.run()
 			return False
 		expected_part1 = int(test_lines[sep - 1])
-		expected_part2 = int(test_lines[-1])
+		raw_part2 = test_lines[-1]
+		expected_part2 = int(raw_part2) if raw_part2.strip() else -1
 		total = 0
 
 		print(TEST + " Day {}: {}\n".format(self.__class__.day, title))
