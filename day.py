@@ -3,6 +3,7 @@ from termcolor import colored
 import re
 import time
 
+UNITS = ["", 'm', 'μ', 'n']
 SEPARATOR = "-- PART1 TEST INPUT ABOVE, PART2 TEST INPUT BELOW --\n"
 PARAMETERS = "PARAMETERS: (.*)"
 TEST = colored("-- TESTING --", "blue", attrs=["bold"])
@@ -21,15 +22,15 @@ def load_file(path: str) -> List[str]:
 		return lines
 
 def format_time(delay: float) -> str:
-	ch = ""
-	if delay < 10:
+	ch = 0
+	while delay < 1:
 		delay *= 1000
-		ch = 'μ'
-	return "{:.2f}{}s".format(delay, ch)
+		ch += 1
+	return "{:.2f}{}s".format(delay, UNITS[ch])
 
-def output_result(result: int, elapsed: float, text_day: str) -> None:
+def output_result(result: int, elapsed: float, text_day: str, day_num: int) -> None:
 	if result != -1:
-		print(INFO + text_day + "part1")
+		print(INFO + text_day + "part" + str(day_num))
 		print("\treceived: " + colored(str(result), "yellow"))
 		print("\telapsed : " + colored(format_time(elapsed), attrs=["dark"]))
 		print()
@@ -63,7 +64,6 @@ class Day(object):
 		match = re.match(PARAMETERS, test_lines[0])
 		if match:
 			parameters = match.groups()[0].split(',')
-			print(parameters)
 			test_lines = test_lines[1:]
 		if not test_lines:
 			self.run()
@@ -138,13 +138,13 @@ class Day(object):
 		submission_part1 = self.part1()
 		time_part1_stop = time.time()
 		time_part1 = time_part1_stop - time_part1_start
-		output_result(submission_part1, time_part1, text_day)
+		output_result(submission_part1, time_part1, text_day, 1)
 
 		time_part2_start = time.time()
 		submission_part2 = self.part2()
 		time_part2_stop = time.time()
 		time_part2 = time_part2_stop - time_part2_start
-		output_result(submission_part2, time_part2, text_day)
+		output_result(submission_part2, time_part2, text_day, 2)
 
 		elapsed = time_part1 + time_part2
 		print("Total time: " + colored(format_time(elapsed), attrs=["dark"]))
