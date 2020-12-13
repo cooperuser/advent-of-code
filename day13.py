@@ -32,7 +32,7 @@ class Day13(Day):
 		for bus, index in self.busses.items():
 			if not index:
 				lcm = bus
-			for n in range(1, 10000):
+			for n in range(1, bus):
 				if (offset + lcm*n - index) % bus == 0:
 					offset += lcm*n
 					lcm *= bus // gcd(lcm, bus)
