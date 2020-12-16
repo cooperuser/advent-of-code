@@ -20,7 +20,7 @@ Segment: TypeAlias = "Tuple[Mask, List[MemorySetter]]"
 
 class Day14(Day):
 	day = 14
-	title = ""
+	title = "Docking Data"
 
 	def setup(self, lines: List[str]) -> None:
 		self.segments: List[Segment] = []
