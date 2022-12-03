@@ -57,7 +57,6 @@ fn get_play(you: &str, opp: &Play) -> i32 {
 }
 
 impl Day02 {
-
     fn part_a(input: Vec<&str>) -> i32 {
         let pairs: Vec<(Play, Play)> = input.iter()
             .filter(|line| !line.is_empty())
