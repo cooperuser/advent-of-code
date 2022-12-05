@@ -1,5 +1,3 @@
-#![allow(unused_imports)]
-
 mod day;
 
 mod day01;
@@ -9,7 +7,7 @@ mod day04;
 mod day05;
 
 fn main() {
-    use day04::*;
+    use day05::*;
 
     let sample = Solution::new(split(SAMPLE));
     let real = Solution::new(split(INPUT));
@@ -34,5 +32,5 @@ fn main() {
 }
 
 pub fn split(input: &str) -> Vec<String> {
-    input.trim().split("\n").map(|s| s.to_string()).collect()
+    input.trim_end().split("\n").map(|s| s.to_string()).collect()
 }
