@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 struct Day01;
 
 impl Day01 {
