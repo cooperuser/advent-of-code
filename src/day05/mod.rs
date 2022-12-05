@@ -9,7 +9,7 @@ pub const SAMPLE_B: &str = "MCD";
 pub struct Solution {
     raw: Vec<String>,
     stacks: Vec<Vec<char>>,
-    commands: Vec<(i32, i32, i32)>
+    commands: Vec<(usize, usize, i32)>
 }
 
 impl Solution {
@@ -37,8 +37,8 @@ impl Solution {
             let line = raw[i].clone();
             let chars: Vec<&str> = line.split_whitespace().collect();
             let count: i32 = chars[1].to_string().parse().unwrap();
-            let from: i32 = chars[3].to_string().parse().unwrap();
-            let to: i32 = chars[5].to_string().parse().unwrap();
+            let from: usize = chars[3].to_string().parse().unwrap();
+            let to: usize = chars[5].to_string().parse().unwrap();
             commands.push((from - 1, to - 1, count));
         }
 
@@ -54,8 +54,8 @@ impl Solution {
         let mut stacks = self.stacks.clone();
         for (from, to, count) in &self.commands {
             for _ in 0..*count {
-                let c = stacks[*from as usize].pop();
-                stacks[*to as usize].push(c.unwrap());
+                let c = stacks[*from].pop();
+                stacks[*to].push(c.unwrap());
             }
         }
 
@@ -71,11 +71,11 @@ impl Solution {
         for (from, to, count) in &self.commands {
             let mut pile = vec![];
             for _ in 0..*count {
-                let c = stacks[*from as usize].pop();
+                let c = stacks[*from].pop();
                 pile.push(c.unwrap());
             }
             pile.reverse();
-            stacks[*to as usize].append(&mut pile);
+            stacks[*to].append(&mut pile);
         }
 
         let mut tops = "".to_string();
