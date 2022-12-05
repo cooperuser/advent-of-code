@@ -1,11 +1,21 @@
 use std::{ops::Range, collections::HashSet};
 
-struct Day04;
+pub const INPUT: &str = include_str!("input.txt");
+pub const SAMPLE: &str = include_str!("input_sample.txt");
+pub const SAMPLE_A: i32 = 2;
+pub const SAMPLE_B: i32 = 4;
 
-impl Day04 {
-    fn part_a(input: Vec<&str>) -> i32 {
-        let lines: Vec<(Range<i32>, Range<i32>)> = input.iter()
-            .map(|line| {
+#[derive(Default)]
+pub struct Solution {
+    raw: Vec<String>,
+    lines: Vec<(Range<i32>, Range<i32>)>
+}
+
+impl Solution {
+    pub fn new(raw: Vec<String>) -> Self {
+        Self {
+            raw: raw.clone(),
+            lines: raw.iter().map(|line| {
                 let ranges = line.split(",")
                     .map(|side| {
                         let v = side.split("-")
@@ -14,10 +24,14 @@ impl Day04 {
                         v[0]..v[1] + 1
                     }).collect::<Vec<Range<i32>>>();
                 (ranges[0].clone(), ranges[1].clone())
-            }).collect();
+            }).collect(),
+            ..Default::default()
+        }
+    }
 
+    pub fn part_a(&self) -> i32 {
         let mut count = 0;
-        for line in lines {
+        for line in self.lines.clone() {
             let a = line.0.collect::<HashSet<i32>>();
             let b = line.1.collect::<HashSet<i32>>();
             let inter = a.intersection(&b).collect::<HashSet<&i32>>().len();
@@ -28,21 +42,9 @@ impl Day04 {
         count
     }
 
-    fn part_b(input: Vec<&str>) -> i32 {
-        let lines: Vec<(Range<i32>, Range<i32>)> = input.iter()
-            .map(|line| {
-                let ranges = line.split(",")
-                    .map(|side| {
-                        let v = side.split("-")
-                            .map(|num| num.parse::<i32>().unwrap())
-                            .collect::<Vec<i32>>();
-                        v[0]..v[1] + 1
-                    }).collect::<Vec<Range<i32>>>();
-                (ranges[0].clone(), ranges[1].clone())
-            }).collect();
-
+    pub fn part_b(&self) -> i32 {
         let mut count = 0;
-        for line in lines {
+        for line in self.lines.clone() {
             let a = line.0.collect::<HashSet<i32>>();
             let b = line.1.collect::<HashSet<i32>>();
             let union = a.union(&b).collect::<HashSet<&i32>>().len();
@@ -60,19 +62,13 @@ mod test {
 
     #[test]
     fn part_a() {
-        // let input = include_str!("input_sample.txt");
-        let input = include_str!("input.txt");
-        // let split = input.split("\n");
-        let split = input.split("\n").filter(|line| !line.is_empty());
-        assert_eq!(Day04::part_a(split.collect()), 651);
+        let solution = Solution::new(crate::split(SAMPLE));
+        assert_eq!(solution.part_a(), SAMPLE_A);
     }
 
     #[test]
     fn part_b() {
-        // let input = include_str!("input_sample.txt");
-        let input = include_str!("input.txt");
-        // let split = input.split("\n");
-        let split = input.split("\n").filter(|line| !line.is_empty());
-        assert_eq!(Day04::part_b(split.collect()), 956);
+        let solution = Solution::new(crate::split(SAMPLE));
+        assert_eq!(solution.part_b(), SAMPLE_B);
     }
 }
