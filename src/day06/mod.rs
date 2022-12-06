@@ -30,7 +30,7 @@ impl Solution {
             for &q in &queue { set.insert(q); }
             if set.len() == 4 { return i as i32 + 1 }
         }
-        0
+        panic!("solution not found");
     }
 
     pub fn part_b(&self) -> i32 {
@@ -42,7 +42,7 @@ impl Solution {
             for &q in &queue { set.insert(q); }
             if set.len() == 14 { return i as i32 + 1 }
         }
-        0
+        panic!("solution not found");
     }
 }
 
