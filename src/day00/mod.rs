@@ -5,6 +5,7 @@ pub const SAMPLE_B: i32 = 0;
 
 #[derive(Default)]
 pub struct Solution {
+    #[allow(dead_code)]
     raw: Vec<String>,
 }
 
