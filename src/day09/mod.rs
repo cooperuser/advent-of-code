@@ -74,10 +74,8 @@ impl Solution {
                 let diff = (head.0 - tails[i].0, head.1 - tails[i].1);
 
                 if diff.0.abs() >= 2 || diff.1.abs() >= 2 {
-                    if diff.0 > 0 { tails[i].0 += 1 }
-                    if diff.0 < 0 { tails[i].0 -= 1 }
-                    if diff.1 > 0 { tails[i].1 += 1 }
-                    if diff.1 < 0 { tails[i].1 -= 1 }
+                    tails[i].0 += diff.0.signum();
+                    tails[i].1 += diff.1.signum();
                 }
             }
             visited.insert(*tails.last().unwrap());
