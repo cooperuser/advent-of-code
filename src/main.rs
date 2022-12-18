@@ -13,9 +13,10 @@ mod day12;
 mod day13;
 mod day14;
 mod day15;
+mod day18;
 
 fn main() {
-    use day15::*;
+    use day18::*;
 
     let sample = Solution::new(split(SAMPLE));
     let real = Solution::new(split(INPUT));
