@@ -81,13 +81,14 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> i32 {
-        let mut sum = 0;
+        // let mut sum = 0;
         // for (index, blueprint) in self.blueprints.iter().enumerate() {
         //     let geodes = blueprint.get(0, (0, 0, 0), (1, 0, 0, 0));
         //     println!("{}", geodes);
         //     sum += (index + 1) as i32 * geodes;
         // }
-        sum
+        // sum
+        0
     }
 
     pub fn part_b(&self) -> i32 {
