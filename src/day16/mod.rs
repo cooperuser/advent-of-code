@@ -1,9 +1,11 @@
+#![allow(dead_code)]
+
 use std::collections::{HashMap, HashSet};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE: &str = include_str!("input_sample.txt");
 pub const SAMPLE_A: i32 = 1651;
-pub const SAMPLE_B: i32 = 0;
+pub const SAMPLE_B: i32 = 1707;
 
 #[derive(Default)]
 pub struct Solution {
