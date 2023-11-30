@@ -1,7 +1,7 @@
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE: &str = include_str!("input_sample.txt");
-pub const SAMPLE_A: i32 = 0;
-pub const SAMPLE_B: i32 = 0;
+pub const SAMPLE_A: i64 = 0;
+pub const SAMPLE_B: i64 = 0;
 
 #[derive(Default)]
 pub struct Solution {
@@ -17,11 +17,11 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> i32 {
+    pub fn part_a(&self) -> i64 {
         0
     }
 
-    pub fn part_b(&self) -> i32 {
+    pub fn part_b(&self) -> i64 {
         0
     }
 }
