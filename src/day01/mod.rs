@@ -26,9 +26,7 @@ impl Solution {
             let mut last = 0;
             for char in line.chars() {
                 if !char.is_numeric() { continue; }
-                if first == 0 {
-                    first = char.to_digit(10).unwrap();
-                }
+                if first == 0 { first = char.to_digit(10).unwrap(); }
                 last = char.to_digit(10).unwrap();
             }
             sum += first * 10 + last;
@@ -40,25 +38,37 @@ impl Solution {
         let mut sum = 0;
         for line in &self.raw {
             let mut nums: Vec<u32> = Vec::new();
-            let mut chars: Vec<String> = Vec::new();
+            let mut three: Vec<String> = Vec::new();
+            let mut four: Vec<String> = Vec::new();
+            let mut five: Vec<String> = Vec::new();
+
             for char in line.chars() {
                 if char.is_numeric() {
                     nums.push(char.to_digit(10).unwrap());
                     continue;
                 }
-                chars.push(char.to_string());
-                let len = chars.len() as i32;
+                three.push(char.to_string());
+                four.push(char.to_string());
+                five.push(char.to_string());
 
-                if chars[(len-4).max(0) as usize..].join("") == "zero" { nums.push(0) }
-                else if chars[(len-3).max(0) as usize..].join("") == "one" { nums.push(1) }
-                else if chars[(len-3).max(0) as usize..].join("") == "two" { nums.push(2) }
-                else if chars[(len-5).max(0) as usize..].join("") == "three" { nums.push(3) }
-                else if chars[(len-4).max(0) as usize..].join("") == "four" { nums.push(4) }
-                else if chars[(len-4).max(0) as usize..].join("") == "five" { nums.push(5) }
-                else if chars[(len-3).max(0) as usize..].join("") == "six" { nums.push(6) }
-                else if chars[(len-5).max(0) as usize..].join("") == "seven" { nums.push(7) }
-                else if chars[(len-5).max(0) as usize..].join("") == "eight" { nums.push(8) }
-                else if chars[(len-4).max(0) as usize..].join("") == "nine" { nums.push(9) }
+                if three.len() > 3 { three.remove(0); }
+                if four.len() > 4 { four.remove(0); }
+                if five.len() > 5 { five.remove(0); }
+
+                let three = three.join("");
+                let four = four.join("");
+                let five = five.join("");
+
+                if three == "one" { nums.push(1); }
+                else if three == "two" { nums.push(2); }
+                else if three == "six" { nums.push(6); }
+                if four == "zero" { nums.push(0); }
+                else if four == "four" { nums.push(4); }
+                else if four == "five" { nums.push(5); }
+                else if four == "nine" { nums.push(9); }
+                if five == "three" { nums.push(3); }
+                else if five == "seven" { nums.push(7); }
+                else if five == "eight" { nums.push(8); }
             }
             let first = nums.first().unwrap();
             let last = nums.last().unwrap();
