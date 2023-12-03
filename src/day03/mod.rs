@@ -30,10 +30,9 @@ fn debug(soln: &Solution) {
                             }
                         },
                         None => {
-                            if soln.symbols.contains_key(&pos) {
-                                print!("{}", soln.symbols.get(&pos).unwrap());
-                            } else {
-                                print!(".");
+                            match soln.symbols.get(&pos) {
+                                Some(s) => print!("{s}"),
+                                None => print!("."),
                             }
                         }
                     }
@@ -115,11 +114,15 @@ impl Solution {
 
     pub fn part_b(&self) -> i64 {
         let mut sum = 0;
+        let max = self.numbers
+            .iter()
+            .max_by_key(|(_, (_, len))| len)
+            .unwrap().1.1 as i64;
         for (pos, symbol) in &self.symbols {
             if *symbol != '*' { continue; }
             let mut found = Vec::new();
             for y in pos.1-1..pos.1+2 {
-                for x in 0..self.raw.len() {
+                for x in pos.0-max..pos.0+max {
                     let x = x as i64;
                     match self.numbers.get(&(x as i64, y)) {
                         Some((num, len)) => {
