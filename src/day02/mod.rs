@@ -59,7 +59,7 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> i64 {
+    pub fn part_a(&self) -> Option<i64> {
         let max = Picking { red: 12, green: 13, blue: 14 };
         let mut sum = 0;
         'game: for game in &self.games {
@@ -70,10 +70,10 @@ impl Solution {
             }
             sum += game.id;
         }
-        sum as i64
+        Some(sum as i64)
     }
 
-    pub fn part_b(&self) -> i64 {
+    pub fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
         for game in &self.games {
             let min = Picking {
@@ -83,7 +83,7 @@ impl Solution {
             };
             sum += min.red * min.green * min.blue;
         }
-        sum as i64
+        Some(sum as i64)
     }
 }
 
@@ -94,12 +94,12 @@ mod test {
     #[test]
     fn part_a() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_a(), SAMPLE_A);
+        assert_eq!(solution.part_a().unwrap_or(0), SAMPLE_A);
     }
 
     #[test]
     fn part_b() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_b(), SAMPLE_B);
+        assert_eq!(solution.part_b().unwrap_or(0), SAMPLE_B);
     }
 }

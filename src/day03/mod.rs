@@ -96,7 +96,7 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> i64 {
+    pub fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
         'next: for ((x, y), (num, len)) in &self.numbers {
             let len = *len as i64;
@@ -109,10 +109,10 @@ impl Solution {
                 }
             }
         }
-        sum
+        Some(sum)
     }
 
-    pub fn part_b(&self) -> i64 {
+    pub fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
         let max = self.numbers
             .iter()
@@ -138,7 +138,7 @@ impl Solution {
                 sum += found[0] * found[1];
             }
         }
-        sum
+        Some(sum)
     }
 }
 
@@ -149,12 +149,12 @@ mod test {
     #[test]
     fn part_a() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_a(), SAMPLE_A);
+        assert_eq!(solution.part_a().unwrap_or(0), SAMPLE_A);
     }
 
     #[test]
     fn part_b() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_b(), SAMPLE_B);
+        assert_eq!(solution.part_b().unwrap_or(0), SAMPLE_B);
     }
 }

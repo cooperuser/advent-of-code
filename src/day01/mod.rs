@@ -19,7 +19,7 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> i64 {
+    pub fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
         for line in &self.raw {
             let mut first = 0;
@@ -31,10 +31,10 @@ impl Solution {
             }
             sum += first * 10 + last;
         }
-        sum as i64
+        Some(sum as i64)
     }
 
-    pub fn part_b(&self) -> i64 {
+    pub fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
         for line in &self.raw {
             let mut nums: Vec<u32> = Vec::new();
@@ -74,7 +74,7 @@ impl Solution {
             let last = nums.last().unwrap();
             sum += first * 10 + last;
         }
-        sum as i64
+        Some(sum as i64)
     }
 }
 
@@ -85,12 +85,12 @@ mod test {
     #[test]
     fn part_a() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_a(), SAMPLE_A);
+        assert_eq!(solution.part_a().unwrap_or(0), SAMPLE_A);
     }
 
     #[test]
     fn part_b() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_b(), SAMPLE_B);
+        assert_eq!(solution.part_b().unwrap_or(0), SAMPLE_B);
     }
 }

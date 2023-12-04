@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::{HashSet, HashMap};
 
 pub const INPUT: &str = include_str!("input.txt");
@@ -35,7 +37,7 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> i64 {
+    pub fn part_a(&self) -> Option<i64> {
         let mut total = 0;
         for card in &self.cards {
             let count = card.winning
@@ -46,10 +48,10 @@ impl Solution {
                 total += 2i64.pow(count as u32 - 1);
             }
         }
-        total
+        Some(total)
     }
 
-    pub fn part_b(&self) -> i64 {
+    pub fn part_b(&self) -> Option<i64> {
         let mut scaling: HashMap<usize, i64> = HashMap::from([(0, 1)]);
         for (index, card) in self.cards.iter().enumerate() {
             if !scaling.contains_key(&index) { scaling.insert(index, 1); }
@@ -65,7 +67,7 @@ impl Solution {
                 }
             }
         }
-        scaling.values().sum()
+        Some(scaling.values().sum())
     }
 }
 
@@ -76,12 +78,12 @@ mod test {
     #[test]
     fn part_a() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_a(), SAMPLE_A);
+        assert_eq!(solution.part_a().unwrap_or(0), SAMPLE_A);
     }
 
     #[test]
     fn part_b() {
         let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_b(), SAMPLE_B);
+        assert_eq!(solution.part_b().unwrap_or(0), SAMPLE_B);
     }
 }
