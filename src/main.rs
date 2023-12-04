@@ -7,7 +7,10 @@ fn main() {
     use day04::*;
 
     let sample = Solution::new(split(SAMPLE));
+    let start = std::time::Instant::now();
     let real = Solution::new(split(INPUT));
+    let duration = start.elapsed();
+    println!("parse :\t{:?}\n", duration);
 
     match sample.part_a() {
         Some(SAMPLE_A) => {
