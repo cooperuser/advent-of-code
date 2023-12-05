@@ -18,26 +18,21 @@ pub struct Solution {
 fn debug(soln: &Solution) {
     for y in 0..soln.raw.len() {
         let mut range = 0..soln.raw.len();
-        loop {
-            match range.next() {
-                Some(x) => {
-                    let pos = (x as i64, y as i64);
-                    match soln.numbers.get(&pos) {
-                        Some((num, len)) => {
-                            print!("{num}");
-                            for _ in 0..len-1 {
-                                range.next();
-                            }
-                        },
-                        None => {
-                            match soln.symbols.get(&pos) {
-                                Some(s) => print!("{s}"),
-                                None => print!("."),
-                            }
-                        }
+        while let Some(x) = range.next() {
+            let pos = (x as i64, y as i64);
+            match soln.numbers.get(&pos) {
+                Some((num, len)) => {
+                    print!("{num}");
+                    for _ in 0..len-1 {
+                        range.next();
                     }
                 },
-                None => break
+                None => {
+                    match soln.symbols.get(&pos) {
+                        Some(s) => print!("{s}"),
+                        None => print!("."),
+                    }
+                }
             }
         }
         println!();
@@ -51,39 +46,35 @@ impl Solution {
         for (y, line) in raw.iter().enumerate() {
             let mut iter = line.chars();
             let mut x = 0;
-            loop {
-                match iter.next() {
-                    Some(c) => {
-                        if c.is_ascii_digit() {
-                            let mut num = c.to_digit(10).unwrap() as i64;
-                            let mut len = 1;
-                            let spot = x;
-                            loop {
-                                match iter.next() {
-                                    Some(d) => {
-                                        if !d.is_ascii_digit() {
-                                            numbers.insert((spot as i64, y as i64), (num, len));
-                                            x += 1;
-                                            if d != '.' {
-                                                symbols.insert((x as i64, y as i64), d);
-                                            }
-                                            break;
-                                        }
-                                        num = num * 10 + d.to_digit(10).unwrap() as i64;
-                                        len += 1;
-                                    },
-                                    None => {
-                                        numbers.insert((spot as i64, y as i64), (num, len));
-                                        break;
-                                    },
+            while let Some(c) = iter.next() {
+
+                if c.is_ascii_digit() {
+                    let mut num = c.to_digit(10).unwrap() as i64;
+                    let mut len = 1;
+                    let spot = x;
+                    loop {
+                        match iter.next() {
+                            Some(d) => {
+                                if !d.is_ascii_digit() {
+                                    numbers.insert((spot as i64, y as i64), (num, len));
+                                    x += 1;
+                                    if d != '.' {
+                                        symbols.insert((x as i64, y as i64), d);
+                                    }
+                                    break;
                                 }
-                                x += 1;
-                            }
-                        } else if c != '.' {
-                            symbols.insert((x as i64, y as i64), c);
+                                num = num * 10 + d.to_digit(10).unwrap() as i64;
+                                len += 1;
+                            },
+                            None => {
+                                numbers.insert((spot as i64, y as i64), (num, len));
+                                break;
+                            },
                         }
-                    },
-                    None => break,
+                        x += 1;
+                    }
+                } else if c != '.' {
+                    symbols.insert((x as i64, y as i64), c);
                 }
                 x += 1;
             }
@@ -92,7 +83,6 @@ impl Solution {
             raw: raw.clone(),
             symbols,
             numbers,
-            ..Default::default()
         }
     }
 
@@ -123,14 +113,10 @@ impl Solution {
             let mut found = Vec::new();
             for y in pos.1-1..pos.1+2 {
                 for x in pos.0-max..pos.0+max {
-                    let x = x as i64;
-                    match self.numbers.get(&(x as i64, y)) {
-                        Some((num, len)) => {
-                            if pos.0 >= x - 1 && pos.0 <= x + *len as i64 {
-                                found.push(num);
-                            }
-                        },
-                        None => (),
+                    if let Some((num, len)) = self.numbers.get(&(x, y)) {
+                        if pos.0 >= x - 1 && pos.0 <= x + *len as i64 {
+                            found.push(num);
+                        }
                     }
                 }
             }

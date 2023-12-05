@@ -33,7 +33,6 @@ impl Solution {
         Self {
             raw: raw.clone(),
             cards,
-            ..Default::default()
         }
     }
 
@@ -54,8 +53,8 @@ impl Solution {
     pub fn part_b(&self) -> Option<i64> {
         let mut scaling: HashMap<usize, i64> = HashMap::from([(0, 1)]);
         for (index, card) in self.cards.iter().enumerate() {
-            if !scaling.contains_key(&index) { scaling.insert(index, 1); }
-            let count = scaling.get(&index).unwrap_or(&1).clone();
+            scaling.entry(index).or_insert(1);
+            let count = *scaling.get(&index).unwrap_or(&1);
             let winning = card.winning
                 .intersection(&card.actual)
                 .collect::<HashSet<_>>()

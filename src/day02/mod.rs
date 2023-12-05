@@ -30,12 +30,12 @@ impl Solution {
         for (id, line) in raw.iter().enumerate() {
             let mut pickings = Vec::new();
             let groups = line
-                .split(":")
+                .split(':')
                 .last()
                 .unwrap()
                 .trim()
-                .split(";")
-                .map(|g| g.split(",").map(|c| c.trim().split_whitespace()));
+                .split(';')
+                .map(|g| g.split(',').map(|c| c.split_whitespace()));
             for group in groups {
                 let mut picking = Picking { red: 0, green: 0, blue: 0 };
                 for mut cube in group {
@@ -55,7 +55,6 @@ impl Solution {
         Self {
             raw: raw.clone(),
             games,
-            ..Default::default()
         }
     }
 

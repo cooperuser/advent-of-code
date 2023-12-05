@@ -15,7 +15,6 @@ impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
         Self {
             raw: raw.clone(),
-            ..Default::default()
         }
     }
 
