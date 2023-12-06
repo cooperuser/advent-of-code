@@ -51,5 +51,5 @@ fn main() {
 }
 
 pub fn split(input: &str) -> Vec<String> {
-    input.trim_end().split('\n').map(|s| s.to_string()).collect()
+    input.trim_end().split('\n').map(|s| s.trim().to_string()).collect()
 }
