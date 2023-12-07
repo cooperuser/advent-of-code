@@ -4,9 +4,10 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 fn main() {
-    use day06::*;
+    use day07::*;
 
     let sample = Solution::new(split(SAMPLE));
     let start = std::time::Instant::now();
