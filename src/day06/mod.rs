@@ -11,6 +11,21 @@ struct Race {
     distance: i64,
 }
 
+impl Race {
+    fn count(&self) -> i64 {
+        let a = -1f64;
+        let b = self.time as f64;
+        let c = -self.distance as f64;
+
+        let mut high = ((-b - (b * b - 4. * a * c).sqrt()) / (2. * a)).floor() as i64;
+        let mut low = ((-b + (b * b - 4. * a * c).sqrt()) / (2. * a)).ceil() as i64;
+        if high * (self.time - high) == self.distance { high -= 1; }
+        if low * (self.time - low) == self.distance { low += 1; }
+
+        high - low + 1
+    }
+}
+
 #[derive(Default)]
 pub struct Solution {
     #[allow(dead_code)]
@@ -42,20 +57,11 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut product = 1;
-        for race in &self.races {
-            product *= (1..race.time)
-                .filter(|i| i * (race.time - i) > race.distance)
-                .count() as i64;
-        }
-        Some(product)
+        Some(self.races.iter().map(|r| r.count()).product())
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        let count = (1..self.race.time)
-            .filter(|i| i * (self.race.time - i) > self.race.distance)
-            .count() as i64;
-        Some(count)
+        Some(self.race.count())
     }
 }
 
