@@ -4,19 +4,21 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 mod day08;
 
 fn main() {
     use day08::*;
 
-    let sample = Solution::new(split(SAMPLE));
+    let sample_a = Solution::new(split(SAMPLE_A));
+    let sample_b = Solution::new(split(SAMPLE_B));
     let start = std::time::Instant::now();
     let real = Solution::new(split(INPUT));
     let duration = start.elapsed();
     println!("parse :\t{:?}\n", duration);
 
-    match sample.part_a() {
-        Some(SAMPLE_A) => {
+    match sample_a.part_a() {
+        Some(ANSWER_A) => {
             let start = std::time::Instant::now();
             let answer = real.part_a();
             let duration = start.elapsed();
@@ -25,7 +27,7 @@ fn main() {
         },
         Some(received) => {
             println!("part_a: failed!");
-            println!("\texpected: {}", SAMPLE_A);
+            println!("\texpected: {}", ANSWER_A);
             println!("\treceived: {}", received);
         },
         None => {
@@ -33,8 +35,8 @@ fn main() {
         }
     }
 
-    match sample.part_b() {
-        Some(SAMPLE_B) => {
+    match sample_b.part_b() {
+        Some(ANSWER_B) => {
             let start = std::time::Instant::now();
             let answer = real.part_b();
             let duration = start.elapsed();
@@ -43,7 +45,7 @@ fn main() {
         },
         Some(received) => {
             println!("part_b: failed!");
-            println!("\texpected: {}", SAMPLE_B);
+            println!("\texpected: {}", ANSWER_B);
             println!("\treceived: {}", received);
         },
         None => {

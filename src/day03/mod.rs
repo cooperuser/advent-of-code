@@ -3,9 +3,10 @@
 use std::collections::HashMap;
 
 pub const INPUT: &str = include_str!("input.txt");
-pub const SAMPLE: &str = include_str!("input_sample.txt");
-pub const SAMPLE_A: i64 = 4361;
-pub const SAMPLE_B: i64 = 467835;
+pub const SAMPLE_A: &str = include_str!("input_sample.txt");
+pub const SAMPLE_B: &str = SAMPLE_A;
+pub const ANSWER_A: i64 = 4361;
+pub const ANSWER_B: i64 = 467835;
 
 #[derive(Default)]
 pub struct Solution {
@@ -134,13 +135,13 @@ mod test {
 
     #[test]
     fn part_a() {
-        let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_a().unwrap_or(0), SAMPLE_A);
+        let solution = Solution::new(crate::split(SAMPLE_A));
+        assert_eq!(solution.part_a().unwrap_or(0), ANSWER_A);
     }
 
     #[test]
     fn part_b() {
-        let solution = Solution::new(crate::split(SAMPLE));
-        assert_eq!(solution.part_b().unwrap_or(0), SAMPLE_B);
+        let solution = Solution::new(crate::split(SAMPLE_B));
+        assert_eq!(solution.part_b().unwrap_or(0), ANSWER_B);
     }
 }
