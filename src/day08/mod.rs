@@ -1,6 +1,6 @@
-#![allow(dead_code)]
+// #![allow(dead_code)]
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample_a.txt");
@@ -14,18 +14,6 @@ pub struct Solution {
     raw: Vec<String>,
     dirs: Vec<bool>,
     map: HashMap<String, (String, String)>,
-}
-
-fn gcd(a: i64, b: i64) -> i64 {
-    if b == 0 { return a; }
-    gcd(b, a % b)
-}
-
-fn lcm(nums: &Vec<i64>) -> i64 {
-    if nums.len() == 1 { return nums[0]; }
-    let a = nums[0];
-    let b = lcm(&nums[1..].into());
-    a * b / gcd(a, b)
 }
 
 impl Solution {
@@ -50,11 +38,15 @@ impl Solution {
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        let loops = self.map.keys()
+        let loops: Vec<u64> = self.map.keys()
             .filter(|p| p.ends_with('A'))
-            .map(|p| self.count(p, "Z"))
+            .map(|p| self.count(p, "Z") as u64)
             .collect();
-        Some(lcm(&loops))
+        let primes: HashSet<u64> = loops
+            .into_iter()
+            .flat_map(primes::factors_uniq)
+            .collect();
+        Some(primes.iter().product::<u64>() as i64)
     }
 
     fn count(&self, start: &str, end: &str) -> i64 {
