@@ -64,8 +64,7 @@ impl Solution {
                 let a = (a.0.0 + a.1.0 * scale, a.0.1 + a.1.1 * scale);
                 let b = (b.0.0 + b.1.0 * scale, b.0.1 + b.1.1 * scale);
 
-                let dist = (a.0 - b.0).abs() + (a.1 - b.1).abs();
-                sum += dist;
+                sum += (a.0 - b.0).abs() + (a.1 - b.1).abs();
             }
         }
 
