@@ -9,9 +9,10 @@ mod day08;
 mod day09;
 mod day10;
 mod day11;
+mod day12;
 
 fn main() {
-    use day11::*;
+    use day12::*;
 
     let sample_a = Solution::new(split(SAMPLE_A));
     let sample_b = Solution::new(split(SAMPLE_B));
