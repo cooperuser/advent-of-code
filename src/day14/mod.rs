@@ -10,17 +10,17 @@ pub const ANSWER_B: i64 = 64;
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
-    map: Map,
+    platform: Platform,
 }
 
 #[derive(Default, Clone)]
-struct Map {
+struct Platform {
     cubes: HashSet<(i64, i64)>,
     rocks: HashSet<(i64, i64)>,
     size: (i64, i64),
 }
 
-impl Map {
+impl Platform {
     fn debug(&self) {
         for row in 0..self.size.0 {
             for col in 0..self.size.1 {
@@ -172,7 +172,7 @@ impl Solution {
         }
         Self {
             raw: raw.clone(),
-            map: Map {
+            platform: Platform {
                 rocks,
                 cubes,
                 size: (raw.len() as i64, raw[0].len() as i64),
@@ -181,18 +181,18 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut map = self.map.clone();
-        map.tilt_north();
-        Some(map.load_north())
+        let mut platform = self.platform.clone();
+        platform.tilt_north();
+        Some(platform.load_north())
     }
 
     pub fn part_b(&self) -> Option<i64> {
         let count = 1_000_000_000;
-        let mut map = self.map.clone();
+        let mut platform = self.platform.clone();
         let mut seen = HashMap::new();
         let mut i = 0i128;
         while i < count {
-            let serial = map.serialize();
+            let serial = platform.serialize();
             if let Some(previous) = seen.get(&serial) {
                 let loop_length = i - previous;
                 i += loop_length * (count / loop_length);
@@ -202,14 +202,14 @@ impl Solution {
                 break;
             }
             seen.insert(serial, i);
-            map.cycle();
+            platform.cycle();
             i += 1;
         }
         while i < count {
-            map.cycle();
+            platform.cycle();
             i += 1;
         }
-        Some(map.load_north())
+        Some(platform.load_north())
     }
 }
 
