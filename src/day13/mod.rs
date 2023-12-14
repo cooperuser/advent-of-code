@@ -53,26 +53,23 @@ fn count_col(points: &HashSet<(usize, usize)>, col: usize, max: usize) -> i64 {
 fn count_diffs(nums: &Vec<i64>, slice: usize) -> i64 {
     let mut diffs = 0;
     for offset in 0..nums.len() {
-        let left = slice - offset - 1;
-        let right = slice + offset;
-
-        if slice < offset + 1 || right >= nums.len() {
+        if slice < offset + 1 || slice + offset >= nums.len() {
             break;
         }
 
-        let a = nums[left];
-        let b = nums[right];
+        let a = nums[slice - offset - 1];
+        let b = nums[slice + offset];
         let c = a ^ b;
 
         let mut bit = 1;
         while bit <= c {
             if c & bit != 0 {
                 diffs += 1;
-            }
 
-            // We don't care if we have more than 1 diff
-            if diffs > 1 {
-                return diffs;
+                // We don't care if we have more than 1 diff
+                if diffs > 1 {
+                    return diffs;
+                }
             }
 
             bit <<= 1;
