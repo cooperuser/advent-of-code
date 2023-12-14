@@ -17,63 +17,50 @@ pub struct Solution {
 
 #[derive(Debug)]
 struct Pattern {
-    size: (i64, i64),
     rows: Vec<i64>,
     cols: Vec<i64>,
+    size: (usize, usize),
 }
 
 impl Pattern {
     fn score(&self, target: i64) -> i64 {
         let mut sum = 0;
-        for row in 1..self.size.0 {
-            if count_diffs(&self.rows, row as usize) == target {
-                sum += row * 100;
-            }
-        }
-        for col in 1..self.size.1 {
-            if count_diffs(&self.cols, col as usize) == target {
-                sum += col;
-            }
-        }
-        sum
+        sum += (1..self.size.0)
+            .filter(|row| count_diffs(&self.rows, *row) == target)
+            .map(|row| row * 100)
+            .sum::<usize>();
+        sum += (1..self.size.1)
+            .filter(|col| count_diffs(&self.cols, *col) == target)
+            .sum::<usize>();
+        sum as i64
     }
 }
 
-fn count_row(points: &HashSet<(i64, i64)>, row: i64, max: i64) -> i64 {
-    let mut value = 0;
-
-    for col in 0..max {
-        if points.contains(&(row, col)) {
-            value |= 1 << col;
-        }
-    }
-
-    value
+fn count_row(points: &HashSet<(usize, usize)>, row: usize, max: usize) -> i64 {
+    (0..max)
+        .filter(|col| points.contains(&(row, *col)))
+        .map(|col| 1 << col)
+        .sum()
 }
 
-fn count_col(points: &HashSet<(i64, i64)>, col: i64, max: i64) -> i64 {
-    let mut value = 0;
-
-    for row in 0..max {
-        if points.contains(&(row, col)) {
-            value |= 1 << row;
-        }
-    }
-
-    value
+fn count_col(points: &HashSet<(usize, usize)>, col: usize, max: usize) -> i64 {
+    (0..max)
+        .filter(|row| points.contains(&(*row, col)))
+        .map(|row| 1 << row)
+        .sum()
 }
 
 fn count_diffs(nums: &Vec<i64>, slice: usize) -> i64 {
     let mut diffs = 0;
     for offset in 0..nums.len() {
-        let left = (slice - offset - 1) as i64;
+        let left = slice - offset - 1;
         let right = slice + offset;
 
-        if left < 0 || right >= nums.len() {
+        if slice < offset + 1 || right >= nums.len() {
             break;
         }
 
-        let a = nums[left as usize];
+        let a = nums[left];
         let b = nums[right];
         let c = a ^ b;
 
@@ -82,6 +69,12 @@ fn count_diffs(nums: &Vec<i64>, slice: usize) -> i64 {
             if c & bit != 0 {
                 diffs += 1;
             }
+
+            // We don't care if we have more than 1 diff
+            if diffs > 1 {
+                return diffs;
+            }
+
             bit <<= 1;
         }
     }
@@ -97,12 +90,12 @@ impl Solution {
             for (row, line) in group.iter().enumerate() {
                 for (col, ch) in line.chars().enumerate() {
                     if ch == '#' {
-                        points.insert((row as i64, col as i64));
+                        points.insert((row, col));
                     }
                 }
             }
 
-            let size = (group.len() as i64, group[0].len() as i64);
+            let size = (group.len(), group[0].len());
             patterns.push(Pattern {
                 rows: (0..size.0).map(|row| count_row(&points, row, size.1)).collect(),
                 cols: (0..size.1).map(|col| count_col(&points, col, size.0)).collect(),
