@@ -12,12 +12,14 @@ pub const ANSWER_B: i64 = 82000210;
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
-    map: HashMap<usize, ((i64, i64), (i64, i64))>
+    map: HashMap<usize, (Point, Point)>
 }
+
+type Point = (i64, i64);
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        let mut set: HashSet<(i64, i64)> = HashSet::new();
+        let mut set: HashSet<Point> = HashSet::new();
         let mut rows: HashSet<usize> = (0..raw.len()).collect();
         let mut cols: HashSet<usize> = (0..raw[0].len()).collect();
         let mut map = HashMap::new();
