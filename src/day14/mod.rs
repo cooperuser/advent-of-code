@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::collections::{HashMap, BTreeSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -17,11 +17,12 @@ pub struct Solution {
 
 #[derive(Default, Clone)]
 struct Platform {
-    rocks: HashMap<(i64, i64), Rock>,
+    rocks: HashSet<(i64, i64)>,
+    map: Vec<Vec<Option<Rock>>>,
     size: (i64, i64),
 }
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 enum Rock {
     Square,
     Round,
@@ -48,29 +49,37 @@ impl Platform {
             Direction::West => (up, right, 0, -1),
         };
 
-        let mut rocks = HashMap::new();
+        let mut rocks = HashSet::new();
+        let mut map: Vec<Vec<Option<Rock>>> = (0..self.size.0)
+            .map(|_| (0..self.size.1).map(|_| None).collect())
+            .collect();
         for &row in &rows {
             for &col in &cols {
-                let spot = (row, col);
-                match self.rocks.get(&spot) {
-                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
+                match self.map[row as usize][col as usize] {
+                    Some(Rock::Square) => map[row as usize][col as usize] = Some(Rock::Square),
                     Some(Rock::Round) => {
                         let mut r = row;
                         let mut c = col;
-                        while r + dr >= 0 && c + dc >= 0 && r + dr < self.size.0 && c + dc < self.size.1 {
-                            if rocks.contains_key(&(r + dr, c + dc)) {
+                        while r + dr >= 0
+                            && c + dc >= 0
+                            && r + dr < self.size.0
+                            && c + dc < self.size.1
+                        {
+                            if map[(r + dr) as usize][(c + dc) as usize].is_some() {
                                 break;
                             }
                             r += dr;
                             c += dc;
                         }
-                        rocks.insert((r, c), Rock::Round);
-                    },
-                    None => ()
+                        map[r as usize][c as usize] = Some(Rock::Round);
+                        rocks.insert((r, c));
+                    }
+                    None => (),
                 }
             }
         }
         self.rocks = rocks;
+        self.map = map;
     }
 
     fn cycle(&mut self) {
@@ -81,47 +90,45 @@ impl Platform {
     }
 
     fn serialize(&self) -> BTreeSet<(i64, i64)> {
-        self.rocks
-            .iter()
-            .filter(|(_, rock)| **rock == Rock::Round)
-            .map(|(pos, _)| *pos)
-            .collect()
+        self.rocks.iter().cloned().collect()
     }
 
     fn load_north(&self) -> i64 {
-        let mut load = 0;
-        for (pos, rock) in &self.rocks {
-            if *rock == Rock::Round {
-                load += self.size.0 - pos.0;
-            }
-        }
-        load
+        self.rocks.iter().map(|(row, _)| self.size.0 - row).sum()
     }
 }
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        let mut rocks = HashMap::new();
+        let mut rocks = HashSet::new();
+        let mut map = Vec::new();
         for (row, line) in raw.iter().enumerate() {
+            let mut map_row = Vec::new();
             for (col, ch) in line.chars().enumerate() {
                 let pos = (row as i64, col as i64);
                 match ch {
                     '#' => {
-                        rocks.insert(pos, Rock::Square);
-                    },
-                    'O' => {
-                        rocks.insert(pos, Rock::Round);
+                        rocks.insert(pos);
+                        map_row.push(Some(Rock::Square));
                     }
-                    _ => ()
+                    'O' => {
+                        rocks.insert(pos);
+                        map_row.push(Some(Rock::Round));
+                    }
+                    _ => {
+                        map_row.push(None);
+                    }
                 }
             }
+            map.push(map_row);
         }
         Self {
             raw: raw.clone(),
             platform: Platform {
                 rocks,
+                map,
                 size: (raw.len() as i64, raw[0].len() as i64),
-            }
+            },
         }
     }
 
