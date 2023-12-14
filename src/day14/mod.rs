@@ -27,95 +27,44 @@ enum Rock {
     Round,
 }
 
+enum Direction {
+    North,
+    South,
+    East,
+    West,
+}
+
 impl Platform {
-    fn tilt_north(&mut self) {
-        let mut rocks = HashMap::new();
-        for row in 0..self.size.0 {
-            for col in 0..self.size.1 {
-                let spot = (row, col);
-                match self.rocks.get(&spot) {
-                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
-                    Some(Rock::Round) => {
-                        for i in 0..self.size.0 {
-                            let pos = (spot.0 - i, spot.1);
-                            let next = (spot.0 - i - 1, spot.1);
-                            if pos.0 == 0 || rocks.contains_key(&next) {
-                                rocks.insert(pos, Rock::Round);
-                                break;
-                            }
-                        }
-                    },
-                    None => ()
-                }
-            }
-        }
-        self.rocks = rocks;
-    }
+    fn tilt(&mut self, dir: Direction) {
+        let down: Vec<_> = (0..self.size.0).collect();
+        let up: Vec<_> = (0..self.size.0).rev().collect();
+        let left: Vec<_> = (0..self.size.1).rev().collect();
+        let right: Vec<_> = (0..self.size.1).collect();
 
-    fn tilt_south(&mut self) {
-        let mut rocks = HashMap::new();
-        for row in (0..self.size.0).rev() {
-            for col in 0..self.size.1 {
-                let spot = (row, col);
-                match self.rocks.get(&spot) {
-                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
-                    Some(Rock::Round) => {
-                        for i in 0..self.size.0 {
-                            let pos = (spot.0 + i, spot.1);
-                            let next = (spot.0 + i + 1, spot.1);
-                            if pos.0 == self.size.0 - 1 || rocks.contains_key(&next) {
-                                rocks.insert(pos, Rock::Round);
-                                break;
-                            }
-                        }
-                    },
-                    None => ()
-                }
-            }
-        }
-        self.rocks = rocks;
-    }
+        let (rows, cols, dr, dc) = match dir {
+            Direction::North => (down, right, -1, 0),
+            Direction::South => (up, left, 1, 0),
+            Direction::East => (down, left, 0, 1),
+            Direction::West => (up, right, 0, -1),
+        };
 
-    fn tilt_west(&mut self) {
         let mut rocks = HashMap::new();
-        for col in 0..self.size.1 {
-            for row in 0..self.size.0 {
+        for &row in &rows {
+            for &col in &cols {
                 let spot = (row, col);
                 match self.rocks.get(&spot) {
                     Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
                     Some(Rock::Round) => {
-                        for i in 0..self.size.0 {
-                            let pos = (spot.0, spot.1 - i);
-                            let next = (spot.0, spot.1 - i - 1);
-                            if pos.1 == 0 || rocks.contains_key(&next) {
-                                rocks.insert(pos, Rock::Round);
+                        let mut r = row;
+                        let mut c = col;
+                        while r + dr >= 0 && c + dc >= 0 && r + dr < self.size.0 && c + dc < self.size.1 {
+                            if rocks.contains_key(&(r + dr, c + dc)) {
                                 break;
                             }
+                            r += dr;
+                            c += dc;
                         }
-                    },
-                    None => ()
-                }
-            }
-        }
-        self.rocks = rocks;
-    }
-
-    fn tilt_east(&mut self) {
-        let mut rocks = HashMap::new();
-        for col in (0..self.size.1).rev() {
-            for row in 0..self.size.0 {
-                let spot = (row, col);
-                match self.rocks.get(&spot) {
-                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
-                    Some(Rock::Round) => {
-                        for i in 0..self.size.0 {
-                            let pos = (spot.0, spot.1 + i);
-                            let next = (spot.0, spot.1 + i + 1);
-                            if pos.1 == self.size.1 - 1 || rocks.contains_key(&next) {
-                                rocks.insert(pos, Rock::Round);
-                                break;
-                            }
-                        }
+                        rocks.insert((r, c), Rock::Round);
                     },
                     None => ()
                 }
@@ -125,10 +74,10 @@ impl Platform {
     }
 
     fn cycle(&mut self) {
-        self.tilt_north();
-        self.tilt_west();
-        self.tilt_south();
-        self.tilt_east();
+        self.tilt(Direction::North);
+        self.tilt(Direction::West);
+        self.tilt(Direction::South);
+        self.tilt(Direction::East);
     }
 
     fn serialize(&self) -> BTreeSet<(i64, i64)> {
@@ -178,7 +127,7 @@ impl Solution {
 
     pub fn part_a(&self) -> Option<i64> {
         let mut platform = self.platform.clone();
-        platform.tilt_north();
+        platform.tilt(Direction::North);
         Some(platform.load_north())
     }
 
