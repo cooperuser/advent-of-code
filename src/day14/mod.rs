@@ -1,4 +1,6 @@
-use std::collections::{HashSet, HashMap};
+#![allow(dead_code)]
+
+use std::collections::{HashMap, BTreeSet};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -15,111 +17,111 @@ pub struct Solution {
 
 #[derive(Default, Clone)]
 struct Platform {
-    cubes: HashSet<(i64, i64)>,
-    rocks: HashSet<(i64, i64)>,
+    rocks: HashMap<(i64, i64), Rock>,
     size: (i64, i64),
 }
 
+#[derive(Clone, PartialEq)]
+enum Rock {
+    Square,
+    Round,
+}
+
 impl Platform {
-    fn debug(&self) {
+    fn tilt_north(&mut self) {
+        let mut rocks = HashMap::new();
         for row in 0..self.size.0 {
             for col in 0..self.size.1 {
-                let pos = (row, col);
-                let cube = self.cubes.contains(&pos);
-                let rock = self.rocks.contains(&pos);
-                if cube && rock {
-                    panic!("error");
-                } else if cube {
-                    print!("#");
-                } else if rock {
-                    print!("O");
-                } else {
-                    print!(".");
-                }
-            }
-            println!();
-        }
-        println!();
-    }
-
-    fn tilt_north(&mut self) {
-        for _ in 0..self.size.0 {
-            let mut rocks = HashSet::new();
-            for row in 0..self.size.0 {
-                for col in 0..self.size.1 {
-                    let pos = (row, col);
-                    let next = (row - 1, col);
-                    if self.rocks.contains(&pos) {
-                        if self.cubes.contains(&next) || self.rocks.contains(&next) || row < 1 {
-                            rocks.insert(pos);
-                            continue;
+                let spot = (row, col);
+                match self.rocks.get(&spot) {
+                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
+                    Some(Rock::Round) => {
+                        for i in 0..self.size.0 {
+                            let pos = (spot.0 - i, spot.1);
+                            let next = (spot.0 - i - 1, spot.1);
+                            if pos.0 == 0 || rocks.contains_key(&next) {
+                                rocks.insert(pos, Rock::Round);
+                                break;
+                            }
                         }
-                        rocks.insert(next);
-                    }
+                    },
+                    None => ()
                 }
             }
-            self.rocks = rocks;
         }
+        self.rocks = rocks;
     }
 
     fn tilt_south(&mut self) {
-        for _ in 0..self.size.0 {
-            let mut rocks = HashSet::new();
-            for row in (0..self.size.0).rev() {
-                for col in 0..self.size.1 {
-                    let pos = (row, col);
-                    let next = (row + 1, col);
-                    if self.rocks.contains(&pos) {
-                        if self.cubes.contains(&next) || self.rocks.contains(&next) || row == self.size.0 - 1 {
-                            rocks.insert(pos);
-                            continue;
+        let mut rocks = HashMap::new();
+        for row in (0..self.size.0).rev() {
+            for col in 0..self.size.1 {
+                let spot = (row, col);
+                match self.rocks.get(&spot) {
+                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
+                    Some(Rock::Round) => {
+                        for i in 0..self.size.0 {
+                            let pos = (spot.0 + i, spot.1);
+                            let next = (spot.0 + i + 1, spot.1);
+                            if pos.0 == self.size.0 - 1 || rocks.contains_key(&next) {
+                                rocks.insert(pos, Rock::Round);
+                                break;
+                            }
                         }
-                        rocks.insert(next);
-                    }
+                    },
+                    None => ()
                 }
             }
-            self.rocks = rocks;
         }
+        self.rocks = rocks;
     }
 
     fn tilt_west(&mut self) {
-        for _ in 0..self.size.1 {
-            let mut rocks = HashSet::new();
-            for col in 0..self.size.1 {
-                for row in 0..self.size.0 {
-                    let pos = (row, col);
-                    let next = (row, col - 1);
-                    if self.rocks.contains(&pos) {
-                        if self.cubes.contains(&next) || self.rocks.contains(&next) || col < 1 {
-                            rocks.insert(pos);
-                            continue;
+        let mut rocks = HashMap::new();
+        for col in 0..self.size.1 {
+            for row in 0..self.size.0 {
+                let spot = (row, col);
+                match self.rocks.get(&spot) {
+                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
+                    Some(Rock::Round) => {
+                        for i in 0..self.size.0 {
+                            let pos = (spot.0, spot.1 - i);
+                            let next = (spot.0, spot.1 - i - 1);
+                            if pos.1 == 0 || rocks.contains_key(&next) {
+                                rocks.insert(pos, Rock::Round);
+                                break;
+                            }
                         }
-                        rocks.insert(next);
-                    }
+                    },
+                    None => ()
                 }
             }
-            self.rocks = rocks;
         }
+        self.rocks = rocks;
     }
 
     fn tilt_east(&mut self) {
-        for _ in 0..self.size.1 {
-            let mut rocks = HashSet::new();
-            for col in (0..self.size.1).rev() {
-                for row in 0..self.size.0 {
-                    let pos = (row, col);
-                    let next = (row, col + 1);
-                    if self.rocks.contains(&pos) {
-                        if self.cubes.contains(&next) || self.rocks.contains(&next) || col == self.size.1 - 1 {
-                            rocks.insert(pos);
-                            continue;
+        let mut rocks = HashMap::new();
+        for col in (0..self.size.1).rev() {
+            for row in 0..self.size.0 {
+                let spot = (row, col);
+                match self.rocks.get(&spot) {
+                    Some(Rock::Square) => { rocks.insert(spot, Rock::Square); },
+                    Some(Rock::Round) => {
+                        for i in 0..self.size.0 {
+                            let pos = (spot.0, spot.1 + i);
+                            let next = (spot.0, spot.1 + i + 1);
+                            if pos.1 == self.size.1 - 1 || rocks.contains_key(&next) {
+                                rocks.insert(pos, Rock::Round);
+                                break;
+                            }
                         }
-                        rocks.insert(next);
-                    }
+                    },
+                    None => ()
                 }
             }
-            self.rocks = rocks;
         }
+        self.rocks = rocks;
     }
 
     fn cycle(&mut self) {
@@ -129,24 +131,20 @@ impl Platform {
         self.tilt_east();
     }
 
-    fn serialize(&self) -> String {
-        let mut values = Vec::new();
-        for row in 0..self.size.0 {
-            let mut value = 0i128;
-            for col in 0..self.size.1 {
-                if self.rocks.contains(&(row, col)) {
-                    value |= 1 << col;
-                }
-            }
-            values.push(value.to_string());
-        }
-        values.join("_")
+    fn serialize(&self) -> BTreeSet<(i64, i64)> {
+        self.rocks
+            .iter()
+            .filter(|(_, rock)| **rock == Rock::Round)
+            .map(|(pos, _)| *pos)
+            .collect()
     }
 
     fn load_north(&self) -> i64 {
         let mut load = 0;
-        for rock in &self.rocks {
-            load += self.size.0 - rock.0;
+        for (pos, rock) in &self.rocks {
+            if *rock == Rock::Round {
+                load += self.size.0 - pos.0;
+            }
         }
         load
     }
@@ -154,17 +152,16 @@ impl Platform {
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        let mut cubes = HashSet::new();
-        let mut rocks = HashSet::new();
+        let mut rocks = HashMap::new();
         for (row, line) in raw.iter().enumerate() {
             for (col, ch) in line.chars().enumerate() {
                 let pos = (row as i64, col as i64);
                 match ch {
                     '#' => {
-                        cubes.insert(pos);
+                        rocks.insert(pos, Rock::Square);
                     },
                     'O' => {
-                        rocks.insert(pos);
+                        rocks.insert(pos, Rock::Round);
                     }
                     _ => ()
                 }
@@ -174,7 +171,6 @@ impl Solution {
             raw: raw.clone(),
             platform: Platform {
                 rocks,
-                cubes,
                 size: (raw.len() as i64, raw[0].len() as i64),
             }
         }
@@ -190,25 +186,25 @@ impl Solution {
         let count = 1_000_000_000;
         let mut platform = self.platform.clone();
         let mut seen = HashMap::new();
+
         let mut i = 0i128;
-        while i < count {
+        let (start, end) = loop {
             let serial = platform.serialize();
             if let Some(previous) = seen.get(&serial) {
-                let loop_length = i - previous;
-                i += loop_length * (count / loop_length);
-                while i > count {
-                    i -= loop_length;
-                }
-                break;
+                break (previous, i);
             }
             seen.insert(serial, i);
             platform.cycle();
             i += 1;
-        }
-        while i < count {
+        };
+
+        let diff = end - start;
+        let remaining = count - start;
+        let phase = remaining % diff;
+        for _ in 0..phase {
             platform.cycle();
-            i += 1;
         }
+
         Some(platform.load_north())
     }
 }
