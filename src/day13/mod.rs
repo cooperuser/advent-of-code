@@ -22,10 +22,21 @@ struct Pattern {
     cols: Vec<i64>,
 }
 
-#[derive(Hash, Debug, PartialEq, Eq, Clone, Copy)]
-enum RowCol {
-    Row(i64),
-    Col(i64),
+impl Pattern {
+    fn score(&self, target: i64) -> i64 {
+        let mut sum = 0;
+        for row in 1..self.size.0 {
+            if count_diffs(&self.rows, row as usize) == target {
+                sum += row * 100;
+            }
+        }
+        for col in 1..self.size.1 {
+            if count_diffs(&self.cols, col as usize) == target {
+                sum += col;
+            }
+        }
+        sum
+    }
 }
 
 fn count_row(points: &HashSet<(i64, i64)>, row: i64, max: i64) -> i64 {
@@ -52,26 +63,29 @@ fn count_col(points: &HashSet<(i64, i64)>, col: i64, max: i64) -> i64 {
     value
 }
 
-fn find_lines(nums: &Vec<i64>) -> HashSet<i64> {
-    let mut found = HashSet::new();
+fn count_diffs(nums: &Vec<i64>, slice: usize) -> i64 {
+    let mut diffs = 0;
+    for offset in 0..nums.len() {
+        let left = (slice - offset - 1) as i64;
+        let right = slice + offset;
 
-    'slice: for slice in 1..nums.len() {
-        for offset in 0..nums.len() {
-            let left = (slice - offset - 1) as i64;
-            let right = slice + offset;
-
-            if left < 0 || right >= nums.len() {
-                break;
-            }
-
-            if nums[left as usize] != nums[right] {
-                continue 'slice;
-            }
+        if left < 0 || right >= nums.len() {
+            break;
         }
-        found.insert(slice as i64);
-    }
 
-    found
+        let a = nums[left as usize];
+        let b = nums[right];
+        let c = a ^ b;
+
+        let mut bit = 1;
+        while bit <= c {
+            if c & bit != 0 {
+                diffs += 1;
+            }
+            bit <<= 1;
+        }
+    }
+    diffs
 }
 
 impl Solution {
@@ -103,54 +117,11 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut sum = 0i64;
-
-        for pattern in &self.patterns {
-            let rows = find_lines(&pattern.rows);
-            let cols = find_lines(&pattern.cols);
-            sum += rows.iter().sum::<i64>() * 100 + cols.iter().sum::<i64>();
-        }
-
-        Some(sum)
+        Some(self.patterns.iter().map(|p| p.score(0)).sum())
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        let mut sum = 0;
-
-        'pattern: for pattern in &self.patterns {
-            let rows_orig: HashSet<RowCol> = find_lines(&pattern.rows).iter().map(|r| RowCol::Row(*r)).collect();
-            let cols_orig: HashSet<RowCol> = find_lines(&pattern.cols).iter().map(|c| RowCol::Col(*c)).collect();
-            let orig: HashSet<RowCol> = rows_orig.union(&cols_orig).cloned().collect();
-
-            for row in 0..pattern.size.0 {
-                for col in 0..pattern.size.1 {
-                    let mut rows = pattern.rows.clone();
-                    let mut cols = pattern.cols.clone();
-
-                    rows[row as usize] ^= 1 << col;
-                    cols[col as usize] ^= 1 << row;
-
-                    let rows: HashSet<RowCol> = find_lines(&rows).iter().map(|r| RowCol::Row(*r)).collect();
-                    let cols: HashSet<RowCol> = find_lines(&cols).iter().map(|r| RowCol::Col(*r)).collect();
-                    let slices: HashSet<RowCol> = rows.union(&cols).cloned().collect();
-
-                    if let Some(slice) = slices.difference(&orig).next() {
-                        match slice {
-                            RowCol::Row(r) => {
-                                sum += r * 100;
-                            },
-                            RowCol::Col(c) => {
-                                sum += c;
-                            },
-                        }
-
-                        continue 'pattern;
-                    }
-                }
-            }
-        }
-
-        Some(sum)
+        Some(self.patterns.iter().map(|p| p.score(1)).sum())
     }
 }
 
