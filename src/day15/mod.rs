@@ -41,7 +41,7 @@ impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
         let mut ops = Vec::new();
         for op in raw[0].split(',') {
-            if op.chars().last().unwrap() == '-' {
+            if op.ends_with('-') {
                 ops.push(Operation::Dash(op[0..op.len() - 1].to_string()));
             } else {
                 let (label, value) = op.split_once('=').unwrap();
@@ -72,20 +72,31 @@ impl Solution {
             match op {
                 Operation::Dash(label) => {
                     let id = hash(label);
-                    let boxx = boxes.entry(id).or_insert(vec![]);
-                    if let Some((index, _)) = boxx.iter().enumerate().find(|(_, lens)| lens.label == *label) {
+                    let boxx = boxes.entry(id).or_default();
+                    let entry = boxx
+                        .iter()
+                        .enumerate()
+                        .find(|(_, lens)| lens.label == *label);
+                    if let Some((index, _)) = entry {
                         boxx.remove(index);
                     }
-                },
+                }
                 Operation::Equals(label, value) => {
                     let id = hash(label);
-                    let boxx = boxes.entry(id).or_insert(vec![]);
-                    if let Some((index, _)) = boxx.iter().enumerate().find(|(_, lens)| lens.label == *label) {
+                    let boxx = boxes.entry(id).or_default();
+                    let entry = boxx
+                        .iter()
+                        .enumerate()
+                        .find(|(_, lens)| lens.label == *label);
+                    if let Some((index, _)) = entry {
                         boxx[index].value = *value;
                     } else {
-                        boxx.push(Lens { label: label.clone(), value: *value });
+                        boxx.push(Lens {
+                            label: label.clone(),
+                            value: *value,
+                        });
                     }
-                },
+                }
             }
         }
 
