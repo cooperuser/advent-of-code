@@ -12,11 +12,11 @@ pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
     blocks: HashMap<Pos, i64>,
-    graph: BTreeMap<Pos, BTreeMap<Pos, i64>>,
     size: (i64, i64),
 }
 
 type Pos = (i64, i64);
+type Graph<V, E> = BTreeMap<V, BTreeMap<V, E>>;
 const DIRS: [Dir; 4] = [Dir::North, Dir::South, Dir::East, Dir::West];
 
 #[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
@@ -28,6 +28,25 @@ enum Dir {
 }
 
 impl Dir {
+    fn to_num(&self) -> usize {
+        match self {
+            Dir::North => 0,
+            Dir::South => 1,
+            Dir::East => 2,
+            Dir::West => 3,
+        }
+    }
+
+    fn from_num(num: usize) -> Self {
+        match num {
+            0 => Dir::North,
+            1 => Dir::South,
+            2 => Dir::East,
+            3 => Dir::West,
+            _ => panic!("bad num")
+        }
+    }
+
     fn add(&self, pos: Pos) -> Pos {
         match self {
             Dir::North => (pos.0 - 1, pos.1),
@@ -37,13 +56,18 @@ impl Dir {
         }
     }
 
-    fn sub(start: Pos, end: Pos) -> Self {
-        match (end.0 - start.0, end.1 - start.1) {
-            (-1, 0) => Self::North,
-            (1, 0) => Self::South,
-            (0, 1) => Self::East,
-            (0, -1) => Self::West,
-            _ => panic!("not adjacent"),
+    fn sub(start: Pos, end: Pos) -> Option<Self> {
+        let pos = (end.0 - start.0, end.1 - start.1);
+        if pos.0 < 0 && pos.1 == 0 {
+            Some(Self::North)
+        } else if pos.0 > 0 && pos.1 == 0 {
+            Some(Self::South)
+        } else if pos.0 == 0 && pos.1 < 0 {
+            Some(Self::West)
+        } else if pos.0 == 0 && pos.1 > 0 {
+            Some(Self::East)
+        } else {
+            None
         }
     }
 
@@ -60,73 +84,90 @@ impl Dir {
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
         let mut blocks = HashMap::new();
-        let mut graph = BTreeMap::new();
         for (row, line) in raw.iter().enumerate() {
             for (col, ch) in line.chars().enumerate() {
-                blocks.insert((row as i64, col as i64), ch.to_string().parse().unwrap());
-            }
-        }
-
-        let size = (raw.len() as i64, raw[0].len() as i64);
-        for row in 0..size.0 {
-            for col in 0..size.1 {
-                let start = (row, col);
-                let mut edges = BTreeMap::new();
-                for dir in DIRS {
-                    let end = dir.add(start);
-                    if end.0 < 0 || end.0 >= size.0 || end.1 < 0 || end.1 >= size.1 {
-                        continue;
-                    }
-                    edges.insert(end, *blocks.get(&end).unwrap());
-                }
-                graph.insert(start, edges);
+                blocks.insert((row as i64, col as i64), ch as i64 - b'0' as i64);
             }
         }
 
         Self {
             raw: raw.clone(),
             blocks,
-            graph,
-            size,
+            size: (raw.len() as i64, raw[0].len() as i64),
         }
     }
 
     pub fn part_a(&self) -> Option<i64> {
+        let graph = self.build_graph(|i| i < 3);
+        Some(self.dijkstra(&graph))
+    }
+
+    pub fn part_b(&self) -> Option<i64> {
+        None
+    }
+
+    fn build_graph(&self, filter: fn(i64) -> bool) -> Graph<Pos, i64> {
+        let mut graph = BTreeMap::new();
+
+        for row in 0..self.size.0 {
+            for col in 0..self.size.1 {
+                let mut edges = BTreeMap::new();
+                for dir in DIRS {
+                    let mut pos = (row, col);
+                    let mut weight = 0;
+                    for i in 0..10 {
+                        pos = dir.add(pos);
+                        match self.blocks.get(&pos) {
+                            Some(w) => weight += w,
+                            None => break,
+                        }
+
+                        if filter(i) {
+                            edges.insert(pos, weight);
+                        }
+                    }
+                }
+                graph.insert((row, col), edges);
+            }
+        }
+
+        graph
+    }
+
+    fn dijkstra(&self, graph: &Graph<Pos, i64>) -> i64 {
         let start = (0, 0);
         let end = (self.size.0 - 1, self.size.1 - 1);
         let mut distances = HashMap::new();
         let mut priority = BinaryHeap::new();
-        let mut directions = HashMap::new();
+
+        // start is the special case that doesn't have a predecessor
         distances.insert(start, None);
 
-        for (node, weight) in self.graph.get(&start).unwrap() {
+        for (node, weight) in &graph[&start] {
             distances.insert(*node, Some((start, *weight)));
             priority.push(Reverse((*weight, *node, start)));
-            directions.insert(*node, (Dir::sub(start, *node), 1));
         }
 
         while let Some(Reverse((distance, node, prev))) = priority.pop() {
             match distances[&node] {
+                // what we popped is what is in distances, we'll compute it
                 Some((p, d)) if p == prev && d == distance => {}
+                // otherwise it's not interesting
                 _ => continue,
             }
-            self.dump_map(&directions, node);
 
-            for (next, weight) in self.graph.get(&node).unwrap() {
+            for (next, weight) in &graph[&node] {
+                if prev == *next || Dir::sub(prev, *next).is_some() {
+                    continue;
+                }
+
                 match distances.get(next) {
+                    // if distances[next] is a lower dist than the alternative one, we do nothing
                     Some(Some((_, dist_next))) if *dist_next <= distance + *weight => {}
+                    // if distances[next] is None then next is start and so the distance won't be changed, it won't be added again in priority
                     Some(None) => {}
+                    // the new path is shorter, either next was not in distances or it was farther
                     _ => {
-                        let dir = Dir::sub(node, *next);
-                        if let Some((last, count)) = directions.get(&node) {
-                            if dir == *last && *count > 2 {
-                                continue;
-                            } else if dir == *last {
-                                directions.insert(*next, (dir, count + 1));
-                            } else {
-                                directions.insert(*next, (dir, 1));
-                            }
-                        }
                         distances.insert(*next, Some((node, *weight + distance)));
                         priority.push(Reverse((*weight + distance, *next, node)));
                     }
@@ -135,53 +176,51 @@ impl Solution {
         }
 
         println!("{:?}", distances.get(&end));
-        // println!("{:?}", distances);
-        self.dump_map(&directions, end);
-        // self.dump_distances(&distances);
+        self.dump_directions(&distances);
+        self.dump_path(&distances, end);
 
-        Some(distances.get(&end).unwrap().unwrap().1)
+        distances.get(&end).unwrap().unwrap().1
     }
 
-    pub fn part_b(&self) -> Option<i64> {
-        None
-    }
-
-    fn dump_map(&self, directions: &HashMap<Pos, (Dir, i64)>, node: Pos) {
+    fn dump_path(&self, distances: &HashMap<Pos, Option<(Pos, i64)>>, node: Pos) {
         let mut node = node;
         let mut path = HashSet::new();
         while node != (0, 0) {
-            if let Some((dir, _)) = directions.get(&node) {
+            if let Some(Some((prev, _))) = distances.get(&node) {
                 path.insert(node);
-                node = dir.rev().add(node);
+                node = *prev;
             }
         }
 
         for row in 0..self.size.0 {
             for col in 0..self.size.1 {
                 let c = if path.contains(&(row, col)) {
-                    match directions.get(&(row, col)) {
-                        Some((Dir::North, _)) => '^',
-                        Some((Dir::South, _)) => 'v',
-                        Some((Dir::East, _)) => '>',
-                        Some((Dir::West, _)) => '<',
-                        None => '.',
+                    let a = (row, col);
+                    let b = distances.get(&a).unwrap().unwrap().0;
+                    let dir = Dir::sub(a, b).unwrap();
+                    match dir {
+                        Dir::North => '^',
+                        Dir::South => 'v',
+                        Dir::East => '>',
+                        Dir::West => '<',
                     }
                 } else {
-                    '.'
+                    ' '
                 };
-                print!("{}", c);
+                print!("{}{}", self.blocks.get(&(row, col)).unwrap(), c);
+                // print!("{}", c);
             }
             println!();
         }
         println!();
     }
 
-    fn dump_distances(&self, distances: &HashMap<Pos, Option<(Pos, i64)>>) {
+    fn dump_directions(&self, distances: &HashMap<Pos, Option<(Pos, i64)>>) {
         for row in 0..self.size.0 {
             for col in 0..self.size.1 {
                 let node = (row, col);
                 if let Some((prev, _)) = distances.get(&node).unwrap() {
-                    let dir = Dir::sub(*prev, node);
+                    let dir = Dir::sub(*prev, node).unwrap();
                     let c = match dir.rev() {
                         Dir::North => '^',
                         Dir::South => 'v',
