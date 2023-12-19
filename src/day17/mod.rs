@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::cmp::Reverse;
 use std::collections::{BTreeMap, BinaryHeap, HashMap, HashSet};
 
@@ -5,7 +7,7 @@ pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
 pub const SAMPLE_B: &str = SAMPLE_A;
 pub const ANSWER_A: i64 = 102;
-pub const ANSWER_B: i64 = 0;
+pub const ANSWER_B: i64 = 94;
 
 #[derive(Default)]
 pub struct Solution {
@@ -19,7 +21,7 @@ type Pos = (i64, i64);
 type Graph<V, E> = BTreeMap<V, BTreeMap<V, E>>;
 const DIRS: [Dir; 4] = [Dir::North, Dir::South, Dir::East, Dir::West];
 
-#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug)]
+#[derive(Hash, PartialEq, Eq, Clone, Copy, Debug, PartialOrd, Ord)]
 enum Dir {
     North,
     South,
@@ -28,25 +30,6 @@ enum Dir {
 }
 
 impl Dir {
-    fn to_num(&self) -> usize {
-        match self {
-            Dir::North => 0,
-            Dir::South => 1,
-            Dir::East => 2,
-            Dir::West => 3,
-        }
-    }
-
-    fn from_num(num: usize) -> Self {
-        match num {
-            0 => Dir::North,
-            1 => Dir::South,
-            2 => Dir::East,
-            3 => Dir::West,
-            _ => panic!("bad num")
-        }
-    }
-
     fn add(&self, pos: Pos) -> Pos {
         match self {
             Dir::North => (pos.0 - 1, pos.1),
@@ -103,7 +86,8 @@ impl Solution {
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        None
+        let graph = self.build_graph(|i| i >= 3);
+        Some(self.dijkstra(&graph))
     }
 
     fn build_graph(&self, filter: fn(i64) -> bool) -> Graph<Pos, i64> {
@@ -141,15 +125,16 @@ impl Solution {
         let mut priority = BinaryHeap::new();
 
         // start is the special case that doesn't have a predecessor
-        distances.insert(start, None);
+        distances.insert((start, None), None);
 
         for (node, weight) in &graph[&start] {
-            distances.insert(*node, Some((start, *weight)));
-            priority.push(Reverse((*weight, *node, start)));
+            let dir = Dir::sub(start, *node);
+            distances.insert((*node, dir), Some((start, *weight)));
+            priority.push(Reverse((*weight, *node, start, dir.unwrap())));
         }
 
-        while let Some(Reverse((distance, node, prev))) = priority.pop() {
-            match distances[&node] {
+        while let Some(Reverse((distance, node, prev, dir))) = priority.pop() {
+            match distances[&(node, Some(dir))] {
                 // what we popped is what is in distances, we'll compute it
                 Some((p, d)) if p == prev && d == distance => {}
                 // otherwise it's not interesting
@@ -157,29 +142,34 @@ impl Solution {
             }
 
             for (next, weight) in &graph[&node] {
-                if prev == *next || Dir::sub(prev, *next).is_some() {
+                let last_dir = Dir::sub(prev, node).unwrap();
+                let dir = Dir::sub(node, *next).unwrap();
+                // if prev == *next || Dir::sub(prev, *next).is_some() {
+                if dir == last_dir || dir == last_dir.rev() {
                     continue;
                 }
 
-                match distances.get(next) {
+                match distances.get(&(*next, Some(dir))) {
                     // if distances[next] is a lower dist than the alternative one, we do nothing
                     Some(Some((_, dist_next))) if *dist_next <= distance + *weight => {}
                     // if distances[next] is None then next is start and so the distance won't be changed, it won't be added again in priority
                     Some(None) => {}
                     // the new path is shorter, either next was not in distances or it was farther
                     _ => {
-                        distances.insert(*next, Some((node, *weight + distance)));
-                        priority.push(Reverse((*weight + distance, *next, node)));
+                        distances.insert((*next, Some(dir)), Some((node, *weight + distance)));
+                        priority.push(Reverse((*weight + distance, *next, node, dir)));
                     }
                 }
             }
         }
 
-        println!("{:?}", distances.get(&end));
-        self.dump_directions(&distances);
-        self.dump_path(&distances, end);
-
-        distances.get(&end).unwrap().unwrap().1
+        let mut min = i64::MAX;
+        for dir in DIRS {
+            if let Some(test) = distances.get(&(end, Some(dir))) {
+                min = min.min(test.unwrap().1);
+            }
+        }
+        min
     }
 
     fn dump_path(&self, distances: &HashMap<Pos, Option<(Pos, i64)>>, node: Pos) {
@@ -205,10 +195,10 @@ impl Solution {
                         Dir::West => '<',
                     }
                 } else {
-                    ' '
+                    '.'
                 };
-                print!("{}{}", self.blocks.get(&(row, col)).unwrap(), c);
-                // print!("{}", c);
+                // print!("{}{}", self.blocks.get(&(row, col)).unwrap(), c);
+                print!("{}", c);
             }
             println!();
         }
@@ -219,7 +209,8 @@ impl Solution {
         for row in 0..self.size.0 {
             for col in 0..self.size.1 {
                 let node = (row, col);
-                if let Some((prev, _)) = distances.get(&node).unwrap() {
+                // if let Some((prev, _)) = distances.get(&node).unwrap() {
+                if let Some(Some((prev, _))) = distances.get(&node) {
                     let dir = Dir::sub(*prev, node).unwrap();
                     let c = match dir.rev() {
                         Dir::North => '^',
