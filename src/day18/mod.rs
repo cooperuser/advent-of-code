@@ -1,10 +1,10 @@
-use std::collections::{HashSet, VecDeque};
+#![allow(dead_code)]
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
 pub const SAMPLE_B: &str = SAMPLE_A;
 pub const ANSWER_A: i64 = 62;
-pub const ANSWER_B: i64 = 0;
+pub const ANSWER_B: i64 = 952408144115;
 
 #[derive(Default)]
 pub struct Solution {
@@ -14,7 +14,6 @@ pub struct Solution {
 }
 
 type Pos = (i64, i64);
-const DIRS: [Dir; 4] = [Dir::North, Dir::South, Dir::East, Dir::West];
 
 #[derive(Debug)]
 enum Dir {
@@ -25,12 +24,12 @@ enum Dir {
 }
 
 impl Dir {
-    fn add(&self, pos: Pos) -> Pos {
+    fn mul(&self, value: i64) -> Pos {
         match self {
-            Dir::North => (pos.0 - 1, pos.1),
-            Dir::South => (pos.0 + 1, pos.1),
-            Dir::East => (pos.0, pos.1 + 1),
-            Dir::West => (pos.0, pos.1 - 1),
+            Dir::North => (-value, 0),
+            Dir::South => (value, 0),
+            Dir::East => (0, value),
+            Dir::West => (0, -value),
         }
     }
 }
@@ -38,8 +37,23 @@ impl Dir {
 #[derive(Debug)]
 struct Plan {
     direction: Dir,
-    count: i64,
+    distance: i64,
     color: String,
+}
+
+fn get_area(vertices: &[Pos]) -> i64 {
+    // Shoelace formula
+    let area: i64 = vertices
+        .windows(2)
+        .map(|w| w[0].0 * w[1].1 - w[1].0 * w[0].1)
+        .sum();
+    // Roughly the number of edge tiles
+    let perimeter: i64 = vertices
+        .windows(2)
+        .map(|w| (w[1].0 - w[0].0 + w[1].1 - w[0].1).abs())
+        .sum();
+
+    (area.abs() + perimeter) / 2 + 1
 }
 
 impl Solution {
@@ -58,7 +72,7 @@ impl Solution {
                     "L" => Dir::West,
                     _ => panic!("Unknown direction {}", parts[0]),
                 },
-                count: parts[1].parse().unwrap(),
+                distance: parts[1].parse().unwrap(),
                 color: parts[2][1..parts[2].len() - 1].to_string()
             })
         }
@@ -69,59 +83,41 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut min = (0, 0);
-        let mut max = (0, 0);
         let mut pos = (0, 0);
-        let mut map = HashSet::from([pos]);
+        let mut vertices = Vec::from([pos]);
         for plan in &self.plans {
-            for _ in 0..plan.count {
-                pos = plan.direction.add(pos);
-                map.insert(pos);
-                min.0 = min.0.min(pos.0);
-                min.1 = min.1.min(pos.1);
-                max.0 = max.0.max(pos.0);
-                max.1 = max.1.max(pos.1);
-            }
+            let offset = plan.direction.mul(plan.distance);
+            pos = (pos.0 + offset.0, pos.1 + offset.1);
+            vertices.push(pos);
         }
 
-        let mut queue = VecDeque::from([(1, 1)]);
-        let mut inside = HashSet::new();
-
-        while let Some(pos) = queue.pop_front() {
-            if map.contains(&pos) || inside.contains(&pos) {
-                continue;
-            }
-
-            inside.insert(pos);
-            for dir in DIRS {
-                queue.push_back(dir.add(pos));
-            }
-        }
-
-        Some(inside.len() as i64 + map.len() as i64)
+        Some(get_area(&vertices))
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        None
-    }
-}
-
-fn debug(map: &HashSet<Pos>, inside: &HashSet<Pos>, size: Pos) {
-    for row in 0..size.0 {
-        for col in 0..size.1 {
-            let pos = (row, col);
-            let c = if inside.contains(&pos) {
-                '#'
-            } else if map.contains(&pos) {
-                'O'
-            } else {
-                '.'
+        let mut pos = (0, 0);
+        let mut vertices = Vec::from([pos]);
+        for plan in &self.plans {
+            let distance: i64 = plan.color[1..6]
+                .chars()
+                .enumerate()
+                .map(|(i, c)| (c.to_digit(16).unwrap() << (4 * (4 - i))) as i64)
+                .sum();
+            let direction = match &plan.color[6..=6] {
+                "0" => Dir::East,
+                "1" => Dir::South,
+                "2" => Dir::West,
+                "3" => Dir::North,
+                _ => panic!("Unknown direction"),
             };
-            print!("{}", c);
+
+            let offset = direction.mul(distance);
+            pos = (pos.0 + offset.0, pos.1 + offset.1);
+            vertices.push(pos);
         }
-        println!();
+
+        Some(get_area(&vertices))
     }
-    println!();
 }
 
 #[cfg(test)]
