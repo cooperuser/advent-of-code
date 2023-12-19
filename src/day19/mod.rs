@@ -1,4 +1,4 @@
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -11,7 +11,7 @@ pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
     workflows: HashMap<String, Vec<Workflow>>,
-    ratings: Vec<HashMap<Category, i64>>,
+    ratings: Vec<[i64; 4]>,
 }
 
 #[derive(Debug)]
@@ -20,32 +20,10 @@ struct Workflow {
     action: Action,
 }
 
-#[derive(Debug, PartialEq, Eq, Hash)]
-enum Category {
-    Extremely,
-    Musical,
-    Aerodynamic,
-    Shiny,
-}
-
-impl FromStr for Category {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        match s {
-            "x" => Ok(Self::Extremely),
-            "m" => Ok(Self::Musical),
-            "a" => Ok(Self::Aerodynamic),
-            "s" => Ok(Self::Shiny),
-            _ => Err(format!("unknown char {s}")),
-        }
-    }
-}
-
 #[derive(Debug)]
 enum Operation {
-    LessThan(Category, i64),
-    GreaterThan(Category, i64),
+    LessThan(usize, i64),
+    GreaterThan(usize, i64),
     Conditionless,
 }
 
@@ -54,6 +32,16 @@ enum Action {
     Label(String),
     Reject,
     Accept,
+}
+
+fn get_category(c: &str) -> usize {
+    match c {
+        "x" => 0,
+        "m" => 1,
+        "a" => 2,
+        "s" => 3,
+        _ => panic!("unknown variable {c}"),
+    }
 }
 
 impl Solution {
@@ -68,9 +56,9 @@ impl Solution {
                 let (operation, action) = match clause.split_once(':') {
                     Some((rule, action)) => {
                         let operation = if let Some((c, v)) = rule.split_once('<') {
-                            Operation::LessThan(c.parse().unwrap(), v.parse().unwrap())
+                            Operation::LessThan(get_category(c), v.parse().unwrap())
                         } else if let Some((c, v)) = rule.split_once('>') {
-                            Operation::GreaterThan(c.parse().unwrap(), v.parse().unwrap())
+                            Operation::GreaterThan(get_category(c), v.parse().unwrap())
                         } else {
                             panic!("unknown operation: {rule}")
                         };
@@ -93,14 +81,14 @@ impl Solution {
 
         let mut ratings = Vec::new();
         for line in blocks[1] {
-            let mut rating = HashMap::new();
+            let mut rating = [0i64; 4];
             let line = line.strip_prefix('{').unwrap().strip_suffix('}').unwrap();
             let parts: Vec<_> = line.split(',').collect();
             for part in parts {
                 let (category, value) = part.split_once('=').unwrap();
-                let category: Category = category.parse().unwrap();
+                let category = get_category(category);
                 let value: i64 = value.parse().unwrap();
-                rating.insert(category, value);
+                rating[category] = value;
             }
             ratings.push(rating);
         }
@@ -117,7 +105,7 @@ impl Solution {
             .ratings
             .iter()
             .filter(|rating| self.test_rating(rating))
-            .map(|rating| rating.values().sum::<i64>())
+            .map(|rating| rating.iter().sum::<i64>())
             .sum::<i64>();
 
         Some(sum)
@@ -127,14 +115,14 @@ impl Solution {
         None
     }
 
-    fn test_rating(&self, rating: &HashMap<Category, i64>) -> bool {
+    fn test_rating(&self, rating: &[i64; 4]) -> bool {
         let mut label = "in".to_string();
         'outer: loop {
             let workflow = self.workflows.get(&label).unwrap();
             for Workflow { operation, action } in workflow {
                 let success = match operation {
-                    Operation::LessThan(c, v) => rating.get(c).unwrap() < v,
-                    Operation::GreaterThan(c, v) => rating.get(c).unwrap() > v,
+                    Operation::LessThan(c, v) => rating[*c] < *v,
+                    Operation::GreaterThan(c, v) => rating[*c] > *v,
                     Operation::Conditionless => true,
                 };
                 if success {
