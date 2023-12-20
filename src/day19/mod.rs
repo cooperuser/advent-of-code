@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::{collections::HashMap, ops::Range};
+use std::{collections::HashMap, ops::Range, str::FromStr};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -27,6 +27,20 @@ enum Operation {
     LessThan(usize, i64),
     GreaterThan(usize, i64),
     Conditionless,
+}
+
+impl FromStr for Operation {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some((c, v)) = s.split_once('<') {
+            Ok(Operation::LessThan(get_category(c), v.parse().unwrap()))
+        } else if let Some((c, v)) = s.split_once('>') {
+            Ok(Operation::GreaterThan(get_category(c), v.parse().unwrap()))
+        } else {
+            Err(format!("unknown operation: {s}"))
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -87,16 +101,7 @@ impl Solution {
             let (label, clauses) = line.split_once('{').unwrap();
             for clause in clauses.strip_suffix('}').unwrap().split(',') {
                 let (operation, action) = match clause.split_once(':') {
-                    Some((rule, action)) => {
-                        let operation = if let Some((c, v)) = rule.split_once('<') {
-                            Operation::LessThan(get_category(c), v.parse().unwrap())
-                        } else if let Some((c, v)) = rule.split_once('>') {
-                            Operation::GreaterThan(get_category(c), v.parse().unwrap())
-                        } else {
-                            panic!("unknown operation: {rule}")
-                        };
-                        (operation, action)
-                    }
+                    Some((rule, action)) => (rule.parse().unwrap(), action),
                     None => (Operation::Conditionless, clause),
                 };
 
