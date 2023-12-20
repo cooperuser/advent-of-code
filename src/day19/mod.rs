@@ -66,8 +66,8 @@ fn get_volume(node: Tree, ranges: [Range<i64>; 4]) -> i64 {
                     r_range[c].start = r_range[c].start.max(v);
                 }
                 Operation::GreaterThan(c, v) => {
-                    r_range[c].end = r_range[c].end.min(v + 1);
                     l_range[c].start = l_range[c].start.max(v + 1);
+                    r_range[c].end = r_range[c].end.min(v + 1);
                 }
                 _ => panic!("Bad operation {operation:?}"),
             }
@@ -119,9 +119,7 @@ impl Solution {
             let parts: Vec<_> = line.split(',').collect();
             for part in parts {
                 let (category, value) = part.split_once('=').unwrap();
-                let category = get_category(category);
-                let value: i64 = value.parse().unwrap();
-                rating[category] = value;
+                rating[get_category(category)] = value.parse().unwrap();
             }
             ratings.push(rating);
         }
@@ -173,20 +171,18 @@ impl Solution {
     }
 
     fn make_tree(&self, label: &str, index: usize) -> Tree {
-        let workflow = self.workflows.get(label).unwrap();
-        match workflow[index].operation {
-            Operation::Conditionless => match &workflow[index].action {
-                Action::Label(l) => self.make_tree(l, 0),
-                Action::Reject => Tree::Leaf(false),
-                Action::Accept => Tree::Leaf(true),
-            },
+        let Workflow { operation, action } = &self.workflows[label][index];
+        let next = match action {
+            Action::Label(l) => self.make_tree(l, 0),
+            Action::Reject => Tree::Leaf(false),
+            Action::Accept => Tree::Leaf(true),
+        };
+
+        match operation {
+            Operation::Conditionless => next,
             _ => Tree::Node(
-                workflow[index].operation.clone(),
-                Box::new(match workflow[index].action.clone() {
-                    Action::Label(l) => self.make_tree(&l, 0),
-                    Action::Reject => Tree::Leaf(false),
-                    Action::Accept => Tree::Leaf(true),
-                }),
+                operation.clone(),
+                Box::new(next),
                 Box::new(self.make_tree(label, index + 1)),
             ),
         }
