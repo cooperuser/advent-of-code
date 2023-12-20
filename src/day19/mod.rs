@@ -1,4 +1,6 @@
-use std::collections::HashMap;
+#![allow(dead_code)]
+
+use std::{collections::HashMap, ops::Range};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -20,18 +22,24 @@ struct Workflow {
     action: Action,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Operation {
     LessThan(usize, i64),
     GreaterThan(usize, i64),
     Conditionless,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 enum Action {
     Label(String),
     Reject,
     Accept,
+}
+
+#[derive(Debug)]
+enum Tree {
+    Node(Operation, Box<Tree>, Box<Tree>),
+    Leaf(bool),
 }
 
 fn get_category(c: &str) -> usize {
@@ -41,6 +49,31 @@ fn get_category(c: &str) -> usize {
         "a" => 2,
         "s" => 3,
         _ => panic!("unknown variable {c}"),
+    }
+}
+
+fn get_volume(node: Tree, ranges: [Range<i64>; 4]) -> i64 {
+    match node {
+        Tree::Leaf(false) => 0,
+        Tree::Leaf(true) => ranges.iter().map(|r| r.end - r.start).product(),
+        Tree::Node(operation, left, right) => {
+            let mut l_range = ranges.clone();
+            let mut r_range = ranges.clone();
+
+            match operation {
+                Operation::LessThan(c, v) => {
+                    l_range[c].end = l_range[c].end.min(v);
+                    r_range[c].start = r_range[c].start.max(v);
+                }
+                Operation::GreaterThan(c, v) => {
+                    r_range[c].end = r_range[c].end.min(v + 1);
+                    l_range[c].start = l_range[c].start.max(v + 1);
+                }
+                _ => panic!("Bad operation {operation:?}"),
+            }
+
+            get_volume(*left, l_range) + get_volume(*right, r_range)
+        }
     }
 }
 
@@ -73,7 +106,7 @@ impl Solution {
                         "R" => Action::Reject,
                         "A" => Action::Accept,
                         _ => Action::Label(action.to_string()),
-                    }
+                    },
                 })
             }
             workflows.insert(label.to_string(), workflow);
@@ -112,7 +145,9 @@ impl Solution {
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        None
+        let ranges = [1..4001, 1..4001, 1..4001, 1..4001];
+        let tree = self.make_tree("in", 0);
+        Some(get_volume(tree, ranges))
     }
 
     fn test_rating(&self, rating: &[i64; 4]) -> bool {
@@ -134,6 +169,26 @@ impl Solution {
                     break;
                 }
             }
+        }
+    }
+
+    fn make_tree(&self, label: &str, index: usize) -> Tree {
+        let workflow = self.workflows.get(label).unwrap();
+        match workflow[index].operation {
+            Operation::Conditionless => match &workflow[index].action {
+                Action::Label(l) => self.make_tree(l, 0),
+                Action::Reject => Tree::Leaf(false),
+                Action::Accept => Tree::Leaf(true),
+            },
+            _ => Tree::Node(
+                workflow[index].operation.clone(),
+                Box::new(match workflow[index].action.clone() {
+                    Action::Label(l) => self.make_tree(&l, 0),
+                    Action::Reject => Tree::Leaf(false),
+                    Action::Accept => Tree::Leaf(true),
+                }),
+                Box::new(self.make_tree(label, index + 1)),
+            ),
         }
     }
 }
