@@ -141,8 +141,8 @@ impl Solution {
             .ratings
             .iter()
             .filter(|rating| self.test_rating(rating))
-            .map(|rating| rating.iter().sum::<i64>())
-            .sum::<i64>();
+            .flatten()
+            .sum();
 
         Some(sum)
     }
