@@ -59,38 +59,31 @@ impl Solution {
 
     pub fn part_a(&self) -> Option<i64> {
         let mut pulses = [0, 0];
-
         let mut modules = self.modules.clone();
+
         for _ in 0..1000 {
             let mut queue = VecDeque::from([("broadcaster", false, "button")]);
             while let Some((label, pulse, from)) = queue.pop_front() {
                 pulses[pulse as usize] += 1;
 
-                if self.destinations.get(label).is_none() {
-                    continue;
-                }
-                let dests = self.destinations.get(label).unwrap();
-                match modules.get_mut(label).unwrap() {
-                    Module::Broadcast => {
-                        for dest in dests {
-                            queue.push_back((dest, pulse, label));
-                        }
-                    },
-                    Module::FlipFlop(state) => {
-                        if !pulse {
-                            *state = !*state;
-                            for dest in dests {
-                                queue.push_back((dest, *state, label));
+                if let Some(dests) = self.destinations.get(label) {
+                    let output = match modules.get_mut(label).unwrap() {
+                        Module::Broadcast => pulse,
+                        Module::FlipFlop(state) => {
+                            if pulse {
+                                continue;
                             }
-                        }
-                    },
-                    Module::Conjunction(memory) => {
-                        memory.insert(from.to_string(), pulse);
-                        let all_high = memory.values().all(|p| *p);
-                        for dest in dests {
-                            queue.push_back((dest, !all_high, label));
-                        }
-                    },
+                            *state = !*state;
+                            *state
+                        },
+                        Module::Conjunction(memory) => {
+                            memory.insert(from.to_string(), pulse);
+                            memory.values().any(|p| !p)
+                        },
+                    };
+                    for dest in dests {
+                        queue.push_back((dest, output, label));
+                    }
                 }
             }
         }
