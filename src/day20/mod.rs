@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::{HashMap, VecDeque};
 
 pub const INPUT: &str = include_str!("input.txt");
@@ -58,41 +60,76 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut pulses = [0, 0];
         let mut modules = self.modules.clone();
+        let mut pulses = [0, 0];
 
         for _ in 0..1000 {
-            let mut queue = VecDeque::from([("broadcaster", false, "button")]);
-            while let Some((label, pulse, from)) = queue.pop_front() {
-                pulses[pulse as usize] += 1;
-
-                if let Some(dests) = self.destinations.get(label) {
-                    let output = match modules.get_mut(label).unwrap() {
-                        Module::Broadcast => pulse,
-                        Module::FlipFlop(state) => {
-                            if pulse {
-                                continue;
-                            }
-                            *state = !*state;
-                            *state
-                        },
-                        Module::Conjunction(memory) => {
-                            memory.insert(from.to_string(), pulse);
-                            memory.values().any(|p| !p)
-                        },
-                    };
-                    for dest in dests {
-                        queue.push_back((dest, output, label));
-                    }
-                }
-            }
+            let (p, _) = self.pulse(&mut modules, "");
+            pulses[0] += p[0];
+            pulses[1] += p[1];
         }
 
         Some(pulses[0] * pulses[1])
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        None
+        if self.modules.len() < 10 {
+            return Some(1);
+        }
+
+        let inputs = if let Some(Module::Conjunction(memory)) = self.modules.get("cl") {
+            memory.keys().collect::<Vec<_>>()
+        } else {
+            panic!("Could not find inputs to rx")
+        };
+
+        let mut total = 1;
+        for input in &inputs {
+            let mut modules = self.modules.clone();
+            let mut presses = 0;
+            loop {
+                presses += 1;
+                if self.pulse(&mut modules, input).1 {
+                    total *= presses;
+                    break;
+                }
+            }
+        }
+
+        Some(total)
+    }
+
+    fn pulse(&self, modules: &mut HashMap<String, Module>, target: &str) -> ([i64; 2], bool) {
+        let mut pulses = [0, 0];
+        let mut queue = VecDeque::from([("broadcaster", false, "button")]);
+        while let Some((label, pulse, from)) = queue.pop_front() {
+            pulses[pulse as usize] += 1;
+
+            if let Some(dests) = self.destinations.get(label) {
+                let output = match modules.get_mut(label).unwrap() {
+                    Module::Broadcast => pulse,
+                    Module::FlipFlop(state) => {
+                        if pulse {
+                            continue;
+                        }
+                        *state = !*state;
+                        *state
+                    }
+                    Module::Conjunction(memory) => {
+                        memory.insert(from.to_string(), pulse);
+                        let any_low = memory.values().any(|p| !p);
+                        if any_low && label == target {
+                            return ([0, 0], true);
+                        }
+                        any_low
+                    }
+                };
+                for dest in dests {
+                    queue.push_back((dest, output, label));
+                }
+            }
+        }
+        (pulses, false)
     }
 }
 
