@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample_a.txt");
 pub const SAMPLE_B: &str = include_str!("input_sample_b.txt");
