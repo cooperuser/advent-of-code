@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use std::collections::HashSet;
 
 pub const INPUT: &str = include_str!("input.txt");
