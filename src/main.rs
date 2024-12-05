@@ -1,3 +1,5 @@
+#![feature(slice_split_once)]
+
 mod day01;
 mod day02;
 mod day03;
