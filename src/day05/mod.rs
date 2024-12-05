@@ -70,7 +70,7 @@ impl Solution {
             }
 
             unordered.sort_by_key(|num| num.1);
-            let ordered: Vec<i64> = unordered.iter().map(|pair| pair.0).collect();
+            let ordered: Vec<i64> = unordered.iter().map(|pair| pair.0).rev().collect();
             sum += ordered[update.len() / 2];
         }
 
