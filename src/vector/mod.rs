@@ -1,4 +1,6 @@
-use std::hash::Hash;
+mod vectorset;
+#[allow(unused_imports)]
+pub use vectorset::VectorSet;
 
 use crate::direction::Direction;
 
@@ -7,7 +9,7 @@ pub const SOUTH: Vector = Vector::new(0, 1);
 pub const EAST: Vector = Vector::new(1, 0);
 pub const WEST: Vector = Vector::new(-1, 0);
 
-#[derive(Default, Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Debug, Default, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Vector {
     pub x: i64,
     pub y: i64,
@@ -53,6 +55,10 @@ impl Vector {
             x: self.x.signum(),
             y: self.y.signum(),
         }
+    }
+
+    pub const fn area(&self) -> i64 {
+        self.x * self.y
     }
 }
 
