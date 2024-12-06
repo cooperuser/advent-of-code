@@ -1,5 +1,8 @@
 #![feature(slice_split_once)]
 
+mod direction;
+mod vector;
+
 mod day01;
 mod day02;
 mod day03;
