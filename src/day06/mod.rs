@@ -13,20 +13,20 @@ pub const ANSWER_B: i64 = 6;
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
-    map: HashSet<Vector>,
+    grid: Vec<Vec<bool>>,
     size: Vector,
     start: Vector,
 }
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        let mut map = HashSet::new();
         let mut start = Vector::default();
+        let mut grid = vec![vec![false; raw[0].len()]; raw.len()];
         for (y, line) in raw.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
                 let spot = (x, y).into();
                 if c == '#' {
-                    map.insert(spot);
+                    grid[y][x] = true;
                 } else if c == '^' {
                     start = spot;
                 }
@@ -35,22 +35,22 @@ impl Solution {
 
         Self {
             raw: raw.clone(),
-            map,
+            grid,
             start,
             size: Vector::new_usize(raw[0].len(), raw.len()),
         }
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        Some(self.compute_path(None).unwrap().len() as i64)
+        Some(self.compute_path().unwrap().len() as i64)
     }
 
     pub fn part_b(&self) -> Option<i64> {
         let mut total = 0;
-        for spot in self.compute_path(None).unwrap() {
+        for spot in self.compute_path().unwrap() {
             if spot == self.start {
                 continue;
-            } else if self.compute_path(Some(spot)).is_none() {
+            } else if self.does_path_loop(spot) {
                 total += 1;
             }
         }
@@ -58,21 +58,36 @@ impl Solution {
         Some(total)
     }
 
-    fn compute_path(&self, extra: Option<Vector>) -> Option<HashSet<Vector>> {
-        let mut facing = Direction::North;
+    fn compute_path(&self) -> Option<HashSet<Vector>> {
         let mut seen: HashSet<Vector> = HashSet::new();
-        let mut seen_facing: HashSet<(Vector, Direction)> = HashSet::new();
+        let mut facing = Direction::North;
         let mut pos = self.start;
         loop {
-            if seen_facing.contains(&(pos, facing)) {
-                return None;
-            }
             seen.insert(pos);
-            seen_facing.insert((pos, facing));
             let next = pos + facing;
             if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
                 return Some(seen);
-            } else if self.map.contains(&next) || Some(next) == extra {
+            } else if self.grid[next.y as usize][next.x as usize] {
+                facing = facing.rotate_right();
+            } else {
+                pos = next;
+            }
+        }
+    }
+
+    fn does_path_loop(&self, extra: Vector) -> bool {
+        let mut grid = vec![vec![vec![false; 4]; self.size.x as usize]; self.size.y as usize];
+        let mut facing = Direction::North;
+        let mut pos = self.start;
+        loop {
+            if grid[pos.y as usize][pos.x as usize][facing as usize] {
+                return true;
+            }
+            grid[pos.y as usize][pos.x as usize][facing as usize] = true;
+            let next = pos + facing;
+            if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
+                return false;
+            } else if self.grid[next.y as usize][next.x as usize] || next == extra {
                 facing = facing.rotate_right();
             } else {
                 pos = next;
