@@ -82,6 +82,40 @@ impl<'a> Iterator for VectorSetIterator<'a> {
     }
 }
 
+pub struct VectorSetIntoIterator {
+    set: VectorSet,
+    index: i64,
+}
+
+impl Iterator for VectorSetIntoIterator {
+    type Item = Vector;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.index > self.set.size.area() {
+                return None;
+            }
+            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.y);
+            self.index += 1;
+            if self.set.contains(pos) {
+                return Some(pos);
+            }
+        }
+    }
+}
+
+impl IntoIterator for VectorSet {
+    type Item = Vector;
+    type IntoIter = VectorSetIntoIterator;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            set: self,
+            index: 0,
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 
-use std::collections::HashSet;
-
 use crate::direction::Direction;
 use crate::vector::{Vector, VectorMap};
 
@@ -44,15 +42,15 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        Some(self.compute_path().unwrap().len() as i64)
+        Some(self.compute_path(None).unwrap().len() as i64)
     }
 
     pub fn part_b(&self) -> Option<i64> {
         let mut total = 0;
-        for spot in self.compute_path().unwrap() {
+        for (spot, _) in self.compute_path(None).unwrap() {
             if spot == self.start {
                 continue;
-            } else if self.does_path_loop(spot) {
+            } else if self.compute_path(Some(spot)).is_none() {
                 total += 1;
             }
         }
@@ -60,24 +58,7 @@ impl Solution {
         Some(total)
     }
 
-    fn compute_path(&self) -> Option<HashSet<Vector>> {
-        let mut seen: HashSet<Vector> = HashSet::new();
-        let mut facing = Direction::North;
-        let mut pos = self.start;
-        loop {
-            seen.insert(pos);
-            let next = pos + facing;
-            if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
-                return Some(seen);
-            } else if self.grid[next.y as usize][next.x as usize] {
-                facing = facing.rotate_right();
-            } else {
-                pos = next;
-            }
-        }
-    }
-
-    fn does_path_loop(&self, extra: Vector) -> bool {
+    fn compute_path(&self, extra: Option<Vector>) -> Option<VectorMap<Vec<bool>>> {
         let mut seen: VectorMap<Vec<bool>> = VectorMap::new(self.size + Vector::new(1, 1));
         let mut facing = Direction::North;
         let mut pos = self.start;
@@ -85,7 +66,7 @@ impl Solution {
             match seen.get(pos) {
                 Some(dirs) => {
                     if dirs[facing as usize] {
-                        return true;
+                        return None;
                     }
                 }
                 None => {
@@ -96,8 +77,8 @@ impl Solution {
             seen.get_mut(pos).as_mut().unwrap()[facing as usize] = true;
             let next = pos + facing;
             if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
-                return false;
-            } else if self.grid[next.y as usize][next.x as usize] || next == extra {
+                return Some(seen);
+            } else if self.grid[next.y as usize][next.x as usize] || Some(next) == extra {
                 facing = facing.rotate_right();
             } else {
                 pos = next;

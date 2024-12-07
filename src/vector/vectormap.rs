@@ -72,7 +72,7 @@ impl<T: Clone> VectorMap<T> {
     #[allow(dead_code)]
     pub fn iter(&self) -> VectorMapIterator<T> {
         VectorMapIterator {
-            set: self,
+            map: self,
             index: 0,
         }
     }
@@ -84,7 +84,7 @@ impl<T: Clone> VectorMap<T> {
 }
 
 pub struct VectorMapIterator<'a, T> {
-    set: &'a VectorMap<T>,
+    map: &'a VectorMap<T>,
     index: i64,
 }
 
@@ -93,14 +93,48 @@ impl<'a, T: Clone> Iterator for VectorMapIterator<'a, T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         loop {
-            if self.index > self.set.size.area() {
+            if self.index > self.map.size.area() {
                 return None;
             }
-            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.y);
+            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.y);
             self.index += 1;
-            if let Some(value) = self.set.get(pos) {
+            if let Some(value) = self.map.get(pos) {
                 return Some((pos, value));
             }
+        }
+    }
+}
+
+pub struct VectorMapIntoIterator<T> {
+    map: VectorMap<T>,
+    index: i64,
+}
+
+impl<T: Clone> Iterator for VectorMapIntoIterator<T> {
+    type Item = (Vector, T);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        loop {
+            if self.index > self.map.size.area() {
+                return None;
+            }
+            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.y);
+            self.index += 1;
+            if let Some(value) = self.map.get(pos) {
+                return Some((pos, value));
+            }
+        }
+    }
+}
+
+impl<T: Clone> IntoIterator for VectorMap<T> {
+    type Item = (Vector, T);
+    type IntoIter = VectorMapIntoIterator<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Self::IntoIter {
+            map: self,
+            index: 0,
         }
     }
 }
@@ -111,68 +145,68 @@ mod test {
 
     #[test]
     fn one_by_one_empty() {
-        let set: VectorMap<()> = VectorMap::new(Vector::new(1, 1));
-        assert_eq!(set.iter().next(), None);
+        let map: VectorMap<()> = VectorMap::new(Vector::new(1, 1));
+        assert_eq!(map.iter().next(), None);
     }
 
     #[test]
     fn one_by_one_filled() {
-        let mut set: VectorMap<()> = VectorMap::new(Vector::new(1, 1));
-        set.insert(Vector::new(0, 0), ());
-        let mut iter = set.iter();
+        let mut map: VectorMap<()> = VectorMap::new(Vector::new(1, 1));
+        map.insert(Vector::new(0, 0), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_empty() {
-        let set: VectorMap<()> = VectorMap::new(Vector::new(2, 2));
-        let mut iter = set.iter();
+        let map: VectorMap<()> = VectorMap::new(Vector::new(2, 2));
+        let mut iter = map.iter();
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_with_one_1() {
-        let mut set: VectorMap<()> = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 0), ());
-        let mut iter = set.iter();
+        let mut map: VectorMap<()> = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 0), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_with_one_2() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(1, 0), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(1, 0), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(1, 0), ())));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_with_one_3() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 1), ())));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_with_one_4() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(1, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(1, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(1, 1), ())));
         assert_eq!(iter.next(), None);
     }
 
     #[test]
     fn two_by_two_with_two_1() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 0), ());
-        set.insert(Vector::new(1, 0), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 0), ());
+        map.insert(Vector::new(1, 0), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(1, 0), ())));
         assert_eq!(iter.next(), None);
@@ -180,10 +214,10 @@ mod test {
 
     #[test]
     fn two_by_two_with_two_2() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 0), ());
-        set.insert(Vector::new(0, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 0), ());
+        map.insert(Vector::new(0, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(0, 1), ())));
         assert_eq!(iter.next(), None);
@@ -191,10 +225,10 @@ mod test {
 
     #[test]
     fn two_by_two_with_two_3() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 0), ());
-        set.insert(Vector::new(1, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 0), ());
+        map.insert(Vector::new(1, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(1, 1), ())));
         assert_eq!(iter.next(), None);
@@ -202,10 +236,10 @@ mod test {
 
     #[test]
     fn two_by_two_with_two_4() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(1, 0), ());
-        set.insert(Vector::new(0, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(1, 0), ());
+        map.insert(Vector::new(0, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(1, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(0, 1), ())));
         assert_eq!(iter.next(), None);
@@ -213,10 +247,10 @@ mod test {
 
     #[test]
     fn two_by_two_with_two_5() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(1, 0), ());
-        set.insert(Vector::new(1, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(1, 0), ());
+        map.insert(Vector::new(1, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(1, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(1, 1), ())));
         assert_eq!(iter.next(), None);
@@ -224,10 +258,10 @@ mod test {
 
     #[test]
     fn two_by_two_with_two_6() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 1), ());
-        set.insert(Vector::new(1, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 1), ());
+        map.insert(Vector::new(1, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 1), ())));
         assert_eq!(iter.next(), Some((Vector::new(1, 1), ())));
         assert_eq!(iter.next(), None);
@@ -235,12 +269,12 @@ mod test {
 
     #[test]
     fn two_by_two_filled() {
-        let mut set = VectorMap::new(Vector::new(2, 2));
-        set.insert(Vector::new(0, 0), ());
-        set.insert(Vector::new(0, 1), ());
-        set.insert(Vector::new(1, 0), ());
-        set.insert(Vector::new(1, 1), ());
-        let mut iter = set.iter();
+        let mut map = VectorMap::new(Vector::new(2, 2));
+        map.insert(Vector::new(0, 0), ());
+        map.insert(Vector::new(0, 1), ());
+        map.insert(Vector::new(1, 0), ());
+        map.insert(Vector::new(1, 1), ());
+        let mut iter = map.iter();
         assert_eq!(iter.next(), Some((Vector::new(0, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(1, 0), ())));
         assert_eq!(iter.next(), Some((Vector::new(0, 1), ())));
