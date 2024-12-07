@@ -37,48 +37,34 @@ impl Solution {
     }
 
     pub fn part_a(&self) -> Option<i64> {
-        let mut sum = 0;
-        'equation: for equation in self.equations.iter() {
-            let len = equation.numbers.len();
-            let mut deque: VecDeque<(i64, usize)> = VecDeque::new();
-            deque.push_back((equation.numbers[0], 1));
-            while let Some(next) = deque.pop_front() {
-                if next.1 == len && next.0 == equation.target {
-                    sum += equation.target;
-                    continue 'equation;
-                } else if next.1 == len {
-                    continue;
-                }
-
-                deque.push_back((next.0 + equation.numbers[next.1], next.1 + 1));
-                deque.push_back((next.0 * equation.numbers[next.1], next.1 + 1));
-            }
-        }
-        Some(sum)
+        Some(self.equations.iter().map(|eq| self.helper(eq, false)).sum())
     }
 
     pub fn part_b(&self) -> Option<i64> {
-        let mut sum = 0;
-        'equation: for equation in self.equations.iter() {
-            let len = equation.numbers.len();
-            let mut deque: VecDeque<(i64, usize)> = VecDeque::new();
-            deque.push_back((equation.numbers[0], 1));
-            while let Some(next) = deque.pop_front() {
-                if next.1 == len && next.0 == equation.target {
-                    sum += equation.target;
-                    continue 'equation;
-                } else if next.1 == len {
-                    continue;
-                }
+        Some(self.equations.iter().map(|eq| self.helper(eq, true)).sum())
+    }
 
-                deque.push_back((next.0 + equation.numbers[next.1], next.1 + 1));
-                deque.push_back((next.0 * equation.numbers[next.1], next.1 + 1));
-                let number = equation.numbers[next.1];
+    fn helper(&self, equation: &Equation, concatenate: bool) -> i64 {
+        let mut deque: VecDeque<(i64, usize)> = VecDeque::new();
+        deque.push_back((equation.numbers[0], 1));
+        while let Some(partial) = deque.pop_front() {
+            if partial.1 == equation.numbers.len() {
+                if partial.0 == equation.target {
+                    return equation.target;
+                }
+                continue;
+            }
+
+            deque.push_back((partial.0 + equation.numbers[partial.1], partial.1 + 1));
+            deque.push_back((partial.0 * equation.numbers[partial.1], partial.1 + 1));
+            if concatenate {
+                let number = equation.numbers[partial.1];
                 let magnitude = (number as f64).log10().ceil() as u32;
-                deque.push_back((next.0 * 10i64.pow(magnitude) + number, next.1 + 1));
+                deque.push_back((partial.0 * 10i64.pow(magnitude) + number, partial.1 + 1));
             }
         }
-        Some(sum)
+
+        0
     }
 }
 
