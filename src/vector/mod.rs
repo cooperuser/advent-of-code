@@ -1,4 +1,7 @@
+mod vectormap;
 mod vectorset;
+#[allow(unused_imports)]
+pub use vectormap::VectorMap;
 #[allow(unused_imports)]
 pub use vectorset::VectorSet;
 

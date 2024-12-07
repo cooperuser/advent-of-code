@@ -3,7 +3,7 @@
 use std::collections::HashSet;
 
 use crate::direction::Direction;
-use crate::vector::Vector;
+use crate::vector::{Vector, VectorMap};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -78,14 +78,22 @@ impl Solution {
     }
 
     fn does_path_loop(&self, extra: Vector) -> bool {
-        let mut grid = vec![vec![vec![false; 4]; self.size.x as usize]; self.size.y as usize];
+        let mut seen: VectorMap<Vec<bool>> = VectorMap::new(self.size + Vector::new(1, 1));
         let mut facing = Direction::North;
         let mut pos = self.start;
         loop {
-            if grid[pos.y as usize][pos.x as usize][facing as usize] {
-                return true;
+            match seen.get(pos) {
+                Some(dirs) => {
+                    if dirs[facing as usize] {
+                        return true;
+                    }
+                }
+                None => {
+                    seen.insert(pos, vec![false; 4]);
+                }
             }
-            grid[pos.y as usize][pos.x as usize][facing as usize] = true;
+
+            seen.get_mut(pos).as_mut().unwrap()[facing as usize] = true;
             let next = pos + facing;
             if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
                 return false;
