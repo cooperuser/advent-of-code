@@ -9,7 +9,12 @@ pub const ANSWER_B: i64 = 11387;
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
-    equations: Vec<(i64, Vec<i64>)>,
+    equations: Vec<Equation>,
+}
+
+struct Equation {
+    target: i64,
+    numbers: Vec<i64>,
 }
 
 impl Solution {
@@ -17,12 +22,13 @@ impl Solution {
         let mut equations = Vec::new();
         for line in raw.iter() {
             let (left, right) = line.split_once(':').unwrap();
-            let left = left.parse().unwrap();
-            let right = right
-                .split_whitespace()
-                .map(|num| num.parse().unwrap())
-                .collect();
-            equations.push((left, right));
+            equations.push(Equation {
+                target: left.parse().unwrap(),
+                numbers: right
+                    .split_whitespace()
+                    .map(|num| num.parse().unwrap())
+                    .collect(),
+            });
         }
         Self {
             raw: raw.clone(),
@@ -33,19 +39,19 @@ impl Solution {
     pub fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
         'equation: for equation in self.equations.iter() {
-            let len = equation.1.len();
+            let len = equation.numbers.len();
             let mut deque: VecDeque<(i64, usize)> = VecDeque::new();
-            deque.push_back((equation.1[0], 1));
+            deque.push_back((equation.numbers[0], 1));
             while let Some(next) = deque.pop_front() {
-                if next.1 == len && next.0 == equation.0 {
-                    sum += equation.0;
+                if next.1 == len && next.0 == equation.target {
+                    sum += equation.target;
                     continue 'equation;
                 } else if next.1 == len {
                     continue;
                 }
 
-                deque.push_back((next.0 + equation.1[next.1], next.1 + 1));
-                deque.push_back((next.0 * equation.1[next.1], next.1 + 1));
+                deque.push_back((next.0 + equation.numbers[next.1], next.1 + 1));
+                deque.push_back((next.0 * equation.numbers[next.1], next.1 + 1));
             }
         }
         Some(sum)
@@ -54,22 +60,22 @@ impl Solution {
     pub fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
         'equation: for equation in self.equations.iter() {
-            let len = equation.1.len();
+            let len = equation.numbers.len();
             let mut deque: VecDeque<(i64, usize)> = VecDeque::new();
-            deque.push_back((equation.1[0], 1));
+            deque.push_back((equation.numbers[0], 1));
             while let Some(next) = deque.pop_front() {
-                if next.1 == len && next.0 == equation.0 {
-                    sum += equation.0;
+                if next.1 == len && next.0 == equation.target {
+                    sum += equation.target;
                     continue 'equation;
                 } else if next.1 == len {
                     continue;
                 }
 
-                deque.push_back((next.0 + equation.1[next.1], next.1 + 1));
-                deque.push_back((next.0 * equation.1[next.1], next.1 + 1));
-                let right = equation.1[next.1];
-                let magnitude = (right as f64).log10().ceil() as u32;
-                deque.push_back((next.0 * 10i64.pow(magnitude) + right, next.1 + 1));
+                deque.push_back((next.0 + equation.numbers[next.1], next.1 + 1));
+                deque.push_back((next.0 * equation.numbers[next.1], next.1 + 1));
+                let number = equation.numbers[next.1];
+                let magnitude = (number as f64).log10().ceil() as u32;
+                deque.push_back((next.0 * 10i64.pow(magnitude) + number, next.1 + 1));
             }
         }
         Some(sum)
