@@ -4,7 +4,6 @@ pub const SAMPLE_B: &str = SAMPLE_A;
 pub const ANSWER_A: i64 = 0;
 pub const ANSWER_B: i64 = 0;
 
-#[derive(Default)]
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
@@ -12,9 +11,7 @@ pub struct Solution {
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        Self {
-            raw: raw.clone(),
-        }
+        Self { raw: raw.clone() }
     }
 
     pub fn part_a(&self) -> Option<i64> {
