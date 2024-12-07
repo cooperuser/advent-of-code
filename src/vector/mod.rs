@@ -7,6 +7,7 @@ pub use vectorset::VectorSet;
 
 use crate::direction::Direction;
 
+pub const ZERO: Vector = Vector::new(0, 0);
 pub const NORTH: Vector = Vector::new(0, -1);
 pub const SOUTH: Vector = Vector::new(0, 1);
 pub const EAST: Vector = Vector::new(1, 0);
@@ -39,6 +40,11 @@ impl Vector {
         }
     }
 
+    #[allow(dead_code)]
+    pub const fn zero() -> Self {
+        ZERO
+    }
+
     pub const fn add(a: Vector, b: Vector) -> Self {
         Self {
             x: a.x + b.x,
@@ -53,6 +59,16 @@ impl Vector {
         }
     }
 
+    #[allow(dead_code)]
+    pub fn range(a: Vector, b: Vector) -> impl Iterator<Item = Vector> {
+        (a.y..b.y).flat_map(move |y| (a.x..b.x).map(move |x| Vector::new(x, y)))
+    }
+
+    #[allow(dead_code)]
+    pub fn iter(self) -> impl Iterator<Item = Vector> {
+        (0..self.y).flat_map(move |y| (0..self.x).map(move |x| Vector::new(x, y)))
+    }
+
     pub const fn normalized(&self) -> Self {
         Self {
             x: self.x.signum(),
@@ -62,6 +78,12 @@ impl Vector {
 
     pub const fn area(&self) -> i64 {
         self.x * self.y
+    }
+
+    pub const fn contained_in(&self, a: Vector, b: Vector) -> bool {
+        let x = self.x >= a.x && self.x < b.x;
+        let y = self.y >= a.y && self.y < b.y;
+        x && y
     }
 }
 

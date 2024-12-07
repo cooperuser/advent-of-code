@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use crate::direction::Direction;
-use crate::vector::{Vector, VectorMap};
+use crate::vector::{Vector, VectorMap, VectorSet};
 
 pub const INPUT: &str = include_str!("input.txt");
 pub const SAMPLE_A: &str = include_str!("input_sample.txt");
@@ -9,26 +9,26 @@ pub const SAMPLE_B: &str = SAMPLE_A;
 pub const ANSWER_A: i64 = 41;
 pub const ANSWER_B: i64 = 6;
 
-#[derive(Default)]
 pub struct Solution {
     #[allow(dead_code)]
     raw: Vec<String>,
-    grid: Vec<Vec<bool>>,
+    grid: VectorSet,
     size: Vector,
     start: Vector,
 }
 
 impl Solution {
     pub fn new(raw: Vec<String>) -> Self {
-        let mut start = Vector::default();
-        let mut grid = vec![vec![false; raw[0].len()]; raw.len()];
+        let size = Vector::new_usize(raw[0].len(), raw.len());
+        let mut grid = VectorSet::new(size);
+        let mut start: Option<Vector> = None;
         for (y, line) in raw.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
-                let spot = (x, y).into();
+                let spot = Vector::new_usize(x, y);
                 if c == '#' {
-                    grid[y][x] = true;
+                    grid.insert(spot);
                 } else if c == '^' {
-                    start = spot;
+                    start = Some(spot);
                 }
             }
         }
@@ -36,8 +36,8 @@ impl Solution {
         Self {
             raw: raw.clone(),
             grid,
-            start,
-            size: Vector::new_usize(raw[0].len(), raw.len()),
+            size,
+            start: start.unwrap(),
         }
     }
 
@@ -59,7 +59,7 @@ impl Solution {
     }
 
     fn compute_path(&self, extra: Option<Vector>) -> Option<VectorMap<Vec<bool>>> {
-        let mut seen: VectorMap<Vec<bool>> = VectorMap::new(self.size + Vector::new(1, 1));
+        let mut seen: VectorMap<Vec<bool>> = VectorMap::new(self.size);
         let mut facing = Direction::North;
         let mut pos = self.start;
         loop {
@@ -74,11 +74,11 @@ impl Solution {
                 }
             }
 
-            seen.get_mut(pos).as_mut().unwrap()[facing as usize] = true;
+            seen.get_mut(pos).unwrap()[facing as usize] = true;
             let next = pos + facing;
-            if next.x < 0 || next.y < 0 || next.x >= self.size.x || next.y >= self.size.y {
+            if !next.contained_in(Vector::zero(), self.size) {
                 return Some(seen);
-            } else if self.grid[next.y as usize][next.x as usize] || Some(next) == extra {
+            } else if self.grid.contains(next) || Some(next) == extra {
                 facing = facing.rotate_right();
             } else {
                 pos = next;
