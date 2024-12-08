@@ -103,6 +103,20 @@ impl std::ops::Sub<Vector> for Vector {
     }
 }
 
+impl std::ops::AddAssign<Vector> for Vector {
+    fn add_assign(&mut self, rhs: Vector) {
+        self.x += rhs.x;
+        self.y += rhs.y;
+    }
+}
+
+impl std::ops::SubAssign<Vector> for Vector {
+    fn sub_assign(&mut self, rhs: Vector) {
+        self.x -= rhs.x;
+        self.y -= rhs.y;
+    }
+}
+
 impl std::ops::Add<Direction> for Vector {
     type Output = Vector;
 
@@ -116,6 +130,22 @@ impl std::ops::Sub<Direction> for Vector {
 
     fn sub(self, rhs: Direction) -> Self::Output {
         Vector::sub(self, rhs.into())
+    }
+}
+
+impl std::ops::AddAssign<Direction> for Vector {
+    fn add_assign(&mut self, rhs: Direction) {
+        let other: Vector = rhs.into();
+        self.x += other.x;
+        self.y += other.y;
+    }
+}
+
+impl std::ops::SubAssign<Direction> for Vector {
+    fn sub_assign(&mut self, rhs: Direction) {
+        let other: Vector = rhs.into();
+        self.x -= other.x;
+        self.y -= other.y;
     }
 }
 
