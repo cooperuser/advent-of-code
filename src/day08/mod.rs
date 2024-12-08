@@ -44,9 +44,9 @@ impl crate::solution::Solution<i64> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut antinodes = VectorSet::new(self.size);
-        for spaces in self.antennae.values() {
-            for (i, &first) in spaces.iter().enumerate() {
-                for &second in spaces.iter().skip(i + 1) {
+        for antenna in self.antennae.values() {
+            for (i, &first) in antenna.iter().enumerate() {
+                for &second in antenna.iter().skip(i + 1) {
                     let diff = second - first;
                     antinodes.insert(first - diff);
                     antinodes.insert(second + diff);
@@ -58,9 +58,9 @@ impl crate::solution::Solution<i64> for Day {
 
     fn part_b(&self) -> Option<i64> {
         let mut antinodes = VectorSet::new(self.size);
-        for spaces in self.antennae.values() {
-            for (i, &first) in spaces.iter().enumerate() {
-                for &second in spaces.iter().skip(i + 1) {
+        for antenna in self.antennae.values() {
+            for (i, &first) in antenna.iter().enumerate() {
+                for &second in antenna.iter().skip(i + 1) {
                     let diff = second - first;
                     let mut a = first;
                     let mut b = second;
