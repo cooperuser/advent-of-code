@@ -14,9 +14,10 @@ mod day05;
 mod day06;
 mod day07;
 mod day08;
+mod day09;
 
 fn main() {
-    let day = day::<day08::Day, i64>();
+    let day = day::<day09::Day, i64>();
     println!("parse :\t{:?}\n", day.duration);
 
     match day.sample_a.part_a() {
