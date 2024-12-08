@@ -1,23 +1,45 @@
-#![allow(dead_code)]
-
 use std::collections::HashSet;
 
-pub const INPUT: &str = include_str!("input.txt");
-pub const SAMPLE_A: &str = include_str!("input_sample.txt");
-pub const SAMPLE_B: &str = SAMPLE_A;
-pub const ANSWER_A: i64 = 143;
-pub const ANSWER_B: i64 = 123;
-
 #[derive(Default)]
-pub struct Solution {
+pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
     rules: HashSet<(i64, i64)>,
     updates: Vec<Vec<i64>>,
 }
 
-impl Solution {
-    pub fn new(raw: Vec<String>) -> Self {
+impl Day {
+    fn check_update(&self, update: &[i64]) -> bool {
+        for (i, &a) in update.iter().enumerate() {
+            for &b in update.iter().take(i) {
+                if self.rules.contains(&(a, b)) {
+                    return false;
+                }
+            }
+
+            for &b in update.iter().skip(i + 1) {
+                if !self.rules.contains(&(a, b)) {
+                    return false;
+                }
+            }
+        }
+
+        true
+    }
+}
+
+impl crate::solution::Solution<i64> for Day {
+    fn meta() -> crate::solution::Meta<i64> {
+        crate::solution::Meta::<i64> {
+            input: include_str!("input.txt").to_string(),
+            sample_a: include_str!("input_sample.txt").to_string(),
+            sample_b: include_str!("input_sample.txt").to_string(),
+            answer_a: 143,
+            answer_b: 123,
+        }
+    }
+
+    fn new(raw: Vec<String>) -> Self {
         let (rules, updates) = raw.split_once(|line| line.is_empty()).unwrap();
         let rules = rules
             .iter()
@@ -36,7 +58,7 @@ impl Solution {
         }
     }
 
-    pub fn part_a(&self) -> Option<i64> {
+    fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
 
         for update in &self.updates {
@@ -48,7 +70,7 @@ impl Solution {
         Some(sum)
     }
 
-    pub fn part_b(&self) -> Option<i64> {
+    fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
         let updates: Vec<Vec<i64>> = self
             .updates
@@ -76,39 +98,24 @@ impl Solution {
 
         Some(sum)
     }
-
-    fn check_update(&self, update: &[i64]) -> bool {
-        for (i, &a) in update.iter().enumerate() {
-            for &b in update.iter().take(i) {
-                if self.rules.contains(&(a, b)) {
-                    return false;
-                }
-            }
-
-            for &b in update.iter().skip(i + 1) {
-                if !self.rules.contains(&(a, b)) {
-                    return false;
-                }
-            }
-        }
-
-        true
-    }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::solution::Solution;
 
     #[test]
     fn part_a() {
-        let solution = Solution::new(crate::split(SAMPLE_A));
-        assert_eq!(solution.part_a().unwrap_or(0), ANSWER_A);
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.sample_a));
+        assert_eq!(solution.part_a(), Some(meta.answer_a));
     }
 
     #[test]
     fn part_b() {
-        let solution = Solution::new(crate::split(SAMPLE_B));
-        assert_eq!(solution.part_b().unwrap_or(0), ANSWER_B);
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.sample_b));
+        assert_eq!(solution.part_b(), Some(meta.answer_b));
     }
 }

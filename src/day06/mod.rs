@@ -1,15 +1,7 @@
-#![allow(dead_code)]
-
 use crate::direction::Direction;
 use crate::vector::{Vector, VectorMap, VectorSet};
 
-pub const INPUT: &str = include_str!("input.txt");
-pub const SAMPLE_A: &str = include_str!("input_sample.txt");
-pub const SAMPLE_B: &str = SAMPLE_A;
-pub const ANSWER_A: i64 = 41;
-pub const ANSWER_B: i64 = 6;
-
-pub struct Solution {
+pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
     grid: VectorSet,
@@ -17,47 +9,7 @@ pub struct Solution {
     start: Vector,
 }
 
-impl Solution {
-    pub fn new(raw: Vec<String>) -> Self {
-        let size = Vector::new_usize(raw[0].len(), raw.len());
-        let mut grid = VectorSet::new(size);
-        let mut start: Option<Vector> = None;
-        for (y, line) in raw.iter().enumerate() {
-            for (x, c) in line.chars().enumerate() {
-                let spot = Vector::new_usize(x, y);
-                if c == '#' {
-                    grid.insert(spot);
-                } else if c == '^' {
-                    start = Some(spot);
-                }
-            }
-        }
-
-        Self {
-            raw: raw.clone(),
-            grid,
-            size,
-            start: start.unwrap(),
-        }
-    }
-
-    pub fn part_a(&self) -> Option<i64> {
-        Some(self.compute_path(None).unwrap().len() as i64)
-    }
-
-    pub fn part_b(&self) -> Option<i64> {
-        let mut total = 0;
-        for (spot, _) in self.compute_path(None).unwrap() {
-            if spot == self.start {
-                continue;
-            } else if self.compute_path(Some(spot)).is_none() {
-                total += 1;
-            }
-        }
-
-        Some(total)
-    }
-
+impl Day {
     fn compute_path(&self, extra: Option<Vector>) -> Option<VectorMap<Vec<bool>>> {
         let mut seen: VectorMap<Vec<bool>> = VectorMap::new(self.size);
         let mut facing = Direction::North;
@@ -87,19 +39,74 @@ impl Solution {
     }
 }
 
+impl crate::solution::Solution<i64> for Day {
+    fn meta() -> crate::solution::Meta<i64> {
+        crate::solution::Meta::<i64> {
+            input: include_str!("input.txt").to_string(),
+            sample_a: include_str!("input_sample.txt").to_string(),
+            sample_b: include_str!("input_sample.txt").to_string(),
+            answer_a: 41,
+            answer_b: 6,
+        }
+    }
+
+    fn new(raw: Vec<String>) -> Self {
+        let size = Vector::new_usize(raw[0].len(), raw.len());
+        let mut grid = VectorSet::new(size);
+        let mut start: Option<Vector> = None;
+        for (y, line) in raw.iter().enumerate() {
+            for (x, c) in line.chars().enumerate() {
+                let spot = Vector::new_usize(x, y);
+                if c == '#' {
+                    grid.insert(spot);
+                } else if c == '^' {
+                    start = Some(spot);
+                }
+            }
+        }
+
+        Self {
+            raw: raw.clone(),
+            grid,
+            size,
+            start: start.unwrap(),
+        }
+    }
+
+    fn part_a(&self) -> Option<i64> {
+        Some(self.compute_path(None).unwrap().len() as i64)
+    }
+
+    fn part_b(&self) -> Option<i64> {
+        let mut total = 0;
+        for (spot, _) in self.compute_path(None).unwrap() {
+            if spot == self.start {
+                continue;
+            } else if self.compute_path(Some(spot)).is_none() {
+                total += 1;
+            }
+        }
+
+        Some(total)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::solution::Solution;
 
     #[test]
     fn part_a() {
-        let solution = Solution::new(crate::split(SAMPLE_A));
-        assert_eq!(solution.part_a().unwrap_or(0), ANSWER_A);
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.sample_a));
+        assert_eq!(solution.part_a(), Some(meta.answer_a));
     }
 
     #[test]
     fn part_b() {
-        let solution = Solution::new(crate::split(SAMPLE_B));
-        assert_eq!(solution.part_b().unwrap_or(0), ANSWER_B);
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.sample_b));
+        assert_eq!(solution.part_b(), Some(meta.answer_b));
     }
 }
