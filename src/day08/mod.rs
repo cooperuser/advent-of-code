@@ -5,7 +5,7 @@ use crate::vector::{Vector, VectorSet};
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    antennae: HashMap<char, VectorSet>,
+    antennae: HashMap<char, Vec<Vector>>,
     size: Vector,
 }
 
@@ -30,8 +30,8 @@ impl crate::solution::Solution<i64> for Day {
                 }
                 antennae
                     .entry(c)
-                    .or_insert_with(|| VectorSet::new(size))
-                    .insert(Vector::new_usize(x, y));
+                    .or_insert_with(Vec::new)
+                    .push(Vector::new_usize(x, y));
             }
         }
 
@@ -45,22 +45,22 @@ impl crate::solution::Solution<i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let mut antinodes = VectorSet::new(self.size);
         for spaces in self.antennae.values() {
-            for (i, first) in spaces.iter().enumerate() {
-                for second in spaces.iter().skip(i + 1) {
+            for (i, &first) in spaces.iter().enumerate() {
+                for &second in spaces.iter().skip(i + 1) {
                     let diff = second - first;
                     antinodes.insert(first - diff);
                     antinodes.insert(second + diff);
                 }
             }
         }
-        Some(antinodes.iter().count() as i64)
+        Some(antinodes.len() as i64)
     }
 
     fn part_b(&self) -> Option<i64> {
         let mut antinodes = VectorSet::new(self.size);
         for spaces in self.antennae.values() {
-            for (i, first) in spaces.iter().enumerate() {
-                for second in spaces.iter().skip(i + 1) {
+            for (i, &first) in spaces.iter().enumerate() {
+                for &second in spaces.iter().skip(i + 1) {
                     let diff = second - first;
                     let mut a = first;
                     let mut b = second;
@@ -75,7 +75,7 @@ impl crate::solution::Solution<i64> for Day {
                 }
             }
         }
-        Some(antinodes.iter().count() as i64)
+        Some(antinodes.len() as i64)
     }
 }
 
