@@ -91,7 +91,7 @@ impl Day {
             }
 
             let Space::Empty(empty_size) = filesystem[empty] else {
-                continue;
+                unreachable!();
             };
             filesystem[empty] = space;
             if filled_size != empty_size {
