@@ -149,6 +149,52 @@ impl std::ops::SubAssign<Direction> for Vector {
     }
 }
 
+impl std::ops::Mul<i64> for Vector {
+    type Output = Vector;
+
+    fn mul(self, rhs: i64) -> Self::Output {
+        Vector::new(self.x * rhs, self.y * rhs)
+    }
+}
+
+impl std::ops::Div<i64> for Vector {
+    type Output = Vector;
+
+    fn div(self, rhs: i64) -> Self::Output {
+        Vector::new(self.x / rhs, self.y / rhs)
+    }
+}
+
+impl std::ops::Mul<Vector> for i64 {
+    type Output = Vector;
+
+    fn mul(self, rhs: Vector) -> Self::Output {
+        rhs * self
+    }
+}
+
+impl std::ops::Div<Vector> for i64 {
+    type Output = Vector;
+
+    fn div(self, rhs: Vector) -> Self::Output {
+        rhs / self
+    }
+}
+
+impl std::ops::MulAssign<i64> for Vector {
+    fn mul_assign(&mut self, rhs: i64) {
+        self.x *= rhs;
+        self.y *= rhs;
+    }
+}
+
+impl std::ops::DivAssign<i64> for Vector {
+    fn div_assign(&mut self, rhs: i64) {
+        self.x /= rhs;
+        self.y /= rhs;
+    }
+}
+
 impl From<Direction> for Vector {
     fn from(value: Direction) -> Self {
         match value {
