@@ -52,11 +52,11 @@ impl crate::solution::Solution<i64> for Day {
             })
             .collect();
 
-        Some(Self::checksum(Self::organize(filesystem, true)))
+        Some(Self::checksum(Self::defragment(filesystem, true)))
     }
 
     fn part_b(&self) -> Option<i64> {
-        Some(Self::checksum(Self::organize(
+        Some(Self::checksum(Self::defragment(
             self.filesystem.clone(),
             false,
         )))
@@ -64,7 +64,7 @@ impl crate::solution::Solution<i64> for Day {
 }
 
 impl Day {
-    fn organize(filesystem: Vec<Space>, simple: bool) -> Vec<Space> {
+    fn defragment(filesystem: Vec<Space>, simple: bool) -> Vec<Space> {
         let mut filesystem = filesystem.clone();
         let mut filled = filesystem.len() - 1;
         let mut empty = 0;
