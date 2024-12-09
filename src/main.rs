@@ -34,19 +34,34 @@ fn main() {
         Some(arg) if arg == "all" => {
             for (index, day) in days.iter().enumerate() {
                 println!("\n===== Day {} =====", index + 1);
-                day();
+                day(false);
             }
         }
         Some(arg) => {
             let Ok(day) = arg.parse::<usize>() else {
                 return;
             };
-            println!("===== Day {day} =====");
-            days[day - 1]()
+            match args.get(2) {
+                Some(arg) if arg == "--time" => {
+                    let times: Vec<_> = (0..10).map(|_| days[day - 1](true).unwrap()).collect();
+                    let parse = times.iter().map(|(p, _, _)| p).sum::<std::time::Duration>() / 10;
+                    let a = times.iter().map(|(_, a, _)| a).sum::<std::time::Duration>() / 10;
+                    let b = times.iter().map(|(_, _, b)| b).sum::<std::time::Duration>() / 10;
+                    println!("======= Day {day:0>2} =======");
+                    println!("(average over 10 runs)");
+                    println!("parse :\t{:?}", parse);
+                    println!("part_a:\t{:?}", a);
+                    println!("part_b:\t{:?}", b);
+                }
+                _ => {
+                    println!("===== Day {day:0>2} =====");
+                    days[day - 1](false);
+                }
+            }
         }
         None => {
             println!("===== Day {} =====", days.len());
-            days.last().unwrap()()
+            days.last().unwrap()(false);
         }
     }
 }

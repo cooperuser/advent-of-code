@@ -7,17 +7,33 @@ pub trait Solution<T: std::fmt::Display + Eq> {
         Self: Sized;
     fn part_a(&self) -> Option<T>;
     fn part_b(&self) -> Option<T>;
-    fn run()
+    fn run(
+        silenced: bool,
+    ) -> Option<(
+        std::time::Duration,
+        std::time::Duration,
+        std::time::Duration,
+    )>
     where
         Self: Sized,
     {
         let meta = Self::meta();
-        let sample_a = Self::new(crate::split(meta.sample_a));
-        let sample_b = Self::new(crate::split(meta.sample_b));
         let start = std::time::Instant::now();
         let real = Self::new(crate::split(meta.input));
         let duration = start.elapsed();
 
+        if silenced {
+            let start = std::time::Instant::now();
+            real.part_a();
+            let a = start.elapsed();
+            let start = std::time::Instant::now();
+            real.part_b();
+            let b = start.elapsed();
+            return Some((duration, a, b));
+        }
+
+        let sample_a = Self::new(crate::split(meta.sample_a));
+        let sample_b = Self::new(crate::split(meta.sample_b));
         println!("parse :\t{:?}\n", duration);
         match sample_a.part_a() {
             Some(received) if received == meta.answer_a => {
@@ -54,6 +70,8 @@ pub trait Solution<T: std::fmt::Display + Eq> {
                 println!("part_b: unsolved!");
             }
         }
+
+        None
     }
 }
 
