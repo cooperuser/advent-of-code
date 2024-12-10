@@ -27,7 +27,7 @@ impl Day {
             deque.push_back((partial.0 * equation.numbers[partial.1], partial.1 + 1));
             if concatenate {
                 let number = equation.numbers[partial.1];
-                let magnitude = (number as f64).log10().ceil() as u32;
+                let magnitude = (number as f64).log10().floor() as u32 + 1;
                 deque.push_back((partial.0 * 10i64.pow(magnitude) + number, partial.1 + 1));
             }
         }
