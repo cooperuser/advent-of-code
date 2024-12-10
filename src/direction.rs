@@ -1,5 +1,12 @@
 use crate::vector::{self, Vector};
 
+pub const DIRS: &[Direction; 4] = &[
+    Direction::North,
+    Direction::South,
+    Direction::East,
+    Direction::West,
+];
+
 #[derive(Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Direction {
     North,
