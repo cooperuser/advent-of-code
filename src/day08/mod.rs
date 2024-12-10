@@ -62,15 +62,15 @@ impl crate::solution::Solution<i64> for Day {
             for (i, &first) in antenna.iter().enumerate() {
                 for &second in antenna.iter().skip(i + 1) {
                     let diff = second - first;
-                    let mut a = first;
-                    let mut b = second;
-                    while a.contained_in(Vector::zero(), self.size) {
-                        antinodes.insert(a);
-                        a -= diff;
+                    let mut node = first;
+                    while node.contained_in(Vector::zero(), self.size) {
+                        antinodes.insert(node);
+                        node -= diff;
                     }
-                    while b.contained_in(Vector::zero(), self.size) {
-                        antinodes.insert(b);
-                        b += diff;
+                    let mut node = second;
+                    while node.contained_in(Vector::zero(), self.size) {
+                        antinodes.insert(node);
+                        node += diff;
                     }
                 }
             }
