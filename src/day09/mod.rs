@@ -23,17 +23,11 @@ impl crate::solution::Solution<i64> for Day {
 
     fn new(raw: Vec<String>) -> Self {
         let mut filesystem = Vec::new();
-        let mut empty = false;
-        let mut index = 0;
-        for size in raw[0].chars().map(|n| (n as i64 - '0' as i64)) {
-            filesystem.push(match empty {
-                true => Space::Empty(size),
-                false => Space::Filled(size, index),
+        for (index, size) in raw[0].chars().map(|n| (n as i64 - '0' as i64)).enumerate() {
+            filesystem.push(match index % 2 == 0 {
+                true => Space::Filled(size, index as i64 / 2),
+                false => Space::Empty(size),
             });
-            if !empty {
-                index += 1;
-            }
-            empty = !empty;
         }
 
         Self {
