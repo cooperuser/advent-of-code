@@ -1,3 +1,9 @@
+pub type Run = Option<(
+    std::time::Duration,
+    std::time::Duration,
+    std::time::Duration,
+)>;
+
 pub trait Solution<T: std::fmt::Display + Eq> {
     fn meta() -> Meta<T>
     where
@@ -7,13 +13,7 @@ pub trait Solution<T: std::fmt::Display + Eq> {
         Self: Sized;
     fn part_a(&self) -> Option<T>;
     fn part_b(&self) -> Option<T>;
-    fn run(
-        silenced: bool,
-    ) -> Option<(
-        std::time::Duration,
-        std::time::Duration,
-        std::time::Duration,
-    )>
+    fn run(silenced: bool) -> Run
     where
         Self: Sized,
     {
