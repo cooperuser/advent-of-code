@@ -8,6 +8,7 @@ mod solution;
 mod vector;
 mod vector3;
 
+mod aoc2023;
 mod aoc2024;
 
 #[derive(Parser, Debug)]
@@ -31,8 +32,8 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let years = &[aoc2024::DAYS];
-    let days = years[args.year - 2024];
+    let years = &[aoc2023::DAYS, aoc2024::DAYS];
+    let days = years[args.year - 2023];
 
     if args.all {
         for (index, day) in days.iter().enumerate() {
