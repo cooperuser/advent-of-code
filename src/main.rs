@@ -6,6 +6,7 @@ use solution::Solution;
 mod direction;
 mod solution;
 mod vector;
+mod vector3;
 
 mod aoc2024;
 
