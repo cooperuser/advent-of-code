@@ -53,22 +53,4 @@ impl crate::solution::Solution<i64> for Day {
     }
 }
 
-#[cfg(test)]
-mod test {
-    use super::*;
-    use crate::solution::Solution;
-
-    #[test]
-    fn part_a() {
-        let meta = Day::meta();
-        let solution = Day::new(crate::split(meta.sample_a));
-        assert_eq!(solution.part_a(), Some(meta.answer_a));
-    }
-
-    #[test]
-    fn part_b() {
-        let meta = Day::meta();
-        let solution = Day::new(crate::split(meta.sample_b));
-        assert_eq!(solution.part_b(), Some(meta.answer_b));
-    }
-}
+crate::solution::test_solution!();
