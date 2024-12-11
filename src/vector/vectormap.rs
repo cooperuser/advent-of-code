@@ -17,7 +17,7 @@ impl<T: Clone> VectorMap<T> {
 
     #[allow(dead_code)]
     pub fn insert(&mut self, pos: Vector, value: T) -> Option<bool> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -28,7 +28,7 @@ impl<T: Clone> VectorMap<T> {
 
     #[allow(dead_code)]
     pub fn remove(&mut self, pos: Vector) -> Option<T> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -39,7 +39,7 @@ impl<T: Clone> VectorMap<T> {
 
     #[allow(dead_code)]
     pub fn get(&self, pos: Vector) -> Option<T> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -48,7 +48,7 @@ impl<T: Clone> VectorMap<T> {
 
     #[allow(dead_code)]
     pub fn get_mut(&mut self, pos: Vector) -> Option<&mut T> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -62,7 +62,7 @@ impl<T: Clone> VectorMap<T> {
 
     #[allow(dead_code)]
     pub fn contains(&self, pos: Vector) -> bool {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return false;
         }
 
@@ -96,7 +96,7 @@ impl<'a, T: Clone> Iterator for VectorMapIterator<'a, T> {
             if self.index > self.map.size.area() {
                 return None;
             }
-            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.y);
+            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.x);
             self.index += 1;
             if let Some(value) = self.map.get(pos) {
                 return Some((pos, value));
@@ -118,7 +118,7 @@ impl<T: Clone> Iterator for VectorMapIntoIterator<T> {
             if self.index > self.map.size.area() {
                 return None;
             }
-            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.y);
+            let pos = Vector::new(self.index % self.map.size.x, self.index / self.map.size.x);
             self.index += 1;
             if let Some(value) = self.map.get(pos) {
                 return Some((pos, value));

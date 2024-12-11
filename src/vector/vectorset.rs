@@ -17,7 +17,7 @@ impl VectorSet {
 
     #[allow(dead_code)]
     pub fn insert(&mut self, pos: Vector) -> Option<bool> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -28,7 +28,7 @@ impl VectorSet {
 
     #[allow(dead_code)]
     pub fn remove(&mut self, pos: Vector) -> Option<bool> {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return None;
         }
 
@@ -39,7 +39,7 @@ impl VectorSet {
 
     #[allow(dead_code)]
     pub fn contains(&self, pos: Vector) -> bool {
-        if pos.x < 0 || pos.y < 0 || pos.x >= self.size.x || pos.y >= self.size.y {
+        if !pos.contained_in(Vector::zero(), self.size) {
             return false;
         }
 
@@ -73,7 +73,7 @@ impl<'a> Iterator for VectorSetIterator<'a> {
             if self.index > self.set.size.area() {
                 return None;
             }
-            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.y);
+            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.x);
             self.index += 1;
             if self.set.contains(pos) {
                 return Some(pos);
@@ -95,7 +95,7 @@ impl Iterator for VectorSetIntoIterator {
             if self.index > self.set.size.area() {
                 return None;
             }
-            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.y);
+            let pos = Vector::new(self.index % self.set.size.x, self.index / self.set.size.x);
             self.index += 1;
             if self.set.contains(pos) {
                 return Some(pos);
