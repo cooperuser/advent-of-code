@@ -92,6 +92,13 @@ impl Vector3 {
         let z = self.z >= a.z && self.z < b.z;
         x && y && z
     }
+
+    pub const fn aabb(a: (Vector3, Vector3), b: (Vector3, Vector3)) -> bool {
+        let x = a.0.x < b.1.x && a.1.x > b.0.x;
+        let y = a.0.y < b.1.y && a.1.y > b.0.y;
+        let z = a.0.z < b.1.z && a.1.z > b.0.z;
+        x && y && z
+    }
 }
 
 impl Vector3 {

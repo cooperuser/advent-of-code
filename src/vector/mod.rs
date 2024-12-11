@@ -85,6 +85,12 @@ impl Vector {
         let y = self.y >= a.y && self.y < b.y;
         x && y
     }
+
+    pub const fn aabb(a: (Vector, Vector), b: (Vector, Vector)) -> bool {
+        let x = a.0.x < b.1.x && a.1.x > b.0.x;
+        let y = a.0.y < b.1.y && a.1.y > b.0.y;
+        x && y
+    }
 }
 
 impl std::ops::Add<Vector> for Vector {
