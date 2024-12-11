@@ -5,6 +5,8 @@ pub use vectormap::Vector3Map;
 #[allow(unused_imports)]
 pub use vectorset::Vector3Set;
 
+use crate::vector::Vector;
+
 pub const ZERO: Vector3 = Vector3::new(0, 0, 0);
 
 #[derive(Debug, Default, Clone, Copy, Hash, Eq, PartialEq)]
@@ -89,6 +91,32 @@ impl Vector3 {
         let y = self.y >= a.y && self.y < b.y;
         let z = self.z >= a.z && self.z < b.z;
         x && y && z
+    }
+}
+
+impl Vector3 {
+    pub const fn xy(&self) -> Vector {
+        Vector::new(self.x, self.y)
+    }
+
+    pub const fn xz(&self) -> Vector {
+        Vector::new(self.x, self.z)
+    }
+
+    pub const fn yx(&self) -> Vector {
+        Vector::new(self.y, self.x)
+    }
+
+    pub const fn yz(&self) -> Vector {
+        Vector::new(self.y, self.z)
+    }
+
+    pub const fn zx(&self) -> Vector {
+        Vector::new(self.z, self.x)
+    }
+
+    pub const fn zy(&self) -> Vector {
+        Vector::new(self.z, self.y)
     }
 }
 
