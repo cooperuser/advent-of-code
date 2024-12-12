@@ -4,6 +4,7 @@ use super::Vector;
 pub struct VectorSet {
     grid: Vec<Vec<bool>>,
     size: Vector,
+    count: usize,
 }
 
 impl VectorSet {
@@ -12,6 +13,7 @@ impl VectorSet {
         Self {
             grid: vec![vec![false; size.x as usize]; size.y as usize],
             size,
+            count: 0,
         }
     }
 
@@ -23,6 +25,9 @@ impl VectorSet {
 
         let old = self.grid[pos.y as usize][pos.x as usize];
         self.grid[pos.y as usize][pos.x as usize] = true;
+        if !old {
+            self.count += 1;
+        }
         Some(!old)
     }
 
@@ -34,6 +39,9 @@ impl VectorSet {
 
         let old = self.grid[pos.y as usize][pos.x as usize];
         self.grid[pos.y as usize][pos.x as usize] = false;
+        if old {
+            self.count -= 1;
+        }
         Some(old)
     }
 
@@ -56,7 +64,7 @@ impl VectorSet {
 
     #[allow(dead_code)]
     pub fn len(&self) -> usize {
-        self.iter().count()
+        self.count
     }
 
     #[allow(dead_code)]
