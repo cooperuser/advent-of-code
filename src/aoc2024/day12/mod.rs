@@ -8,7 +8,12 @@ use crate::{
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    regions: Vec<HashSet<Vector>>,
+    regions: Vec<Region>,
+    size: Vector,
+}
+
+struct Region {
+    spaces: VectorSet,
     size: Vector,
 }
 
@@ -40,10 +45,14 @@ impl crate::solution::Solution<i64> for Day {
             }
             let mut deque = VecDeque::from([pos]);
             let mut region = HashSet::new();
+            let mut min = pos;
+            let mut max = pos;
             while let Some(pos) = deque.pop_front() {
                 if !region.insert(pos) {
                     continue;
                 }
+                min = min.min(pos);
+                max = max.max(pos);
                 seen.insert(pos);
                 let c = map.get(pos).unwrap();
                 for dir in DIRS {
@@ -53,7 +62,17 @@ impl crate::solution::Solution<i64> for Day {
                     }
                 }
             }
-            regions.push(region);
+
+            // Normalize region to min size
+            let size = max - min + Vector::new(1, 1);
+            let mut vectorset = VectorSet::new(size);
+            for pos in region {
+                vectorset.insert(pos - min);
+            }
+            regions.push(Region {
+                spaces: vectorset,
+                size,
+            });
         }
 
         Self {
@@ -66,11 +85,11 @@ impl crate::solution::Solution<i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
         for region in &self.regions {
-            let area = region.len() as i64;
+            let area = region.spaces.len() as i64;
             let mut perimeter = 0;
-            for &pos in region {
+            for pos in region.spaces.iter() {
                 for dir in DIRS {
-                    if !region.contains(&(pos + dir)) {
+                    if !region.spaces.contains(pos + dir) {
                         perimeter += 1;
                     }
                 }
@@ -86,21 +105,24 @@ impl crate::solution::Solution<i64> for Day {
             let mut edges = 0;
             for check in DIRS {
                 let mut start = match check {
-                    Direction::North => self.size,
+                    Direction::North => region.size,
                     Direction::South => Vector::new(-1, -1),
-                    Direction::East => Vector::new(-1, self.size.y),
-                    Direction::West => Vector::new(self.size.x, -1),
+                    Direction::East => Vector::new(-1, region.size.y),
+                    Direction::West => Vector::new(region.size.x, -1),
                 };
                 let step = check.rotate_left();
                 while start.contained_in(Vector::new(-1, -1), self.size + Vector::new(1, 1)) {
                     let mut pos = start;
-                    let mut edge = region.contains(&pos) && region.contains(&(pos + check));
+                    let a = region.spaces.contains(pos);
+                    let b = region.spaces.contains(pos + check);
+                    let mut edge = a && b;
                     if edge {
                         edges += 1;
                     }
+
                     while pos.contained_in(Vector::new(-1, -1), self.size + Vector::new(1, 1)) {
                         let next = pos + check;
-                        if edge != (!region.contains(&pos) && region.contains(&next)) {
+                        if edge != (!region.spaces.contains(pos) && region.spaces.contains(next)) {
                             edge = !edge;
                             if edge {
                                 edges += 1;
@@ -108,10 +130,11 @@ impl crate::solution::Solution<i64> for Day {
                         }
                         pos += step;
                     }
+
                     start += check;
                 }
             }
-            sum += region.len() as i64 * edges;
+            sum += region.spaces.len() as i64 * edges;
         }
         Some(sum)
     }
