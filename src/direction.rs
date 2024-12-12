@@ -45,6 +45,17 @@ impl Direction {
             Self::West => Self::East,
         }
     }
+
+    pub const fn prepare_scan(&self, size: Vector) -> (Vector, Self) {
+        let step = self.rotate_left();
+        let start = match self {
+            Self::North => size,
+            Self::South => Vector::new(-1, -1),
+            Self::East => Vector::new(-1, size.y),
+            Self::West => Vector::new(size.x, -1),
+        };
+        (start, step)
+    }
 }
 
 pub struct NonCardinalVectorError;

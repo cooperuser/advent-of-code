@@ -1,7 +1,7 @@
 use std::collections::{HashSet, VecDeque};
 
 use crate::{
-    direction::{Direction, DIRS},
+    direction::DIRS,
     vector::{Vector, VectorMap, VectorSet},
 };
 
@@ -107,14 +107,7 @@ impl crate::solution::Solution<i64> for Day {
         for region in &self.regions {
             let mut edges = 0;
             for dir in DIRS {
-                let step = dir.rotate_left();
-                let mut start = match dir {
-                    Direction::North => region.size,
-                    Direction::South => Vector::new(-1, -1),
-                    Direction::East => Vector::new(-1, region.size.y),
-                    Direction::West => Vector::new(region.size.x, -1),
-                };
-
+                let (mut start, step) = dir.prepare_scan(region.size);
                 while start.contained_in(Vector::new(-1, -1), self.size + Vector::new(1, 1)) {
                     let mut pos = start;
                     let mut edge = region.spaces.contains(pos) && region.spaces.contains(pos + dir);
