@@ -93,6 +93,14 @@ impl Vector3 {
         x && y && z
     }
 
+    pub const fn rem_euclid(&self, rhs: Vector3) -> Vector3 {
+        Vector3::new(
+            self.x.rem_euclid(rhs.x),
+            self.y.rem_euclid(rhs.y),
+            self.z.rem_euclid(rhs.z),
+        )
+    }
+
     pub const fn aabb(a: (Vector3, Vector3), b: (Vector3, Vector3)) -> bool {
         let x = a.0.x < b.1.x && a.1.x > b.0.x;
         let y = a.0.y < b.1.y && a.1.y > b.0.y;
