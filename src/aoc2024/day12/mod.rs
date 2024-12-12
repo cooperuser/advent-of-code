@@ -84,6 +84,7 @@ impl crate::solution::Solution<i64> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut sum = 0;
+
         for region in &self.regions {
             let area = region.spaces.len() as i64;
             let mut perimeter = 0;
@@ -96,32 +97,33 @@ impl crate::solution::Solution<i64> for Day {
             }
             sum += area * perimeter;
         }
+
         Some(sum)
     }
 
     fn part_b(&self) -> Option<i64> {
         let mut sum = 0;
+
         for region in &self.regions {
             let mut edges = 0;
-            for check in DIRS {
-                let mut start = match check {
+            for dir in DIRS {
+                let step = dir.rotate_left();
+                let mut start = match dir {
                     Direction::North => region.size,
                     Direction::South => Vector::new(-1, -1),
                     Direction::East => Vector::new(-1, region.size.y),
                     Direction::West => Vector::new(region.size.x, -1),
                 };
-                let step = check.rotate_left();
+
                 while start.contained_in(Vector::new(-1, -1), self.size + Vector::new(1, 1)) {
                     let mut pos = start;
-                    let a = region.spaces.contains(pos);
-                    let b = region.spaces.contains(pos + check);
-                    let mut edge = a && b;
+                    let mut edge = region.spaces.contains(pos) && region.spaces.contains(pos + dir);
                     if edge {
                         edges += 1;
                     }
 
                     while pos.contained_in(Vector::new(-1, -1), self.size + Vector::new(1, 1)) {
-                        let next = pos + check;
+                        let next = pos + dir;
                         if edge != (!region.spaces.contains(pos) && region.spaces.contains(next)) {
                             edge = !edge;
                             if edge {
@@ -131,11 +133,13 @@ impl crate::solution::Solution<i64> for Day {
                         pos += step;
                     }
 
-                    start += check;
+                    start += dir;
                 }
             }
+
             sum += region.spaces.len() as i64 * edges;
         }
+
         Some(sum)
     }
 }
