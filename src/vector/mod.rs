@@ -95,6 +95,18 @@ impl Vector {
         let y = a.0.y < b.1.y && a.1.y > b.0.y;
         x && y
     }
+
+    pub const fn min(&self, other: Vector) -> Vector {
+        let x = if self.x < other.x { self.x } else { other.x };
+        let y = if self.y < other.y { self.y } else { other.y };
+        Vector::new(x, y)
+    }
+
+    pub const fn max(&self, other: Vector) -> Vector {
+        let x = if self.x > other.x { self.x } else { other.x };
+        let y = if self.y > other.y { self.y } else { other.y };
+        Vector::new(x, y)
+    }
 }
 
 impl std::ops::Add<Vector> for Vector {
