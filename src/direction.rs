@@ -1,6 +1,6 @@
 use crate::vector::{self, Vector};
 
-pub const DIRS: &[Direction; 4] = &[
+pub const DIRS: [Direction; 4] = [
     Direction::North,
     Direction::South,
     Direction::East,

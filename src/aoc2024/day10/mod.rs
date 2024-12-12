@@ -58,7 +58,7 @@ impl crate::solution::Solution<i64> for Day {
                     continue;
                 }
 
-                for &dir in DIRS {
+                for dir in DIRS {
                     let next_pos = pos + dir;
                     match self.map.get(next_pos) {
                         Some(next) if next == height + 1 => deque.push_front(next_pos),
@@ -87,7 +87,7 @@ impl crate::solution::Solution<i64> for Day {
                     continue;
                 }
 
-                for &dir in DIRS {
+                for dir in DIRS {
                     let next_pos = pos + dir;
                     match self.map.get(next_pos) {
                         Some(next) if next == height + 1 => deque.push_front(next_pos),
