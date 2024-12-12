@@ -58,6 +58,23 @@ impl VectorSet {
     pub fn len(&self) -> usize {
         self.iter().count()
     }
+
+    #[allow(dead_code)]
+    pub fn print(&self) {
+        for y in 0..self.size.y {
+            for x in 0..self.size.x {
+                print!(
+                    "{}",
+                    if self.contains(Vector::new(x, y)) {
+                        '#'
+                    } else {
+                        '.'
+                    }
+                );
+            }
+            println!();
+        }
+    }
 }
 
 pub struct VectorSetIterator<'a> {
