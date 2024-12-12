@@ -7,7 +7,7 @@ pub const DIRS: [Direction; 4] = [
     Direction::West,
 ];
 
-#[derive(Clone, Copy, Hash, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 pub enum Direction {
     North,
     South,
