@@ -16,6 +16,27 @@ impl<T: Clone> VectorMap<T> {
     }
 
     #[allow(dead_code)]
+    pub fn filled_with(size: Vector, generator: fn(Vector) -> Option<T>) -> Self {
+        let mut grid = Vec::new();
+        for y in 0..size.y {
+            let mut row = Vec::new();
+            for x in 0..size.x {
+                row.push(generator(Vector::new(x, y)));
+            }
+            grid.push(row);
+        }
+        Self { grid, size }
+    }
+
+    #[allow(dead_code)]
+    pub fn filled_with_value(size: Vector, value: T) -> Self {
+        Self {
+            grid: vec![vec![Some(value); size.x as usize]; size.y as usize],
+            size,
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn insert(&mut self, pos: Vector, value: T) -> Option<bool> {
         if !pos.contained_in(Vector::zero(), self.size) {
             return None;

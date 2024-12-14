@@ -38,10 +38,7 @@ impl crate::solution::Solution<i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let half = self.size / 2;
         let plus_one = half + Vector::new(1, 1);
-        let mut quadrants: VectorMap<i64> = VectorMap::new(Vector::new(2, 2));
-        for quadrant in Vector::new(2, 2).iter() {
-            quadrants.insert(quadrant, 0);
-        }
+        let mut quadrants: VectorMap<i64> = VectorMap::filled_with_value(Vector::new(2, 2), 0);
 
         for robot in self.robots.iter() {
             let pos = robot.position + robot.velocity * 100;

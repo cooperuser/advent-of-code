@@ -16,6 +16,31 @@ impl<T: Clone> Vector3Map<T> {
     }
 
     #[allow(dead_code)]
+    pub fn filled_with(size: Vector3, generator: fn(Vector3) -> Option<T>) -> Self {
+        let mut grid = Vec::new();
+        for z in 0..size.z {
+            let mut layer = Vec::new();
+            for y in 0..size.y {
+                let mut row = Vec::new();
+                for x in 0..size.x {
+                    row.push(generator(Vector3::new(x, y, z)));
+                }
+                layer.push(row);
+            }
+            grid.push(layer);
+        }
+        Self { grid, size }
+    }
+
+    #[allow(dead_code)]
+    pub fn filled_with_value(size: Vector3, value: T) -> Self {
+        Self {
+            grid: vec![vec![vec![Some(value); size.x as usize]; size.y as usize]; size.z as usize],
+            size,
+        }
+    }
+
+    #[allow(dead_code)]
     pub fn insert(&mut self, pos: Vector3, value: T) -> Option<bool> {
         if !pos.contained_in(Vector3::zero(), self.size) {
             return None;
