@@ -66,23 +66,6 @@ impl VectorSet {
     pub fn len(&self) -> usize {
         self.count
     }
-
-    #[allow(dead_code)]
-    pub fn print(&self) {
-        for y in 0..self.size.y {
-            for x in 0..self.size.x {
-                print!(
-                    "{}",
-                    if self.contains(Vector::new(x, y)) {
-                        '#'
-                    } else {
-                        '.'
-                    }
-                );
-            }
-            println!();
-        }
-    }
 }
 
 pub struct VectorSetIterator<'a> {
@@ -138,6 +121,26 @@ impl IntoIterator for VectorSet {
             set: self,
             index: 0,
         }
+    }
+}
+
+impl std::fmt::Display for VectorSet {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for y in 0..self.size.y {
+            for x in 0..self.size.x {
+                write!(
+                    f,
+                    "{}",
+                    if self.contains(Vector::new(x, y)) {
+                        '#'
+                    } else {
+                        '.'
+                    }
+                )?;
+            }
+            writeln!(f)?;
+        }
+        Ok(())
     }
 }
 
