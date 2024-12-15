@@ -2,7 +2,7 @@ use std::collections::{HashSet, VecDeque};
 
 use crate::{
     direction::{Direction, DIRS},
-    vector::{Vector, VectorMap, VectorSet},
+    vector::{Vector, VectorMap},
 };
 
 pub struct Day {
@@ -10,7 +10,6 @@ pub struct Day {
     raw: Vec<String>,
     grid: VectorMap<Tile>,
     start: Vector,
-    end: Vector,
     size: Vector,
 }
 
@@ -36,14 +35,11 @@ impl crate::solution::Solution<i64> for Day {
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let mut grid = VectorMap::new(size);
         let mut start = None;
-        let mut end = None;
         for (y, line) in raw.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
                 let pos = Vector::new_usize(x, y);
                 if y == 0 && c == '.' {
                     start = Some(pos);
-                } else if y as i64 == size.y - 1 && c == '.' {
-                    end = Some(pos);
                 }
                 grid.insert(pos, c.to_string().parse().unwrap());
             }
@@ -53,7 +49,6 @@ impl crate::solution::Solution<i64> for Day {
             raw: raw.clone(),
             grid,
             start: start.unwrap(),
-            end: end.unwrap(),
             size,
         }
     }
@@ -72,37 +67,90 @@ impl crate::solution::Solution<i64> for Day {
                     continue;
                 }
             }
+
             seen.insert(pos, distance);
             if pos.y == self.size.y - 1 && distance > max {
                 max = distance;
                 continue;
             }
 
-            if let Some(Tile::Slope(slope)) = self.grid.get(pos) {
-                deque.push_back((distance + 1, pos + slope, slope, set.clone()));
+            let mut next: Vec<Direction> = Vec::new();
+            match self.grid.get(pos) {
+                Some(Tile::Path) => {
+                    for dir in DIRS {
+                        if dir.flip() == last_dir {
+                            continue;
+                        }
+                        match self.grid.get(pos + dir) {
+                            None | Some(Tile::Forest) => {}
+                            _ => {
+                                next.push(dir);
+                            }
+                        }
+                    }
+                }
+                Some(Tile::Slope(slope)) => {
+                    next.push(slope);
+                }
+                _ => {}
+            }
+
+            if next.len() == 1 {
+                deque.push_back((distance + 1, pos + next[0], next[0], set));
                 continue;
             }
-            for dir in DIRS {
-                if dir.flip() == last_dir {
-                    continue;
-                }
-                let next = pos + dir;
-                match self.grid.get(pos) {
-                    Some(Tile::Path) => {
-                        deque.push_back((distance + 1, next, dir, set.clone()));
-                    }
-                    Some(Tile::Slope(slope)) if slope == dir => {
-                        deque.push_back((distance + 1, next, dir, set.clone()));
-                    }
-                    _ => {}
-                }
+            for dir in next {
+                deque.push_back((distance + 1, pos + dir, dir, set.clone()));
             }
         }
         Some(max)
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut deque: VecDeque<(i64, Vector, Direction, HashSet<Vector>)> =
+            VecDeque::from([(0, self.start, Direction::South, HashSet::new())]);
+        let mut seen: VectorMap<i64> = VectorMap::new(self.size);
+        let mut max = 0;
+        while let Some((distance, pos, last_dir, mut set)) = deque.pop_front() {
+            if !set.insert(pos) {
+                continue;
+            }
+            if let Some(last) = seen.get(pos) {
+                if last > distance {
+                    continue;
+                }
+            }
+
+            seen.insert(pos, distance);
+            if pos.y == self.size.y - 1 && distance > max {
+                max = distance;
+                continue;
+            }
+
+            let mut next: Vec<Direction> = Vec::new();
+            if let Some(Tile::Path) | Some(Tile::Slope(_)) = self.grid.get(pos) {
+                for dir in DIRS {
+                    if dir.flip() == last_dir {
+                        continue;
+                    }
+                    match self.grid.get(pos + dir) {
+                        None | Some(Tile::Forest) => {}
+                        _ => {
+                            next.push(dir);
+                        }
+                    }
+                }
+            }
+
+            if next.len() == 1 {
+                deque.push_back((distance + 1, pos + next[0], next[0], set));
+                continue;
+            }
+            for dir in next {
+                deque.push_back((distance + 1, pos + dir, dir, set.clone()));
+            }
+        }
+        Some(max)
     }
 }
 
