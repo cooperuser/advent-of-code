@@ -147,11 +147,33 @@ impl std::ops::Add<Direction> for Vector {
     }
 }
 
+impl std::ops::Add<Option<Direction>> for Vector {
+    type Output = Vector;
+
+    fn add(self, rhs: Option<Direction>) -> Self::Output {
+        match rhs {
+            Some(dir) => self + dir,
+            None => self,
+        }
+    }
+}
+
 impl std::ops::Sub<Direction> for Vector {
     type Output = Vector;
 
     fn sub(self, rhs: Direction) -> Self::Output {
         Vector::sub(self, rhs.into())
+    }
+}
+
+impl std::ops::Sub<Option<Direction>> for Vector {
+    type Output = Vector;
+
+    fn sub(self, rhs: Option<Direction>) -> Self::Output {
+        match rhs {
+            Some(dir) => self - dir,
+            None => self,
+        }
     }
 }
 
@@ -163,11 +185,31 @@ impl std::ops::AddAssign<Direction> for Vector {
     }
 }
 
+impl std::ops::AddAssign<Option<Direction>> for Vector {
+    fn add_assign(&mut self, rhs: Option<Direction>) {
+        if let Some(dir) = rhs {
+            let other: Vector = dir.into();
+            self.x += other.x;
+            self.y += other.y;
+        }
+    }
+}
+
 impl std::ops::SubAssign<Direction> for Vector {
     fn sub_assign(&mut self, rhs: Direction) {
         let other: Vector = rhs.into();
         self.x -= other.x;
         self.y -= other.y;
+    }
+}
+
+impl std::ops::SubAssign<Option<Direction>> for Vector {
+    fn sub_assign(&mut self, rhs: Option<Direction>) {
+        if let Some(dir) = rhs {
+            let other: Vector = dir.into();
+            self.x -= other.x;
+            self.y -= other.y;
+        }
     }
 }
 
