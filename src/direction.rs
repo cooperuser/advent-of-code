@@ -60,6 +60,14 @@ impl Direction {
     }
 }
 
+impl std::ops::Neg for Direction {
+    type Output = Direction;
+
+    fn neg(self) -> Self::Output {
+        self.flip()
+    }
+}
+
 impl FromStr for Direction {
     type Err = ();
 
