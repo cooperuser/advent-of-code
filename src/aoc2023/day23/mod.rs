@@ -1,8 +1,8 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
     direction::{Direction, DIRS},
-    vector::{Vector, VectorMap},
+    vector::{Vector, VectorMap, VectorSet},
 };
 
 pub struct Day {
@@ -54,12 +54,12 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut deque: VecDeque<(i64, Vector, Direction, HashSet<Vector>)> =
-            VecDeque::from([(0, self.start, Direction::South, HashSet::new())]);
+        let mut deque: VecDeque<(i64, Vector, Direction, VectorSet)> =
+            VecDeque::from([(0, self.start, Direction::South, VectorSet::new(self.size))]);
         let mut seen: VectorMap<i64> = VectorMap::new(self.size);
         let mut max = 0;
         while let Some((distance, pos, last_dir, mut set)) = deque.pop_front() {
-            if !set.insert(pos) {
+            if !set.insert(pos).unwrap() {
                 continue;
             }
             if let Some(last) = seen.get(pos) {
@@ -83,9 +83,7 @@ impl crate::solution::Solution<i64> for Day {
                         }
                         match self.grid.get(pos + dir) {
                             None | Some(Tile::Forest) => {}
-                            _ => {
-                                next.push(dir);
-                            }
+                            _ => next.push(dir),
                         }
                     }
                 }
@@ -107,12 +105,12 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut deque: VecDeque<(i64, Vector, Direction, HashSet<Vector>)> =
-            VecDeque::from([(0, self.start, Direction::South, HashSet::new())]);
+        let mut deque: VecDeque<(i64, Vector, Direction, VectorSet)> =
+            VecDeque::from([(0, self.start, Direction::South, VectorSet::new(self.size))]);
         let mut seen: VectorMap<i64> = VectorMap::new(self.size);
         let mut max = 0;
         while let Some((distance, pos, last_dir, mut set)) = deque.pop_front() {
-            if !set.insert(pos) {
+            if !set.insert(pos).unwrap() {
                 continue;
             }
             if let Some(last) = seen.get(pos) {
@@ -135,9 +133,7 @@ impl crate::solution::Solution<i64> for Day {
                     }
                     match self.grid.get(pos + dir) {
                         None | Some(Tile::Forest) => {}
-                        _ => {
-                            next.push(dir);
-                        }
+                        _ => next.push(dir),
                     }
                 }
             }
