@@ -1,4 +1,4 @@
-use std::collections::BinaryHeap;
+use std::collections::{BinaryHeap, HashSet, VecDeque};
 
 use crate::{
     direction::{Direction, DIRS},
@@ -57,7 +57,7 @@ impl crate::solution::Solution<i64> for Day {
         let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
             distance: 0,
             position: self.start,
-            direction: Direction::South,
+            direction: Some(Direction::South),
             visited: VectorSet::new(self.size),
         }]);
         let mut seen: VectorMap<i64> = VectorMap::new(self.size);
@@ -88,7 +88,7 @@ impl crate::solution::Solution<i64> for Day {
             match self.grid.get(pos) {
                 Some(Tile::Path) => {
                     for dir in DIRS {
-                        if dir.flip() == last_dir {
+                        if Some(dir.flip()) == last_dir {
                             continue;
                         }
                         match self.grid.get(pos + dir) {
@@ -107,7 +107,7 @@ impl crate::solution::Solution<i64> for Day {
                 heap.push(State {
                     distance: distance + 1,
                     position: pos + next[0],
-                    direction: next[0],
+                    direction: Some(next[0]),
                     visited: set,
                 });
                 continue;
@@ -116,7 +116,7 @@ impl crate::solution::Solution<i64> for Day {
                 heap.push(State {
                     distance: distance + 1,
                     position: pos + dir,
-                    direction: dir,
+                    direction: Some(dir),
                     visited: set.clone(),
                 });
             }
@@ -125,66 +125,100 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
+        let mut graph: VectorMap<HashSet<(i64, Vector)>> = VectorMap::new(self.size);
+        let mut deque: VecDeque<Vector> = VecDeque::from([self.start]);
+        while let Some(start) = deque.pop_front() {
+            if graph.contains(start) {
+                continue;
+            }
+            let mut paths: HashSet<(i64, Vector)> = HashSet::new();
+            let mut path: VecDeque<(i64, Vector, Option<Direction>)> = VecDeque::new();
+            for dir in DIRS {
+                match self.grid.get(start + dir) {
+                    None | Some(Tile::Forest) => {}
+                    _ => path.push_back((0, start + dir, Some(dir))),
+                }
+            }
+            while let Some((dist, pos, last_dir)) = path.pop_front() {
+                let mut next: Vec<Direction> = Vec::new();
+                for dir in DIRS {
+                    if Some(dir.flip()) == last_dir {
+                        continue;
+                    }
+                    match self.grid.get(pos + dir) {
+                        None | Some(Tile::Forest) => {}
+                        _ => {
+                            next.push(dir);
+                            if (pos + dir).y == self.size.y - 1 {
+                                paths.insert((dist + 1, pos + dir));
+                                continue;
+                            }
+                        }
+                    }
+                }
+                if next.len() == 1 {
+                    path.push_back((dist + 1, pos + next[0], Some(next[0])));
+                } else if !next.is_empty() {
+                    paths.insert((dist + 1, pos));
+                    deque.push_back(pos);
+                }
+            }
+            graph.insert(start, paths);
+        }
+
         let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
             distance: 0,
             position: self.start,
-            direction: Direction::South,
+            direction: None,
             visited: VectorSet::new(self.size),
         }]);
-        let mut seen: VectorMap<i64> = VectorMap::new(self.size);
         let mut max = 0;
         while let Some(State {
             distance,
             position: pos,
-            direction: last_dir,
+            direction: _,
             visited: mut set,
         }) = heap.pop()
         {
             if !set.insert(pos).unwrap() {
                 continue;
             }
-            if let Some(last) = seen.get(pos) {
-                if last > distance {
-                    continue;
-                }
-            }
-            seen.insert(pos, distance);
 
-            if pos.y == self.size.y - 1 && distance > max {
-                max = distance;
+            if pos.y == self.size.y - 1 {
+                if distance > max {
+                    max = distance;
+                    println!("{max}");
+                }
                 continue;
             }
 
-            let mut next: Vec<Direction> = Vec::new();
-            for dir in DIRS {
-                if dir.flip() == last_dir {
-                    continue;
-                }
-                match self.grid.get(pos + dir) {
-                    None | Some(Tile::Forest) => {}
-                    _ => next.push(dir),
+            let mut next: Vec<(i64, Vector)> = Vec::new();
+            for node in graph.get(pos).unwrap() {
+                if !set.contains(node.1) {
+                    next.push(node);
                 }
             }
 
             if next.len() == 1 {
                 heap.push(State {
-                    distance: distance + 1,
-                    position: pos + next[0],
-                    direction: next[0],
+                    distance: distance + next[0].0,
+                    position: next[0].1,
+                    direction: None,
                     visited: set,
                 });
                 continue;
             }
             for dir in next {
                 heap.push(State {
-                    distance: distance + 1,
-                    position: pos + dir,
-                    direction: dir,
+                    distance: distance + dir.0,
+                    position: dir.1,
+                    direction: None,
                     visited: set.clone(),
                 });
             }
         }
-        Some(max)
+
+        Some(max + 1)
     }
 }
 
@@ -207,7 +241,7 @@ impl std::str::FromStr for Tile {
 struct State {
     distance: i64,
     position: Vector,
-    direction: Direction,
+    direction: Option<Direction>,
     visited: VectorSet,
 }
 
