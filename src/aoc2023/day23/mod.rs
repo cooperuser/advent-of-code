@@ -156,15 +156,13 @@ impl crate::solution::Solution<i64> for Day {
             }
 
             let mut next: Vec<Direction> = Vec::new();
-            if let Some(Tile::Path | Tile::Slope(_)) = self.grid.get(pos) {
-                for dir in DIRS {
-                    if dir.flip() == last_dir {
-                        continue;
-                    }
-                    match self.grid.get(pos + dir) {
-                        None | Some(Tile::Forest) => {}
-                        _ => next.push(dir),
-                    }
+            for dir in DIRS {
+                if dir.flip() == last_dir {
+                    continue;
+                }
+                match self.grid.get(pos + dir) {
+                    None | Some(Tile::Forest) => {}
+                    _ => next.push(dir),
                 }
             }
 
