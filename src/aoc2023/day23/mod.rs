@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::collections::BinaryHeap;
 
 use crate::{
     direction::{Direction, DIRS},
@@ -54,11 +54,21 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut deque: VecDeque<(i64, Vector, Direction, VectorSet)> =
-            VecDeque::from([(0, self.start, Direction::South, VectorSet::new(self.size))]);
+        let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
+            distance: 0,
+            position: self.start,
+            direction: Direction::South,
+            visited: VectorSet::new(self.size),
+        }]);
         let mut seen: VectorMap<i64> = VectorMap::new(self.size);
         let mut max = 0;
-        while let Some((distance, pos, last_dir, mut set)) = deque.pop_front() {
+        while let Some(State {
+            distance,
+            position: pos,
+            direction: last_dir,
+            visited: mut set,
+        }) = heap.pop()
+        {
             if !set.insert(pos).unwrap() {
                 continue;
             }
@@ -67,8 +77,8 @@ impl crate::solution::Solution<i64> for Day {
                     continue;
                 }
             }
-
             seen.insert(pos, distance);
+
             if pos.y == self.size.y - 1 && distance > max {
                 max = distance;
                 continue;
@@ -94,22 +104,42 @@ impl crate::solution::Solution<i64> for Day {
             }
 
             if next.len() == 1 {
-                deque.push_back((distance + 1, pos + next[0], next[0], set));
+                heap.push(State {
+                    distance: distance + 1,
+                    position: pos + next[0],
+                    direction: next[0],
+                    visited: set,
+                });
                 continue;
             }
             for dir in next {
-                deque.push_back((distance + 1, pos + dir, dir, set.clone()));
+                heap.push(State {
+                    distance: distance + 1,
+                    position: pos + dir,
+                    direction: dir,
+                    visited: set.clone(),
+                });
             }
         }
         Some(max)
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut deque: VecDeque<(i64, Vector, Direction, VectorSet)> =
-            VecDeque::from([(0, self.start, Direction::South, VectorSet::new(self.size))]);
+        let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
+            distance: 0,
+            position: self.start,
+            direction: Direction::South,
+            visited: VectorSet::new(self.size),
+        }]);
         let mut seen: VectorMap<i64> = VectorMap::new(self.size);
         let mut max = 0;
-        while let Some((distance, pos, last_dir, mut set)) = deque.pop_front() {
+        while let Some(State {
+            distance,
+            position: pos,
+            direction: last_dir,
+            visited: mut set,
+        }) = heap.pop()
+        {
             if !set.insert(pos).unwrap() {
                 continue;
             }
@@ -118,15 +148,15 @@ impl crate::solution::Solution<i64> for Day {
                     continue;
                 }
             }
-
             seen.insert(pos, distance);
+
             if pos.y == self.size.y - 1 && distance > max {
                 max = distance;
                 continue;
             }
 
             let mut next: Vec<Direction> = Vec::new();
-            if let Some(Tile::Path) | Some(Tile::Slope(_)) = self.grid.get(pos) {
+            if let Some(Tile::Path | Tile::Slope(_)) = self.grid.get(pos) {
                 for dir in DIRS {
                     if dir.flip() == last_dir {
                         continue;
@@ -139,11 +169,21 @@ impl crate::solution::Solution<i64> for Day {
             }
 
             if next.len() == 1 {
-                deque.push_back((distance + 1, pos + next[0], next[0], set));
+                heap.push(State {
+                    distance: distance + 1,
+                    position: pos + next[0],
+                    direction: next[0],
+                    visited: set,
+                });
                 continue;
             }
             for dir in next {
-                deque.push_back((distance + 1, pos + dir, dir, set.clone()));
+                heap.push(State {
+                    distance: distance + 1,
+                    position: pos + dir,
+                    direction: dir,
+                    visited: set.clone(),
+                });
             }
         }
         Some(max)
@@ -163,6 +203,33 @@ impl std::str::FromStr for Tile {
             "<" => Ok(Self::Slope(Direction::West)),
             _ => Err(()),
         }
+    }
+}
+
+struct State {
+    distance: i64,
+    position: Vector,
+    direction: Direction,
+    visited: VectorSet,
+}
+
+impl std::cmp::Ord for State {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.distance.cmp(&other.distance).reverse()
+    }
+}
+
+impl std::cmp::PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.distance.cmp(&other.distance))
+    }
+}
+
+impl std::cmp::Eq for State {}
+
+impl std::cmp::PartialEq for State {
+    fn eq(&self, other: &Self) -> bool {
+        self.distance.eq(&other.distance)
     }
 }
 
