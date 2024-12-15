@@ -1,3 +1,5 @@
+use std::str::FromStr;
+
 use crate::vector::{self, Vector};
 
 pub const DIRS: [Direction; 4] = [
@@ -55,6 +57,48 @@ impl Direction {
             Self::West => Vector::new(size.x, -1),
         };
         (start, step)
+    }
+}
+
+impl FromStr for Direction {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "^" => Ok(Self::North),
+            "v" | "V" => Ok(Self::South),
+            ">" => Ok(Self::East),
+            "<" => Ok(Self::West),
+            _ => Err(()),
+        }
+    }
+}
+
+impl From<char> for Direction {
+    fn from(value: char) -> Self {
+        match value {
+            '^' => Self::North,
+            'v' | 'V' => Self::South,
+            '>' => Self::East,
+            '<' => Self::West,
+            _ => panic!(),
+        }
+    }
+}
+
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::North => '^',
+                Self::South => 'v',
+                Self::East => '>',
+                Self::West => '<',
+            }
+        )?;
+        Ok(())
     }
 }
 

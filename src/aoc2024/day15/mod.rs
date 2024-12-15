@@ -32,17 +32,6 @@ impl crate::solution::Solution<i64> for Day {
         let mut walls = VectorSet::new(size);
         let mut boxes = VectorSet::new(size);
         let mut start = None;
-        let inputs = inputs
-            .join("")
-            .chars()
-            .map(|c| match c {
-                '^' => Direction::North,
-                'v' => Direction::South,
-                '>' => Direction::East,
-                '<' => Direction::West,
-                _ => panic!(),
-            })
-            .collect();
 
         for (y, line) in map.iter().enumerate() {
             for (x, c) in line.chars().enumerate() {
@@ -59,7 +48,7 @@ impl crate::solution::Solution<i64> for Day {
 
         Self {
             raw: raw.clone(),
-            inputs,
+            inputs: inputs.join("").chars().map(|c| c.into()).collect(),
             walls,
             boxes,
             size,
