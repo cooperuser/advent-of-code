@@ -1,5 +1,8 @@
+mod vector3f;
 mod vectormap;
 mod vectorset;
+#[allow(unused_imports)]
+pub use vector3f::Vector3f;
 #[allow(unused_imports)]
 pub use vectormap::Vector3Map;
 #[allow(unused_imports)]
