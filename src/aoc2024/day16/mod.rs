@@ -5,10 +5,12 @@ use crate::{
     vector::{Vector, VectorMap, VectorSet},
 };
 
+type Node = HashMap<Direction, (i64, Vector, Direction)>;
+
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    grid: VectorSet,
+    graph: HashMap<Vector, Node>,
     size: Vector,
     start: Vector,
     end: Vector,
@@ -44,25 +46,15 @@ impl crate::solution::Solution<i64> for Day {
                 grid.insert(pos);
             }
         }
-        Self {
-            raw: raw.clone(),
-            grid,
-            size,
-            start: start.unwrap(),
-            end: end.unwrap(),
-        }
-    }
 
-    fn part_a(&self) -> Option<i64> {
-        type Node = HashMap<Direction, (i64, Vector, Direction)>;
         let mut graph: HashMap<Vector, Node> = HashMap::new();
-        let mut nodes = VectorSet::new(self.size);
-        nodes.insert(self.start);
-        nodes.insert(self.end);
-        for pos in self.grid.iter() {
+        let mut nodes = VectorSet::new(size);
+        nodes.insert(start.unwrap());
+        nodes.insert(end.unwrap());
+        for pos in grid.iter() {
             let mut dirs = Vec::new();
             for dir in DIRS {
-                if self.grid.contains(pos + dir) {
+                if grid.contains(pos + dir) {
                     dirs.push(dir);
                 }
             }
@@ -73,7 +65,7 @@ impl crate::solution::Solution<i64> for Day {
 
         for start in nodes.iter() {
             'outgoing: for outgoing in DIRS {
-                if !self.grid.contains(start + outgoing) {
+                if !grid.contains(start + outgoing) {
                     continue;
                 }
 
@@ -83,16 +75,16 @@ impl crate::solution::Solution<i64> for Day {
                 while !nodes.contains(pos) {
                     let left = facing.rotate_left();
                     let right = facing.rotate_right();
-                    if self.grid.contains(pos + facing) {
+                    if grid.contains(pos + facing) {
                         pos += facing;
                         score += 1;
                         continue;
-                    } else if self.grid.contains(pos + left) {
+                    } else if grid.contains(pos + left) {
                         facing = left;
                         pos += facing;
                         score += 1001;
                         continue;
-                    } else if self.grid.contains(pos + right) {
+                    } else if grid.contains(pos + right) {
                         facing = right;
                         pos += facing;
                         score += 1001;
@@ -108,13 +100,23 @@ impl crate::solution::Solution<i64> for Day {
             }
         }
 
+        Self {
+            raw: raw.clone(),
+            graph,
+            size,
+            start: start.unwrap(),
+            end: end.unwrap(),
+        }
+    }
+
+    fn part_a(&self) -> Option<i64> {
+        let mut min = i64::MAX;
+        let mut visited: VectorMap<i64> = VectorMap::new(self.size);
         let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
             score: 0,
             position: self.start,
             direction: Direction::East,
         }]);
-        let mut min = i64::MAX;
-        let mut visited: VectorMap<i64> = VectorMap::new(self.size);
         while let Some(State {
             score,
             position,
@@ -133,7 +135,7 @@ impl crate::solution::Solution<i64> for Day {
                 continue;
             }
 
-            for (&dir, &node) in graph.get(&position).unwrap() {
+            for (&dir, &node) in self.graph.get(&position).unwrap() {
                 if !visited.contains(node.1) {
                     let s = if dir == direction { 0 } else { 1000 };
                     heap.push(State {
@@ -144,6 +146,7 @@ impl crate::solution::Solution<i64> for Day {
                 }
             }
         }
+
         Some(min)
     }
 
