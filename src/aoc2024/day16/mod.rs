@@ -2,7 +2,7 @@ use std::collections::{BinaryHeap, HashMap, HashSet};
 
 use crate::{
     direction::{Direction, DIRS},
-    vector::{Vector, VectorMap, VectorSet},
+    vector::{Vector, VectorSet},
 };
 
 type Node = HashMap<Direction, (i64, Vector, Direction, HashSet<Vector>)>;
@@ -112,8 +112,8 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut min = i64::MAX;
-        let mut visited: VectorMap<i64> = VectorMap::new(self.size);
+        let mut min: Option<i64> = None;
+        let mut visited: HashMap<(Vector, Direction), i64> = HashMap::new();
         let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
             score: 0,
             position: self.start,
@@ -127,20 +127,20 @@ impl crate::solution::Solution<i64> for Day {
             path: _,
         }) = heap.pop()
         {
-            match visited.get(position) {
-                Some(s) if s > score => continue,
+            match visited.get(&(position, direction)) {
+                Some(&s) if s < score => continue,
                 _ => {}
             }
-            visited.insert(position, score);
+            visited.insert((position, direction), score);
             if position == self.end {
-                if score < min {
-                    min = score;
+                if min.is_none() || score < min.unwrap() {
+                    min = Some(score);
                 }
                 continue;
             }
 
             for (&dir, node) in self.graph.get(&position).unwrap() {
-                if !visited.contains(node.1) {
+                if !visited.contains_key(&(node.1, node.2)) {
                     let s = if dir == direction { 0 } else { 1000 };
                     heap.push(State {
                         score: score + node.0 + s,
@@ -152,7 +152,7 @@ impl crate::solution::Solution<i64> for Day {
             }
         }
 
-        Some(min)
+        min
     }
 
     fn part_b(&self) -> Option<i64> {
@@ -176,7 +176,7 @@ impl crate::solution::Solution<i64> for Day {
         }) = heap.pop()
         {
             if position == self.end {
-                if min.is_none() || Some(score) == min {
+                if min.is_none() || score == min.unwrap() {
                     min = Some(score);
                     paths.extend(path);
                 } else {
@@ -190,7 +190,7 @@ impl crate::solution::Solution<i64> for Day {
             }
 
             match visited.get(&(position, direction)) {
-                Some(s) if *s < score => continue,
+                Some(&s) if s < score => continue,
                 _ => {}
             }
             visited.insert((position, direction), score);
