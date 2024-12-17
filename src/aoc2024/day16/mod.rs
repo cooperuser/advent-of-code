@@ -1,11 +1,11 @@
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 use crate::{
     direction::{Direction, DIRS},
     vector::{Vector, VectorMap, VectorSet},
 };
 
-type Node = HashMap<Direction, (i64, Vector, Direction)>;
+type Node = HashMap<Direction, (i64, Vector, Direction, HashSet<Vector>)>;
 
 pub struct Day {
     #[allow(dead_code)]
@@ -72,7 +72,9 @@ impl crate::solution::Solution<i64> for Day {
                 let mut pos = start + outgoing;
                 let mut facing = outgoing;
                 let mut score = 1;
+                let mut set = HashSet::new();
                 while !nodes.contains(pos) {
+                    set.insert(pos);
                     let left = facing.rotate_left();
                     let right = facing.rotate_right();
                     if grid.contains(pos + facing) {
@@ -96,7 +98,7 @@ impl crate::solution::Solution<i64> for Day {
                 graph
                     .entry(start)
                     .or_default()
-                    .insert(outgoing, (score, pos, facing));
+                    .insert(outgoing, (score, pos, facing, set));
             }
         }
 
@@ -116,11 +118,13 @@ impl crate::solution::Solution<i64> for Day {
             score: 0,
             position: self.start,
             direction: Direction::East,
+            path: HashSet::new(),
         }]);
         while let Some(State {
             score,
             position,
             direction,
+            path: _,
         }) = heap.pop()
         {
             match visited.get(position) {
@@ -135,13 +139,14 @@ impl crate::solution::Solution<i64> for Day {
                 continue;
             }
 
-            for (&dir, &node) in self.graph.get(&position).unwrap() {
+            for (&dir, node) in self.graph.get(&position).unwrap() {
                 if !visited.contains(node.1) {
                     let s = if dir == direction { 0 } else { 1000 };
                     heap.push(State {
                         score: score + node.0 + s,
                         position: node.1,
                         direction: node.2,
+                        path: HashSet::new(),
                     })
                 }
             }
@@ -151,14 +156,80 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut min: Option<i64> = None;
+        let mut visited: HashMap<(Vector, Direction), i64> = HashMap::new();
+        let mut heap: BinaryHeap<State> = BinaryHeap::from([State {
+            score: 0,
+            position: self.start,
+            direction: Direction::East,
+            path: HashSet::new(),
+        }]);
+        let mut set = VectorSet::new(self.size);
+        let mut paths: HashSet<(Vector, Direction)> = HashSet::new();
+        set.insert(self.start);
+
+        while let Some(State {
+            score,
+            position,
+            direction,
+            path,
+        }) = heap.pop()
+        {
+            if position == self.end {
+                if min.is_none() || Some(score) == min {
+                    min = Some(score);
+                    paths.extend(path);
+                } else {
+                    break;
+                }
+                continue;
+            }
+
+            if min.is_some() && score > min? {
+                continue;
+            }
+
+            match visited.get(&(position, direction)) {
+                Some(s) if *s < score => continue,
+                _ => {}
+            }
+            visited.insert((position, direction), score);
+
+            for (&dir, node) in self.graph.get(&position).unwrap() {
+                if !path.contains(&(node.1, node.2)) {
+                    let s = if dir == direction { 0 } else { 1000 };
+                    let mut path = path.clone();
+                    path.insert((position, dir));
+                    heap.push(State {
+                        score: score + node.0 + s,
+                        position: node.1,
+                        direction: node.2,
+                        path,
+                    })
+                }
+            }
+        }
+
+        let mut set = VectorSet::new(self.size);
+        set.insert(self.end);
+        for (position, direction) in paths {
+            set.insert(position);
+            let junction = self.graph.get(&position).unwrap();
+            for &spot in &junction.get(&direction).unwrap().3 {
+                set.insert(spot);
+            }
+        }
+
+        Some(set.len() as i64)
     }
 }
 
+#[derive(Debug)]
 struct State {
     score: i64,
     position: Vector,
     direction: Direction,
+    path: HashSet<(Vector, Direction)>,
 }
 
 impl std::cmp::Ord for State {
