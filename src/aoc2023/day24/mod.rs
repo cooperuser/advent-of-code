@@ -1,6 +1,7 @@
-use std::collections::HashSet;
-
 use crate::vector3::{Vector3, Vector3f};
+
+use ndarray::prelude::*;
+use ndarray_linalg::*;
 
 pub struct Day {
     #[allow(dead_code)]
@@ -62,7 +63,120 @@ impl crate::solution::Solution<i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        // (p0 x v0) - (p0 x v[i]) - (p[i] x v0) + (p[i] x v[i])
+        // (p0 x v0) - (p0 x v1) - (p1 x v0) + (p1 x v1)
+        // (p0 x v0) - (p0 x v2) - (p2 x v0) + (p2 x v2)
+        // -
+        // -(p x v0) - (p0 x v) + (p0 x v0) + (p x v1) + (p1 x v) - (p1 x v1)
+        // -(p x v0) - (p0 x v) + (p0 x v0) + (p x v2) + (p2 x v) - (p2 x v2)
+        //
+        // -(pp.y * v0.z - pp.z * v0.y) - (p0.y * vv.z - p0.z * vv.y) + (p0.y * v0.z - p0.z * v0.y) + (pp.y * v1.z - pp.z * v1.y) + (p1.y * vv.z - p1.z * vv.y) - (p1.y * v1.z - p1.z * v1.y)
+        // -(pp.z * v0.x - pp.x * v0.z) - (p0.z * vv.x - p0.x * vv.z) + (p0.z * v0.x - p0.x * v0.z) + (pp.z * v1.x - pp.x * v1.z) + (p1.z * vv.x - p1.x * vv.z) - (p1.z * v1.x - p1.x * v1.z)
+        // -(pp.x * v0.y - pp.y * v0.x) - (p0.x * vv.y - p0.y * vv.x) + (p0.x * v0.y - p0.y * v0.x) + (pp.x * v1.y - pp.y * v1.x) + (p1.x * vv.y - p1.y * vv.x) - (p1.x * v1.y - p1.y * v1.x)
+        // -(pp.y * v0.z - pp.z * v0.y) - (p0.y * vv.z - p0.z * vv.y) + (p0.y * v0.z - p0.z * v0.y) + (pp.y * v2.z - pp.z * v2.y) + (p2.y * vv.z - p2.z * vv.y) - (p2.y * v2.z - p2.z * v2.y)
+        // -(pp.z * v0.x - pp.x * v0.z) - (p0.z * vv.x - p0.x * vv.z) + (p0.z * v0.x - p0.x * v0.z) + (pp.z * v2.x - pp.x * v2.z) + (p2.z * vv.x - p2.x * vv.z) - (p2.z * v2.x - p2.x * v2.z)
+        // -(pp.x * v0.y - pp.y * v0.x) - (p0.x * vv.y - p0.y * vv.x) + (p0.x * v0.y - p0.y * v0.x) + (pp.x * v2.y - pp.y * v2.x) + (p2.x * vv.y - p2.y * vv.x) - (p2.x * v2.y - p2.y * v2.x)
+        //
+        // (p0.y * v0.z - p0.z * v0.y) - (p0.y * v[i].z - p0.z * v[i].y) - (p[i].y * v0.z - p[i].z * v0.y) - (p[i].y * v[i].z - p[i].z * v[i].y)
+        // (p0.z * v0.x - p0.x * v0.z) - (p0.z * v[i].x - p0.x * v[i].z) - (p[i].z * v0.x - p[i].x * v0.z) - (p[i].z * v[i].x - p[i].x * v[i].z)
+        // (p0.x * v0.y - p0.y * v0.x) - (p0.x * v[i].y - p0.y * v[i].x) - (p[i].x * v0.y - p[i].y * v0.x) - (p[i].x * v[i].y - p[i].y * v[i].x)
+        //
+        // -(pp_y * v_0_z - pp_z * v_0_y) - (p_0_y * vv_z - p_0_z * vv_y) + (p_0_y * v_0_z - p_0_z * v_0_y) + (pp_y * v_1_z - pp_z * v_1_y) + (p_1_y * vv_z - p_1_z * vv_y) - (p_1_y * v_1_z - p_1_z * v_1_y)
+        // -(pp_z * v_0_x - pp_x * v_0_z) - (p_0_z * vv_x - p_0_x * vv_z) + (p_0_z * v_0_x - p_0_x * v_0_z) + (pp_z * v_1_x - pp_x * v_1_z) + (p_1_z * vv_x - p_1_x * vv_z) - (p_1_z * v_1_x - p_1_x * v_1_z)
+        // -(pp_x * v_0_y - pp_y * v_0_x) - (p_0_x * vv_y - p_0_y * vv_x) + (p_0_x * v_0_y - p_0_y * v_0_x) + (pp_x * v_1_y - pp_y * v_1_x) + (p_1_x * vv_y - p_1_y * vv_x) - (p_1_x * v_1_y - p_1_y * v_1_x)
+        // -(pp_y * v_0_z - pp_z * v_0_y) - (p_0_y * vv_z - p_0_z * vv_y) + (p_0_y * v_0_z - p_0_z * v_0_y) + (pp_y * v_2_z - pp_z * v_2_y) + (p_2_y * vv_z - p_2_z * vv_y) - (p_2_y * v_2_z - p_2_z * v_2_y)
+        // -(pp_z * v_0_x - pp_x * v_0_z) - (p_0_z * vv_x - p_0_x * vv_z) + (p_0_z * v_0_x - p_0_x * v_0_z) + (pp_z * v_2_x - pp_x * v_2_z) + (p_2_z * vv_x - p_2_x * vv_z) - (p_2_z * v_2_x - p_2_x * v_2_z)
+        // -(pp_x * v_0_y - pp_y * v_0_x) - (p_0_x * vv_y - p_0_y * vv_x) + (p_0_x * v_0_y - p_0_y * v_0_x) + (pp_x * v_2_y - pp_y * v_2_x) + (p_2_x * vv_y - p_2_y * vv_x) - (p_2_x * v_2_y - p_2_y * v_2_x)
+        //
+        // pp_y * (v_1_z - v_0_z) + pp_z * (v_0_y - v_1_y) + vv_y * (p_0_z - p_1_z) + vv_z * (p_1_y - p_0_y) = -((p_0_y * v_0_z) - (p_0_z * v_0_y) - (p_1_y * v_1_z) + (p_1_z * v_1_y))
+        // pp_x * (v_0_z - v_1_z) + pp_z * (v_1_x - v_0_x) + vv_x * (p_1_z - p_0_z) + vv_z * (p_0_x - p_1_x) = -((p_0_z * v_0_x) - (p_0_x * v_0_z) + (p_1_x * v_1_z) - (p_1_z * v_1_x))
+        // pp_x * (v_1_y - v_0_y) + pp_y * (v_0_x - v_1_x) + vv_x * (p_0_y - p_1_y) + vv_y * (p_1_x - p_0_x) = -((p_0_x * v_0_y) - (p_0_y * v_0_x) - (p_1_x * v_1_y) + (p_1_y * v_1_x))
+        // pp_y * (v_2_z - v_0_z) + pp_z * (v_0_y - v_2_y) + vv_y * (p_0_z - p_2_z) + vv_z * (p_2_y - p_0_y) = -((p_0_y * v_0_z) - (p_0_z * v_0_y) - (p_2_y * v_2_z) + (p_2_z * v_2_y))
+        // pp_x * (v_0_z - v_2_z) + pp_z * (v_2_x - v_0_x) + vv_x * (p_2_z - p_0_z) + vv_z * (p_0_x - p_2_x) = -((p_0_z * v_0_x) - (p_0_x * v_0_z) + (p_2_x * v_2_z) - (p_2_z * v_2_x))
+        // pp_x * (v_2_y - v_0_y) + pp_y * (v_0_x - v_2_x) + vv_x * (p_0_y - p_2_y) + vv_y * (p_2_x - p_0_x) = -((p_0_x * v_0_y) - (p_0_y * v_0_x) - (p_2_x * v_2_y) + (p_2_y * v_2_x))
+        //
+        let p_0 = self.stones[0].position;
+        let p_0 = Vector3f::new(p_0.x as f64, p_0.y as f64, p_0.z as f64);
+        let v_0 = self.stones[0].velocity;
+        let v_0 = Vector3f::new(v_0.x as f64, v_0.y as f64, v_0.z as f64);
+        let p_1 = self.stones[2].position;
+        let p_1 = Vector3f::new(p_1.x as f64, p_1.y as f64, p_1.z as f64);
+        let v_1 = self.stones[2].velocity;
+        let v_1 = Vector3f::new(v_1.x as f64, v_1.y as f64, v_1.z as f64);
+        let p_2 = self.stones[3].position;
+        let p_2 = Vector3f::new(p_2.x as f64, p_2.y as f64, p_2.z as f64);
+        let v_2 = self.stones[3].velocity;
+        let v_2 = Vector3f::new(v_2.x as f64, v_2.y as f64, v_2.z as f64);
+        let a: Array2<f64> = array![
+            [
+                0.0,
+                v_1.z - v_0.z,
+                v_0.y - v_1.y,
+                0.0,
+                p_0.z - p_1.z,
+                p_1.y - p_0.y,
+            ],
+            [
+                v_0.z - v_1.z,
+                0.0,
+                v_1.x - v_0.x,
+                p_1.z - p_0.z,
+                0.0,
+                p_0.x - p_1.x,
+            ],
+            [
+                v_1.y - v_0.y,
+                v_0.x - v_1.x,
+                0.0,
+                p_0.y - p_1.y,
+                p_1.x - p_0.x,
+                0.0,
+            ],
+            [
+                0.0,
+                v_2.z - v_0.z,
+                v_0.y - v_2.y,
+                0.0,
+                p_0.z - p_2.z,
+                p_2.y - p_0.y,
+            ],
+            [
+                v_0.z - v_2.z,
+                0.0,
+                v_2.x - v_0.x,
+                p_2.z - p_0.z,
+                0.0,
+                p_0.x - p_2.x,
+            ],
+            [
+                v_2.y - v_0.y,
+                v_0.x - v_2.x,
+                0.0,
+                p_0.y - p_2.y,
+                p_2.x - p_0.x,
+                0.0,
+            ],
+        ];
+        let b = array![
+            -((p_0.y * v_0.z) - (p_0.z * v_0.y) - (p_1.y * v_1.z) + (p_1.z * v_1.y)),
+            -((p_0.z * v_0.x) - (p_0.x * v_0.z) + (p_1.x * v_1.z) - (p_1.z * v_1.x)),
+            -((p_0.x * v_0.y) - (p_0.y * v_0.x) - (p_1.x * v_1.y) + (p_1.y * v_1.x)),
+            -((p_0.y * v_0.z) - (p_0.z * v_0.y) - (p_2.y * v_2.z) + (p_2.z * v_2.y)),
+            -((p_0.z * v_0.x) - (p_0.x * v_0.z) + (p_2.x * v_2.z) - (p_2.z * v_2.x)),
+            -((p_0.x * v_0.y) - (p_0.y * v_0.x) - (p_2.x * v_2.y) + (p_2.y * v_2.x)),
+        ];
+        let x = a.solve_into(b).unwrap();
+        let position = Vector3::new(
+            x[0].round() as i64,
+            x[1].round() as i64,
+            x[2].round() as i64,
+        );
+        let _velocity = Vector3::new(
+            x[3].round() as i64,
+            x[4].round() as i64,
+            x[5].round() as i64,
+        );
+        Some(position.x + position.y + position.z)
     }
 }
 
