@@ -16,6 +16,7 @@ mod day13;
 mod day14;
 mod day15;
 mod day16;
+mod day17;
 
 pub const DAYS: &[fn(bool) -> Run] = &[
     day01::Day::run,
@@ -34,4 +35,5 @@ pub const DAYS: &[fn(bool) -> Run] = &[
     day14::Day::run,
     day15::Day::run,
     day16::Day::run,
+    day17::Day::run,
 ];
