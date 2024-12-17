@@ -1,0 +1,23 @@
+Register A: 46323429
+Register B: 0
+Register C: 0
+
+Program: 2,4,1,1,7,5,1,5,4,3,0,3,5,5,3,0
+
+bst A  ; 2 4
+bxl 1  ; 1 1
+cdv B  ; 7 5
+bxl 5  ; 1 5
+bxc    ; 4 3
+adv 3  ; 0 3
+out B  ; 5 5
+jnz 0  ; 3 0
+
+B = A % 8
+B = B ^ 1
+C = A / 2**B
+B = B ^ 5
+B = B ^ C
+A = A / 2**3
+out(B % 8)
+if A jump 0
