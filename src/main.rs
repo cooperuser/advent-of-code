@@ -4,6 +4,7 @@ use clap::Parser;
 use solution::Solution;
 
 mod direction;
+mod graph;
 mod solution;
 mod vector;
 mod vector3;
