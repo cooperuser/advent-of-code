@@ -66,6 +66,13 @@ impl VectorSet {
     pub fn len(&self) -> usize {
         self.count
     }
+
+    #[allow(dead_code)]
+    pub fn extend(&mut self, other: &VectorSet) {
+        for v in other.iter() {
+            self.insert(v);
+        }
+    }
 }
 
 pub struct VectorSetIterator<'a> {
