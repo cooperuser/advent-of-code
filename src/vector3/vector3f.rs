@@ -108,6 +108,66 @@ impl Vector3f {
             / ((a.1 * a.1) * (b.1 * b.1) - (a.1 * b.1) * (a.1 * b.1));
         Some((frac_a, frac_b))
     }
+
+    pub fn are_parallel(a: (Vector3f, Vector3f), b: (Vector3f, Vector3f)) -> bool {
+        let a_mag = a.1 * a.1;
+        let b_mag = b.1 * b.1;
+        a_mag == 0.0 || b_mag == 0.0 || (a.1 * b.1).powi(2) == a_mag * b_mag
+    }
+
+    pub fn separated_by(
+        a: (Vector3f, Vector3f),
+        b: (Vector3f, Vector3f),
+        v: Vector3f,
+    ) -> Option<(f64, f64, f64)> {
+        // a_0_x + a*a_1_x + t*v_x = b_0_x + b*b_1_x
+        // a_0_y + a*a_1_y + t*v_y = b_0_y + b*b_1_y
+        // a_0_z + a*a_1_z + t*v_z = b_0_z + b*b_1_z
+        let t_numerator =
+            -(a.0.x * a.1.y * b.1.z) + (a.0.x * a.1.z * b.1.y) + (a.0.y * a.1.x * b.1.z)
+                - (a.0.y * a.1.z * b.1.x)
+                - (a.0.z * a.1.x * b.1.y)
+                + (a.0.z * a.1.y * b.1.x)
+                - (a.1.x * b.0.y * b.1.z)
+                + (a.1.x * b.0.z * b.1.y)
+                + (a.1.y * b.0.x * b.1.z)
+                - (a.1.y * b.0.z * b.1.x)
+                - (a.1.z * b.0.x * b.1.y)
+                + (a.1.z * b.0.y * b.1.x);
+        let a_numerator = -(a.0.x * b.1.y * v.z) + (a.0.x * b.1.z * v.y) + (a.0.y * b.1.x * v.z)
+            - (a.0.y * b.1.z * v.x)
+            - (a.0.z * b.1.x * v.y)
+            + (a.0.z * b.1.y * v.x)
+            + (b.0.x * b.1.y * v.z)
+            - (b.0.x * b.1.z * v.y)
+            - (b.0.y * b.1.x * v.z)
+            + (b.0.y * b.1.z * v.x)
+            + (b.0.z * b.1.x * v.y)
+            - (b.0.z * b.1.y * v.x);
+        let b_numerator = -(a.0.x * a.1.y * v.z) + (a.0.x * a.1.z * v.y) + (a.0.y * a.1.x * v.z)
+            - (a.0.y * a.1.z * v.x)
+            - (a.0.z * a.1.x * v.y)
+            + (a.0.z * a.1.y * v.x)
+            - (a.1.x * b.0.y * v.z)
+            + (a.1.x * b.0.z * v.y)
+            + (a.1.y * b.0.x * v.z)
+            - (a.1.y * b.0.z * v.x)
+            - (a.1.z * b.0.x * v.y)
+            + (a.1.z * b.0.y * v.x);
+        let denominator = (a.1.x * b.1.y * v.z) - (a.1.x * b.1.z * v.y) - (a.1.y * b.1.x * v.z)
+            + (a.1.y * b.1.z * v.x)
+            + (a.1.z * b.1.x * v.y)
+            - (a.1.z * b.1.y * v.x);
+        if denominator != 0.0 {
+            Some((
+                t_numerator / denominator,
+                a_numerator / denominator,
+                b_numerator / denominator,
+            ))
+        } else {
+            None
+        }
+    }
 }
 
 impl std::ops::Add<Vector3f> for Vector3f {
