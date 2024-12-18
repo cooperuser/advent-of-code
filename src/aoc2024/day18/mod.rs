@@ -13,13 +13,13 @@ pub struct Day {
     end: Vector,
 }
 
-impl crate::solution::Solution<String> for Day {
-    fn meta() -> crate::solution::Meta<String> {
-        crate::solution::Meta::<String> {
+impl crate::solution::Solution<i64, String> for Day {
+    fn meta() -> crate::solution::Meta<i64, String> {
+        crate::solution::Meta::<i64, String> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
-            answer_a: "22".to_string(),
+            answer_a: 22,
             answer_b: "6,1".to_string(),
         }
     }
@@ -45,13 +45,13 @@ impl crate::solution::Solution<String> for Day {
         }
     }
 
-    fn part_a(&self) -> Option<String> {
+    fn part_a(&self) -> Option<i64> {
         let mut map = VectorSet::new(self.size);
         for byte in 0..if self.bytes.len() < 50 { 12 } else { 1024 } {
             map.insert(self.bytes[byte]);
         }
 
-        self.search(&map).map(|n| n.to_string())
+        self.search(&map)
     }
 
     fn part_b(&self) -> Option<String> {

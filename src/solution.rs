@@ -4,15 +4,15 @@ pub type Run = Option<(
     std::time::Duration,
 )>;
 
-pub trait Solution<T: std::fmt::Display + Eq> {
-    fn meta() -> Meta<T>
+pub trait Solution<T: std::fmt::Display + Eq, U: std::fmt::Display + Eq> {
+    fn meta() -> Meta<T, U>
     where
         Self: Sized;
     fn new(raw: Vec<String>) -> Self
     where
         Self: Sized;
     fn part_a(&self) -> Option<T>;
-    fn part_b(&self) -> Option<T>;
+    fn part_b(&self) -> Option<U>;
     fn run(silenced: bool) -> Run
     where
         Self: Sized,
@@ -76,12 +76,12 @@ pub trait Solution<T: std::fmt::Display + Eq> {
 }
 
 #[derive(Clone)]
-pub struct Meta<T> {
+pub struct Meta<T, U> {
     pub input: String,
     pub sample_a: String,
     pub sample_b: String,
     pub answer_a: T,
-    pub answer_b: T,
+    pub answer_b: U,
 }
 
 macro_rules! test_solution {

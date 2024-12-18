@@ -16,14 +16,14 @@ enum Opcode {
     Cdv,
 }
 
-impl crate::solution::Solution<String> for Day {
-    fn meta() -> crate::solution::Meta<String> {
-        crate::solution::Meta::<String> {
+impl crate::solution::Solution<String, i64> for Day {
+    fn meta() -> crate::solution::Meta<String, i64> {
+        crate::solution::Meta::<String, i64> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: "5,7,3,0".to_string(),
-            answer_b: "117440".to_string(),
+            answer_b: 117440,
         }
     }
 
@@ -53,7 +53,7 @@ impl crate::solution::Solution<String> for Day {
         )
     }
 
-    fn part_b(&self) -> Option<String> {
+    fn part_b(&self) -> Option<i64> {
         let mut saved = Vec::new();
         for a in 1..1024 {
             let output = self.compute(a);
@@ -77,7 +77,7 @@ impl crate::solution::Solution<String> for Day {
             saved = next;
         }
 
-        Some(saved.iter().min().unwrap().to_string())
+        saved.iter().min().copied()
     }
 }
 
