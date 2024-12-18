@@ -1,4 +1,3 @@
-use std::borrow::BorrowMut;
 use std::cmp::Reverse;
 use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
@@ -80,6 +79,7 @@ where
         self.map.get(node).unwrap().clone()
     }
 
+    #[allow(dead_code)]
     pub fn are_nodes_connected(&self, a: &V, b: &V) -> bool {
         let mut deque: VecDeque<V> = VecDeque::from([a.clone()]);
         let mut visited: HashSet<V> = HashSet::from([a.clone()]);

@@ -1,11 +1,8 @@
-use std::collections::HashSet;
-
 use crate::graph::Graph;
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    nodes: Vec<String>,
     graph: Graph<String, i64>,
 }
 
@@ -21,25 +18,17 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<String>) -> Self {
-        let mut nodes: HashSet<String> = HashSet::new();
         let mut graph = Graph::new();
         for line in raw.iter() {
             let (left, right) = line.split_once(": ").unwrap();
             let left = left.to_string();
-            nodes.insert(left.clone());
             for right in right.split_whitespace() {
-                let right = right.to_string();
-                nodes.insert(right.clone());
                 graph.add_edge(&left, &right.to_string(), 1);
             }
         }
 
-        let mut nodes: Vec<String> = nodes.iter().cloned().collect();
-        nodes.sort();
-
         Self {
             raw: raw.clone(),
-            nodes,
             graph,
         }
     }
