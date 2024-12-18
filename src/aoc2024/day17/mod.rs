@@ -1,5 +1,3 @@
-use std::ops::BitXor;
-
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
@@ -56,21 +54,30 @@ impl crate::solution::Solution<String> for Day {
     }
 
     fn part_b(&self) -> Option<String> {
-        if self.instructions.len() < 10 {
-            return Some("117440".to_string());
-        }
-
-        let mut a = 2977469;
-        let increment = 7171773 - 2977469;
-        loop {
-            let output = self.fast(a);
-            if output.len() == self.instructions.len() {
-                break;
+        let mut saved = Vec::new();
+        for a in 1..1024 {
+            let output = self.compute(a);
+            if output[0] == self.instructions[0] {
+                saved.push(a);
             }
-            a += increment;
         }
 
-        Some(a.to_string())
+        for pos in 1..self.instructions.len() {
+            let mut next = Vec::new();
+            for s in saved {
+                for bit in 0..8 {
+                    let a = (bit << (7 + 3 * pos)) | s;
+                    let output = self.compute(a);
+                    if output.len() > pos && output[pos] == self.instructions[pos] {
+                        next.push(a);
+                    }
+                }
+            }
+
+            saved = next;
+        }
+
+        Some(saved.iter().min().unwrap().to_string())
     }
 }
 
@@ -89,57 +96,43 @@ impl Day {
     fn compute(&self, a: i64) -> Vec<i64> {
         let mut output: Vec<i64> = Vec::new();
         let mut registers = self.registers.clone();
-        registers[0] = a;
         let mut instruction = 0;
-        loop {
-            if instruction >= self.instructions.len() {
-                break;
-            }
+        registers[0] = a;
+
+        while instruction < self.instructions.len() {
+            let opcode = self.instructions[instruction];
             let operand = self.instructions[instruction + 1];
-            match Opcode::from_i64(self.instructions[instruction]) {
-                Opcode::Adv => registers[0] /= 2i64.pow(self.combo(&registers, operand) as u32),
-                Opcode::Bxl => registers[1] = registers[1].bitxor(operand),
-                Opcode::Bst => registers[1] = self.combo(&registers, operand).rem_euclid(8),
-                Opcode::Jnz => {
-                    if registers[0] != 0 {
-                        instruction = operand as usize;
-                        continue;
-                    }
-                }
-                Opcode::Bxc => registers[1] = registers[1].bitxor(registers[2]),
-                Opcode::Out => {
-                    let value = self.combo(&registers, operand).rem_euclid(8);
-                    output.push(value);
-                }
-                Opcode::Bdv => {
-                    registers[1] = registers[0] / 2i64.pow(self.combo(&registers, operand) as u32)
-                }
-                Opcode::Cdv => {
-                    registers[2] = registers[0] / 2i64.pow(self.combo(&registers, operand) as u32)
-                }
-            }
             instruction += 2;
+
+            match Opcode::from_i64(opcode) {
+                Opcode::Adv => registers[0] >>= self.combo(&registers, operand),
+                Opcode::Bxl => registers[1] ^= operand,
+                Opcode::Bst => registers[1] = self.combo(&registers, operand) % 8,
+                Opcode::Jnz if registers[0] != 0 => instruction = operand as usize,
+                Opcode::Jnz => {}
+                Opcode::Bxc => registers[1] ^= registers[2],
+                Opcode::Out => output.push(self.combo(&registers, operand) % 8),
+                Opcode::Bdv => registers[1] = registers[0] >> self.combo(&registers, operand),
+                Opcode::Cdv => registers[2] = registers[0] >> self.combo(&registers, operand),
+            }
         }
 
         output
     }
 
-    fn fast(&self, a: i64) -> Vec<i64> {
+    #[allow(dead_code)]
+    fn fast_compute(&self, a: i64) -> Vec<i64> {
         let mut out = Vec::new();
         let mut a = a;
         let mut b;
         let mut c;
-        while a != 0 && out.len() != self.instructions.len() {
+        while a != 0 {
             b = a & 7;
             b ^= 1;
             c = a >> b;
             b ^= 5;
             b ^= c;
             a >>= 3;
-            let o = b % 8;
-            if o != self.instructions[out.len()] {
-                break;
-            }
             out.push(b % 8);
         }
         out
