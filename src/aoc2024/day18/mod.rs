@@ -1,3 +1,5 @@
+// tags: binary search, path finding
+
 use std::collections::VecDeque;
 
 use crate::{
