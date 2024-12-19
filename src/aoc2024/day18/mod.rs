@@ -8,6 +8,7 @@ use crate::{
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
+    intial: usize,
     bytes: Vec<Vector>,
     size: Vector,
     end: Vector,
@@ -39,6 +40,7 @@ impl crate::solution::Solution<i64, String> for Day {
         }
         Self {
             raw: raw.clone(),
+            intial: if bytes.len() < 50 { 12 } else { 1024 },
             bytes,
             size,
             end: size - Vector::new(1, 1),
@@ -47,7 +49,7 @@ impl crate::solution::Solution<i64, String> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut map = VectorSet::new(self.size);
-        for byte in 0..if self.bytes.len() < 50 { 12 } else { 1024 } {
+        for byte in 0..self.intial {
             map.insert(self.bytes[byte]);
         }
 
@@ -57,12 +59,27 @@ impl crate::solution::Solution<i64, String> for Day {
     fn part_b(&self) -> Option<String> {
         let mut map = VectorSet::new(self.size);
         let mut i = 0;
-        while self.search(&map).is_some() {
-            map.insert(self.bytes[i]);
-            i += 1;
+        let mut min = self.intial;
+        let mut max = self.bytes.len() - 1;
+        while min < max {
+            let mid = (max + min) / 2;
+            while i < mid {
+                map.insert(self.bytes[i]);
+                i += 1;
+            }
+            while i >= mid {
+                map.remove(self.bytes[i]);
+                i -= 1;
+            }
+
+            if self.search(&map).is_none() {
+                max = mid;
+            } else {
+                min = mid + 1;
+            }
         }
 
-        let byte = self.bytes[i - 1];
+        let byte = self.bytes[max - 1];
         Some(format!("{},{}", byte.x, byte.y))
     }
 }
