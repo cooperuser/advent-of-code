@@ -306,6 +306,7 @@ impl<V: Eq, E: Ord> PartialOrd for State<V, E> {
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::collections::BTreeSet as Set;
 
     #[test]
     fn are_nodes_connected() {
@@ -350,6 +351,15 @@ mod test {
         graph.add_edge(&"f", &"g", 1);
         graph.add_edge(&"g", &"h", 3);
 
-        assert_eq!(Some(vec![("b", "c"), ("f", "g")]), graph.minimum_cut());
+        let min_cut = graph.minimum_cut();
+        assert!(min_cut.is_some());
+
+        let mut bridges: Set<Set<&str>> = Set::new();
+        for bridge in min_cut.unwrap() {
+            bridges.insert(Set::from([bridge.0, bridge.1]));
+        }
+
+        let expected = Set::from([Set::from(["b", "c"]), Set::from(["f", "g"])]);
+        assert_eq!(expected, bridges);
     }
 }
