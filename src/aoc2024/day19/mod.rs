@@ -6,9 +6,8 @@ use std::{
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    patterns: Vec<Pattern>,
     towels: Vec<Vec<Color>>,
-    sorted: HashMap<Color, BinaryHeap<Pattern>>,
+    patterns: HashMap<Color, BinaryHeap<Pattern>>,
 }
 
 #[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
@@ -26,6 +25,7 @@ struct Pattern {
 }
 
 type Memo = HashMap<Vec<Color>, Option<Vec<Vec<Color>>>>;
+type Memo2 = HashMap<Vec<Color>, usize>;
 
 impl crate::solution::Solution<i64, i64> for Day {
     fn meta() -> crate::solution::Meta<i64, i64> {
@@ -58,9 +58,8 @@ impl crate::solution::Solution<i64, i64> for Day {
             .collect();
         Self {
             raw: raw.clone(),
-            patterns,
             towels,
-            sorted,
+            patterns: sorted,
         }
     }
 
@@ -76,7 +75,12 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut count = 0;
+        let mut memo: Memo2 = HashMap::new();
+        for towel in &self.towels {
+            count += self.get_towel_possibilities(towel, &mut memo);
+        }
+        Some(count as i64)
     }
 }
 
@@ -86,7 +90,7 @@ impl Day {
             return output.clone();
         }
 
-        for Pattern { pattern: p } in self.sorted.get(&towel[0])? {
+        for Pattern { pattern: p } in self.patterns.get(&towel[0])? {
             if p == towel {
                 return Some(vec![p.clone()]);
             } else if p.len() > towel.len() {
@@ -105,6 +109,31 @@ impl Day {
 
         memo.insert(towel.to_vec(), None);
         None
+    }
+
+    fn get_towel_possibilities(&self, towel: &[Color], memo: &mut Memo2) -> usize {
+        if let Some(output) = memo.get(&towel.to_vec()) {
+            return *output;
+        }
+
+        let sorted = match self.patterns.get(&towel[0]) {
+            Some(s) => s,
+            None => return 0,
+        };
+
+        let mut possible = 0;
+        for Pattern { pattern: p } in sorted {
+            if p == towel {
+                possible += 1;
+            } else if p.len() > towel.len() {
+                continue;
+            } else if *p == towel[0..p.len()] {
+                possible += self.get_towel_possibilities(&towel[p.len()..], memo)
+            }
+        }
+
+        memo.insert(towel.to_vec(), possible);
+        possible
     }
 }
 
