@@ -69,6 +69,14 @@ impl Vector {
         (0..self.y).flat_map(move |y| (0..self.x).map(move |x| Vector::new(x, y)))
     }
 
+    pub const fn sum(&self) -> i64 {
+        self.x + self.y
+    }
+
+    pub const fn product(&self) -> i64 {
+        self.x * self.y
+    }
+
     pub const fn normalized(&self) -> Self {
         Self {
             x: self.x.signum(),
