@@ -1,20 +1,9 @@
-use std::collections::{HashSet, VecDeque};
+use std::collections::VecDeque;
 
 use crate::{
     direction::DIRS,
-    vector::{Vector, VectorSet},
+    vector::{Vector, VectorMap, VectorSet},
 };
-
-const DOUBLE_DIRS: [Vector; 8] = [
-    Vector::new(-2, 0),
-    Vector::new(-1, -1),
-    Vector::new(-1, 1),
-    Vector::new(0, -2),
-    Vector::new(0, 2),
-    Vector::new(1, -1),
-    Vector::new(1, 1),
-    Vector::new(2, 0),
-];
 
 pub struct Day {
     #[allow(dead_code)]
@@ -32,7 +21,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 44,
-            answer_b: 0,
+            answer_b: 285,
         }
     }
 
@@ -65,38 +54,54 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
+        let offsets = Self::get_offsets(2, 2);
         let cutoff = if self.size.x < 50 { 1 } else { 100 };
-        let path = self.get_path(self.start, self.end).unwrap();
-        let max = path;
-        let len = self.grid.len();
-        let mut count = 0;
-        for (i, pos) in self.grid.iter().enumerate() {
-            let Some(a) = self.get_path(self.start, pos) else {
-                continue;
-            };
-            for dir in DOUBLE_DIRS {
-                if !self.grid.contains(pos + dir) {
-                    continue;
-                }
-                let Some(b) = self.get_path(pos + dir, self.end) else {
-                    continue;
-                };
-                let dist = a + b + 2;
-                if max - dist >= cutoff {
-                    count += 1;
-                }
-            }
-            println!("{:?} / {:?}", i, len);
-        }
-        Some(count)
+        Some(self.cheat(&offsets, cutoff))
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let offsets = Self::get_offsets(1, 20);
+        let cutoff = if self.size.x < 50 { 50 } else { 100 };
+        Some(self.cheat(&offsets, cutoff))
     }
 }
 
 impl Day {
+    fn cheat(&self, offsets: &[Vector], cutoff: i64) -> i64 {
+        let mut count = 0;
+        let max = self.get_path(self.start, self.end).unwrap();
+        let mut cache: VectorMap<i64> = VectorMap::new(self.size);
+        for pos in self.grid.iter() {
+            let Some(a) = self.get_path(self.start, pos) else {
+                continue;
+            };
+            for &dir in offsets {
+                if !self.grid.contains(pos + dir) {
+                    continue;
+                }
+
+                if let Some(b) = cache.get(pos + dir) {
+                    let dist = a + b + dir.x.abs() + dir.y.abs();
+                    if max - dist >= cutoff {
+                        count += 1;
+                    }
+                    continue;
+                }
+
+                let Some(b) = self.get_path(pos + dir, self.end) else {
+                    continue;
+                };
+                let dist = a + b + dir.x.abs() + dir.y.abs();
+                cache.insert(pos + dir, b);
+                if max - dist >= cutoff {
+                    count += 1;
+                }
+            }
+        }
+
+        count
+    }
+
     fn get_path(&self, start: Vector, end: Vector) -> Option<i64> {
         let mut deque: VecDeque<(Vector, i64)> = VecDeque::from([(start, 0)]);
         let mut visited = VectorSet::new(self.size);
@@ -120,67 +125,17 @@ impl Day {
         None
     }
 
-    fn cheat(&self, path: &[Vector], index: usize) -> Option<i64> {
-        let mut visited = VectorSet::new(self.size);
-        // for &pos in path.iter().take(index) {
-        //     visited.insert(pos);
-        // }
-
-        let mut deque: VecDeque<(Vector, usize)> = VecDeque::new();
-        let start = path[index];
-        for dir in DOUBLE_DIRS {
-            deque.push_back((start + dir, index + 2));
-        }
-
-        while let Some((pos, distance)) = deque.pop_front() {
-            if !pos.contained_in(Vector::zero(), self.size)
-                || !visited.insert(pos).unwrap()
-                || !self.grid.contains(pos)
-            {
-                continue;
-            }
-
-            if pos == self.end {
-                return Some(distance as i64);
-            }
-
-            for dir in DIRS {
-                deque.push_back((pos + dir, distance + 1));
+    fn get_offsets(min: i64, max: i64) -> Vec<Vector> {
+        let mut dirs = Vec::new();
+        for dir in DIRS {
+            for i in min..=max {
+                for j in 0..i {
+                    dirs.push(Vector::from(dir) * j + Vector::from(dir.rotate_right()) * (i - j));
+                }
             }
         }
-
-        None
+        dirs
     }
-
-    // fn path(&self, start: Vector, cheated: bool) -> Vec<i64> {
-    //     let mut deque: VecDeque<(Vector, bool, i64, VectorSet)> =
-    //         VecDeque::from([(start, cheated, 0, VectorSet::new(self.size))]);
-    //     let mut distances = Vec::new();
-    //     while let Some((pos, cheated, distance, mut path)) = deque.pop_front() {
-    //         if !pos.contained_in(Vector::zero(), self.size)
-    //             || !path.insert(pos).unwrap()
-    //             || !self.grid.contains(pos)
-    //         {
-    //             continue;
-    //         }
-    //
-    //         if pos == self.end {
-    //             distances.push(distance);
-    //         }
-    //
-    //         for dir in DIRS {
-    //             deque.push_back((pos + dir, cheated, distance + 1, path.clone()));
-    //         }
-    //
-    //         if !cheated {
-    //             for dir in DOUBLE_DIRS {
-    //                 deque.push_back((pos + dir, true, distance + 2, path.clone()));
-    //             }
-    //         }
-    //     }
-    //
-    //     distances
-    // }
 }
 
 crate::solution::test_solution!();
