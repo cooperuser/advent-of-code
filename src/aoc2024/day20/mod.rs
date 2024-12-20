@@ -12,6 +12,7 @@ pub struct Day {
     size: Vector,
     start: Vector,
     end: Vector,
+    path: VectorMap<i64>,
 }
 
 impl crate::solution::Solution<i64, i64> for Day {
@@ -44,12 +45,31 @@ impl crate::solution::Solution<i64, i64> for Day {
             }
         }
 
+        let mut path: VectorMap<i64> = VectorMap::new(size);
+        let mut deque: VecDeque<(Vector, i64)> = VecDeque::from([(start.unwrap(), 0)]);
+        while let Some((pos, distance)) = deque.pop_front() {
+            if !pos.contained_in(Vector::zero(), size) || path.contains(pos) || !grid.contains(pos)
+            {
+                continue;
+            }
+            path.insert(pos, distance);
+
+            if pos == end.unwrap() {
+                break;
+            }
+
+            for dir in DIRS {
+                deque.push_back((pos + dir, distance + 1));
+            }
+        }
+
         Self {
             raw: raw.clone(),
             grid,
             size,
             start: start.unwrap(),
             end: end.unwrap(),
+            path,
         }
     }
 
@@ -103,26 +123,7 @@ impl Day {
     }
 
     fn get_path(&self, start: Vector, end: Vector) -> Option<i64> {
-        let mut deque: VecDeque<(Vector, i64)> = VecDeque::from([(start, 0)]);
-        let mut visited = VectorSet::new(self.size);
-        while let Some((pos, distance)) = deque.pop_front() {
-            if !pos.contained_in(Vector::zero(), self.size)
-                || !visited.insert(pos).unwrap()
-                || !self.grid.contains(pos)
-            {
-                continue;
-            }
-
-            if pos == end {
-                return Some(distance);
-            }
-
-            for dir in DIRS {
-                deque.push_back((pos + dir, distance + 1));
-            }
-        }
-
-        None
+        Some(self.path.get(end)? - self.path.get(start)?)
     }
 
     fn get_offsets(min: i64, max: i64) -> Vec<Vector> {
