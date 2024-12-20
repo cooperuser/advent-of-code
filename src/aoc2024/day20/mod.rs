@@ -1,7 +1,9 @@
+// tags: caching, flood fill
+
 use std::collections::VecDeque;
 
 use crate::{
-    direction::DIRS,
+    direction::{self, DIRS},
     vector::{Vector, VectorMap, VectorSet},
 };
 
@@ -48,8 +50,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         let mut path: VectorMap<i64> = VectorMap::new(size);
         let mut deque: VecDeque<(Vector, i64)> = VecDeque::from([(start.unwrap(), 0)]);
         while let Some((pos, distance)) = deque.pop_front() {
-            if !pos.contained_in(Vector::zero(), size) || path.contains(pos) || !grid.contains(pos)
-            {
+            if !grid.contains(pos) || path.contains(pos) {
                 continue;
             }
             path.insert(pos, distance);
@@ -74,13 +75,13 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let offsets = Self::get_offsets(2, 2);
+        let offsets = direction::make_offset(2, 2);
         let cutoff = if self.size.x < 50 { 1 } else { 100 };
         Some(self.cheat(&offsets, cutoff))
     }
 
     fn part_b(&self) -> Option<i64> {
-        let offsets = Self::get_offsets(1, 20);
+        let offsets = direction::make_offset(1, 20);
         let cutoff = if self.size.x < 50 { 50 } else { 100 };
         Some(self.cheat(&offsets, cutoff))
     }
@@ -124,18 +125,6 @@ impl Day {
 
     fn get_path(&self, start: Vector, end: Vector) -> Option<i64> {
         Some(self.path.get(end)? - self.path.get(start)?)
-    }
-
-    fn get_offsets(min: i64, max: i64) -> Vec<Vector> {
-        let mut dirs = Vec::new();
-        for dir in DIRS {
-            for i in min..=max {
-                for j in 0..i {
-                    dirs.push(Vector::from(dir) * j + Vector::from(dir.rotate_right()) * (i - j));
-                }
-            }
-        }
-        dirs
     }
 }
 

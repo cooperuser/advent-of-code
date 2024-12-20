@@ -60,6 +60,20 @@ impl Direction {
     }
 }
 
+pub fn make_offset(min: i64, max: i64) -> Vec<Vector> {
+    let mut offsets = Vec::new();
+    for dir in DIRS {
+        let forward = Vector::from(dir);
+        let right = Vector::from(dir.rotate_right());
+        for i in min..=max {
+            for j in 0..i {
+                offsets.push(forward * j + right * (i - j));
+            }
+        }
+    }
+    offsets
+}
+
 impl std::ops::Neg for Direction {
     type Output = Direction;
 
