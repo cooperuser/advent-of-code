@@ -1,4 +1,4 @@
-// tags: flood fill
+// tags: flood fill, pathfinding
 
 use std::collections::VecDeque;
 
@@ -44,6 +44,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             }
         }
 
+        // Precalculate the distance to each point on the path
         let mut path: VectorMap<i64> = VectorMap::new(size);
         let mut deque: VecDeque<(Vector, i64)> = VecDeque::from([(start.unwrap(), 0)]);
         while let Some((pos, distance)) = deque.pop_front() {
@@ -84,12 +85,16 @@ impl crate::solution::Solution<i64, i64> for Day {
 impl Day {
     fn cheat(&self, offsets: &[Vector], cutoff: i64) -> i64 {
         let mut count = 0;
+        // Since the path is linear, we can just get sum the distances from the start
+        // to the cheat, and from the end of the cheat to the end of the path.
         for (pos, a) in self.path.iter() {
             for &dir in offsets {
                 let Some(b) = self.path.get(pos + dir) else {
                     continue;
                 };
 
+                // The distance from the start of the path to the end gets canceled
+                // out when doing path_len - (a + (path_len - b) + cheat_len)
                 if b - a - dir.x.abs() - dir.y.abs() >= cutoff {
                     count += 1;
                 }
