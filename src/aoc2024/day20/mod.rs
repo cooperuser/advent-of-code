@@ -93,27 +93,23 @@ impl Day {
         let max = self.get_path(self.start, self.end).unwrap();
         let mut cache: VectorMap<i64> = VectorMap::new(self.size);
         for pos in self.grid.iter() {
-            let Some(a) = self.get_path(self.start, pos) else {
-                continue;
-            };
+            let a = self.get_path(self.start, pos).unwrap();
             for &dir in offsets {
-                if !self.grid.contains(pos + dir) {
+                let pos = pos + dir;
+                if !self.grid.contains(pos) {
                     continue;
                 }
 
-                if let Some(b) = cache.get(pos + dir) {
-                    let dist = a + b + dir.x.abs() + dir.y.abs();
-                    if max - dist >= cutoff {
-                        count += 1;
+                let b = match cache.get(pos) {
+                    Some(b) => b,
+                    None => {
+                        let b = self.get_path(pos, self.end).unwrap();
+                        cache.insert(pos, b);
+                        b
                     }
-                    continue;
-                }
-
-                let Some(b) = self.get_path(pos + dir, self.end) else {
-                    continue;
                 };
+
                 let dist = a + b + dir.x.abs() + dir.y.abs();
-                cache.insert(pos + dir, b);
                 if max - dist >= cutoff {
                     count += 1;
                 }
