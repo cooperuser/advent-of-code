@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     direction::{Direction, DIRS},
-    vector::{Vector, VectorMap, VectorSet},
+    vector::{Vector, VectorSet},
 };
 
 pub struct Day {
@@ -58,18 +58,8 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
 
         let keypad_size = Vector::new(3, 4);
-        let mut raw_keypad: VectorMap<Key> = VectorMap::new(keypad_size);
-        raw_keypad.insert(Vector::new(0, 0), Key::Number(7));
-        raw_keypad.insert(Vector::new(1, 0), Key::Number(8));
-        raw_keypad.insert(Vector::new(2, 0), Key::Number(9));
-        raw_keypad.insert(Vector::new(0, 1), Key::Number(4));
-        raw_keypad.insert(Vector::new(1, 1), Key::Number(5));
-        raw_keypad.insert(Vector::new(2, 1), Key::Number(6));
-        raw_keypad.insert(Vector::new(0, 2), Key::Number(1));
-        raw_keypad.insert(Vector::new(1, 2), Key::Number(2));
-        raw_keypad.insert(Vector::new(2, 2), Key::Number(3));
-        raw_keypad.insert(Vector::new(1, 3), Key::Number(0));
-        raw_keypad.insert(Vector::new(2, 3), Key::Enter);
+        let mut blank: VectorSet = VectorSet::new(keypad_size);
+        blank.insert(Vector::new(0, 3));
 
         let mut keypad = HashMap::new();
         let mut keys = Vec::new();
@@ -86,7 +76,7 @@ impl crate::solution::Solution<i64, i64> for Day {
                 while let Some((pos, mut path)) = deque.pop_front() {
                     if !pos.contained_in(Vector::zero(), keypad_size)
                         || !visited.insert(pos).unwrap()
-                        || !raw_keypad.contains(pos)
+                        || blank.contains(pos)
                     {
                         continue;
                     }
@@ -107,12 +97,8 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
 
         let arrowpad_size = Vector::new(3, 2);
-        let mut raw_arrows: VectorMap<Input> = VectorMap::new(arrowpad_size);
-        raw_arrows.insert(Vector::new(1, 0), Input::Up);
-        raw_arrows.insert(Vector::new(2, 0), Input::Enter);
-        raw_arrows.insert(Vector::new(0, 1), Input::Left);
-        raw_arrows.insert(Vector::new(1, 1), Input::Down);
-        raw_arrows.insert(Vector::new(2, 1), Input::Right);
+        let mut blank: VectorSet = VectorSet::new(arrowpad_size);
+        blank.insert(Vector::new(0, 0));
 
         let mut arrowpad = HashMap::new();
         let arrows = [
@@ -133,7 +119,7 @@ impl crate::solution::Solution<i64, i64> for Day {
                 while let Some((pos, mut path)) = deque.pop_front() {
                     if !pos.contained_in(Vector::zero(), arrowpad_size)
                         || !visited.insert(pos).unwrap()
-                        || !raw_arrows.contains(pos)
+                        || blank.contains(pos)
                     {
                         continue;
                     }
@@ -198,7 +184,7 @@ impl crate::solution::Solution<i64, i64> for Day {
                     .collect::<Vec<_>>()
                     .join("")
             );
-            println!("{:?}", inputs.len());
+            println!("{:?} * {number}", inputs.len());
         }
         Some(counts.iter().sum())
     }
