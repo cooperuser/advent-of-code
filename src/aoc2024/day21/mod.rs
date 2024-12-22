@@ -1,12 +1,6 @@
-use std::{
-    collections::{HashMap, VecDeque},
-    fmt::Display,
-};
+use std::{collections::HashMap, fmt::Display};
 
-use crate::{
-    direction::Direction,
-    vector::{Vector, VectorSet},
-};
+use crate::{direction::Direction, vector::Vector};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -30,19 +24,6 @@ enum Input {
     Right,
     Enter,
 }
-
-const DIRS: [Direction; 4] = [
-    Direction::East,
-    Direction::North,
-    Direction::South,
-    Direction::West,
-];
-const DIRS2: [Direction; 4] = [
-    Direction::North,
-    Direction::South,
-    Direction::East,
-    Direction::West,
-];
 
 impl crate::solution::Solution<i64, i64> for Day {
     fn meta() -> crate::solution::Meta<i64, i64> {
@@ -69,16 +50,6 @@ impl crate::solution::Solution<i64, i64> for Day {
             codes.push(input);
         }
 
-        // let dirs: Vec<_> = DIRS.iter().permutations(4).collect();
-        // println!("{:?}", dirs[17]);
-        // println!("{:?}", dirs[21]);
-        // println!("{:?}", dirs[23]);
-        // let dirs = dirs[17].clone(); // 17, 21, 23
-
-        let keypad_size = Vector::new(3, 4);
-        let mut blank: VectorSet = VectorSet::new(keypad_size);
-        blank.insert(Vector::new(0, 3));
-
         let mut keypad = HashMap::new();
         let mut keys = Vec::new();
         keys.push(Key::Enter);
@@ -88,36 +59,12 @@ impl crate::solution::Solution<i64, i64> for Day {
             let start_pos = Self::key_to_pos(start);
             for &end in &keys {
                 let end_pos = Self::key_to_pos(end);
-                let mut deque: VecDeque<(Vector, Vec<Input>)> =
-                    VecDeque::from([(start_pos, Vec::new())]);
-                let mut visited = VectorSet::new(keypad_size);
-                while let Some((pos, mut path)) = deque.pop_front() {
-                    if !pos.contained_in(Vector::zero(), keypad_size)
-                        || !visited.insert(pos).unwrap()
-                        || blank.contains(pos)
-                    {
-                        continue;
-                    }
-
-                    if pos == end_pos {
-                        path.push(Input::Enter);
-                        keypad.insert((start, end), path);
-                        break;
-                    }
-
-                    let last_row = start_pos.y == 3 || end_pos.y == 3;
-                    for dir in if last_row { DIRS } else { DIRS2 } {
-                        let mut path = path.clone();
-                        path.push(dir.into());
-                        deque.push_back((pos + dir, path));
-                    }
-                }
+                keypad.insert(
+                    (start, end),
+                    Self::get_path(start_pos, end_pos, Vector::new(0, 3)),
+                );
             }
         }
-
-        let arrowpad_size = Vector::new(3, 2);
-        let mut blank: VectorSet = VectorSet::new(arrowpad_size);
-        blank.insert(Vector::new(0, 0));
 
         let mut arrowpad = HashMap::new();
         let arrows = [
@@ -132,30 +79,10 @@ impl crate::solution::Solution<i64, i64> for Day {
             let start_pos = Self::arrow_to_pos(start);
             for &end in &arrows {
                 let end_pos = Self::arrow_to_pos(end);
-                let mut deque: VecDeque<(Vector, Vec<Input>)> =
-                    VecDeque::from([(start_pos, Vec::new())]);
-                let mut visited = VectorSet::new(arrowpad_size);
-                while let Some((pos, mut path)) = deque.pop_front() {
-                    if !pos.contained_in(Vector::zero(), arrowpad_size)
-                        || !visited.insert(pos).unwrap()
-                        || blank.contains(pos)
-                    {
-                        continue;
-                    }
-
-                    if pos == end_pos {
-                        path.push(Input::Enter);
-                        arrowpad.insert((start, end), path);
-                        break;
-                    }
-
-                    let last_row = start_pos.y == 0 || end_pos.y == 0;
-                    for dir in if last_row { DIRS } else { DIRS2 } {
-                        let mut path = path.clone();
-                        path.push(dir.into());
-                        deque.push_back((pos + dir, path));
-                    }
-                }
+                arrowpad.insert(
+                    (start, end),
+                    Self::get_path(start_pos, end_pos, Vector::new(0, 0)),
+                );
             }
         }
 
@@ -168,39 +95,27 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        // let mut keys = Vec::new();
-        // keys.push(Key::Enter);
-        // keys.extend((0..=9).map(Key::Number));
-        // for &a in &keys {
-        //     for &b in &keys {
-        //         println!(
-        //             "{:?} -> {:?}: {:?}",
-        //             a,
-        //             b,
-        //             self.keypad
-        //                 .get(&(a, b))
-        //                 .unwrap()
-        //                 .iter()
-        //                 .map(|s| s.to_string())
-        //                 .collect::<Vec<_>>()
-        //                 .join("")
-        //         );
-        //     }
-        //     println!();
-        // }
-
         let mut counts: Vec<i64> = Vec::new();
         for code in &self.codes {
             let length = self.get_code_length(code, 2);
             let number = Self::get_code_number(code);
-            println!("{length} * {number}");
             counts.push(length * number);
         }
         Some(counts.iter().sum())
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        if self.codes[0][0] == Key::Number(0) {
+            return Some(0);
+        }
+
+        let mut counts: Vec<i64> = Vec::new();
+        for code in &self.codes {
+            let length = self.get_code_length(code, 25);
+            let number = Self::get_code_number(code);
+            counts.push(length * number);
+        }
+        Some(counts.iter().sum())
     }
 }
 
@@ -221,14 +136,6 @@ impl Day {
             }
             inputs = next;
         }
-        println!(
-            "{}",
-            inputs
-                .iter()
-                .map(|s| s.to_string())
-                .collect::<Vec<_>>()
-                .join("")
-        );
         inputs.len() as i64
     }
 
@@ -251,23 +158,6 @@ impl Day {
         }
     }
 
-    fn pos_to_key(value: Vector) -> Key {
-        match (value.x, value.y) {
-            (0, 0) => Key::Number(7),
-            (1, 0) => Key::Number(8),
-            (2, 0) => Key::Number(9),
-            (0, 1) => Key::Number(4),
-            (1, 1) => Key::Number(5),
-            (2, 1) => Key::Number(6),
-            (0, 2) => Key::Number(1),
-            (1, 2) => Key::Number(2),
-            (2, 2) => Key::Number(3),
-            (1, 3) => Key::Number(0),
-            (2, 3) => Key::Enter,
-            _ => panic!(),
-        }
-    }
-
     fn arrow_to_pos(value: Input) -> Vector {
         match value {
             Input::Up => Vector::new(1, 0),
@@ -278,15 +168,39 @@ impl Day {
         }
     }
 
-    fn pos_to_arrow(value: Vector) -> Input {
-        match (value.x, value.y) {
-            (1, 0) => Input::Up,
-            (2, 0) => Input::Enter,
-            (0, 1) => Input::Left,
-            (1, 1) => Input::Down,
-            (2, 1) => Input::Right,
-            _ => panic!(),
+    fn get_path(start: Vector, end: Vector, blank: Vector) -> Vec<Input> {
+        let mut path = Vec::new();
+        let diff = end - start;
+        let vertical: Vec<Input> = [
+            [Input::Down].repeat(diff.y.max(0) as usize),
+            [Input::Up].repeat((-diff.y).max(0) as usize),
+        ]
+        .iter()
+        .flatten()
+        .cloned()
+        .collect();
+        let horizontal: Vec<Input> = [
+            [Input::Right].repeat(diff.x.max(0) as usize),
+            [Input::Left].repeat((-diff.x).max(0) as usize),
+        ]
+        .iter()
+        .flatten()
+        .cloned()
+        .collect();
+
+        if diff.x > 0 && Vector::new(start.x, end.y) != blank {
+            path.extend(vertical);
+            path.extend(horizontal);
+        } else if Vector::new(end.x, start.y) != blank {
+            path.extend(horizontal);
+            path.extend(vertical);
+        } else if Vector::new(start.x, end.y) != blank {
+            path.extend(vertical);
+            path.extend(horizontal);
         }
+
+        path.push(Input::Enter);
+        path
     }
 }
 
