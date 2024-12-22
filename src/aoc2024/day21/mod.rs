@@ -1,11 +1,10 @@
-use core::panic;
 use std::{
     collections::{HashMap, VecDeque},
     fmt::Display,
 };
 
 use crate::{
-    direction::{Direction, DIRS},
+    direction::Direction,
     vector::{Vector, VectorSet},
 };
 
@@ -32,6 +31,19 @@ enum Input {
     Enter,
 }
 
+const DIRS: [Direction; 4] = [
+    Direction::East,
+    Direction::North,
+    Direction::South,
+    Direction::West,
+];
+const DIRS2: [Direction; 4] = [
+    Direction::North,
+    Direction::South,
+    Direction::East,
+    Direction::West,
+];
+
 impl crate::solution::Solution<i64, i64> for Day {
     fn meta() -> crate::solution::Meta<i64, i64> {
         crate::solution::Meta::<i64, i64> {
@@ -56,6 +68,12 @@ impl crate::solution::Solution<i64, i64> for Day {
             }
             codes.push(input);
         }
+
+        // let dirs: Vec<_> = DIRS.iter().permutations(4).collect();
+        // println!("{:?}", dirs[17]);
+        // println!("{:?}", dirs[21]);
+        // println!("{:?}", dirs[23]);
+        // let dirs = dirs[17].clone(); // 17, 21, 23
 
         let keypad_size = Vector::new(3, 4);
         let mut blank: VectorSet = VectorSet::new(keypad_size);
@@ -87,7 +105,8 @@ impl crate::solution::Solution<i64, i64> for Day {
                         break;
                     }
 
-                    for dir in DIRS {
+                    let last_row = start_pos.y == 3 || end_pos.y == 3;
+                    for dir in if last_row { DIRS } else { DIRS2 } {
                         let mut path = path.clone();
                         path.push(dir.into());
                         deque.push_back((pos + dir, path));
@@ -130,7 +149,8 @@ impl crate::solution::Solution<i64, i64> for Day {
                         break;
                     }
 
-                    for dir in DIRS {
+                    let last_row = start_pos.y == 0 || end_pos.y == 0;
+                    for dir in if last_row { DIRS } else { DIRS2 } {
                         let mut path = path.clone();
                         path.push(dir.into());
                         deque.push_back((pos + dir, path));
@@ -148,43 +168,33 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut number_pos = Key::Enter;
-        let mut arrow_a = Input::Enter;
-        let mut arrow_b = Input::Enter;
+        // let mut keys = Vec::new();
+        // keys.push(Key::Enter);
+        // keys.extend((0..=9).map(Key::Number));
+        // for &a in &keys {
+        //     for &b in &keys {
+        //         println!(
+        //             "{:?} -> {:?}: {:?}",
+        //             a,
+        //             b,
+        //             self.keypad
+        //                 .get(&(a, b))
+        //                 .unwrap()
+        //                 .iter()
+        //                 .map(|s| s.to_string())
+        //                 .collect::<Vec<_>>()
+        //                 .join("")
+        //         );
+        //     }
+        //     println!();
+        // }
+
         let mut counts: Vec<i64> = Vec::new();
         for code in &self.codes {
-            let mut inputs: Vec<Input> = Vec::new();
-            for &key in code {
-                for &arrow in self.keypad.get(&(number_pos, key)).unwrap() {
-                    for &arrow in self.arrowpad.get(&(arrow_a, arrow)).unwrap() {
-                        inputs.extend(self.arrowpad.get(&(arrow_b, arrow)).unwrap());
-                        arrow_b = arrow;
-                    }
-                    arrow_a = arrow;
-                }
-                number_pos = key;
-            }
-            let mut number = 0;
-            for (i, &key) in code[0..code.len() - 1].iter().enumerate() {
-                let Key::Number(n) = key else {
-                    continue;
-                };
-                number += 10i64.pow((code.len() - i - 2) as u32) * n as i64;
-            }
-            counts.push(inputs.len() as i64 * number);
-            println!(
-                "{}: {}",
-                code.iter()
-                    .map(|s| s.to_string())
-                    .collect::<Vec<_>>()
-                    .join(""),
-                inputs
-                    .iter()
-                    .map(|s| s.to_string())
-                    .collect::<Vec<_>>()
-                    .join("")
-            );
-            println!("{:?} * {number}", inputs.len());
+            let length = self.get_code_length(code, 2);
+            let number = Self::get_code_number(code);
+            println!("{length} * {number}");
+            counts.push(length * number);
         }
         Some(counts.iter().sum())
     }
@@ -195,6 +205,44 @@ impl crate::solution::Solution<i64, i64> for Day {
 }
 
 impl Day {
+    fn get_code_length(&self, code: &[Key], arrowpads: usize) -> i64 {
+        let mut number_pos = Key::Enter;
+        let mut arrows = vec![Input::Enter; arrowpads];
+        let mut inputs: Vec<Input> = Vec::new();
+        for &key in code {
+            inputs.extend(self.keypad.get(&(number_pos, key)).unwrap());
+            number_pos = key;
+        }
+        for arrow in &mut arrows {
+            let mut next: Vec<Input> = Vec::new();
+            for input in inputs {
+                next.extend(self.arrowpad.get(&(*arrow, input)).unwrap());
+                *arrow = input;
+            }
+            inputs = next;
+        }
+        println!(
+            "{}",
+            inputs
+                .iter()
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>()
+                .join("")
+        );
+        inputs.len() as i64
+    }
+
+    fn get_code_number(code: &[Key]) -> i64 {
+        let mut number = 0;
+        for (i, &key) in code[0..code.len() - 1].iter().enumerate() {
+            let Key::Number(n) = key else {
+                continue;
+            };
+            number += 10i64.pow((code.len() - i - 2) as u32) * n as i64;
+        }
+        number
+    }
+
     fn key_to_pos(value: Key) -> Vector {
         match value {
             Key::Enter => Vector::new(2, 3),
@@ -283,3 +331,54 @@ impl Display for Key {
 }
 
 crate::solution::test_solution!();
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::solution::Solution;
+
+    #[test]
+    fn a() {
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.input));
+        let code = [Key::Number(0), Key::Number(2), Key::Number(9), Key::Enter];
+        let answer = solution.get_code_length(&code, 2);
+        assert_eq!(68, answer);
+    }
+
+    #[test]
+    fn b() {
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.input));
+        let code = [Key::Number(9), Key::Number(8), Key::Number(0), Key::Enter];
+        let answer = solution.get_code_length(&code, 2);
+        assert_eq!(60, answer);
+    }
+
+    #[test]
+    fn c() {
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.input));
+        let code = [Key::Number(1), Key::Number(7), Key::Number(9), Key::Enter];
+        let answer = solution.get_code_length(&code, 2);
+        assert_eq!(68, answer);
+    }
+
+    #[test]
+    fn d() {
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.input));
+        let code = [Key::Number(4), Key::Number(5), Key::Number(6), Key::Enter];
+        let answer = solution.get_code_length(&code, 2);
+        assert_eq!(64, answer);
+    }
+
+    #[test]
+    fn e() {
+        let meta = Day::meta();
+        let solution = Day::new(crate::split(meta.input));
+        let code = [Key::Number(3), Key::Number(7), Key::Number(9), Key::Enter];
+        let answer = solution.get_code_length(&code, 2);
+        assert_eq!(64, answer);
+    }
+}
