@@ -5,6 +5,8 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::ops::{Add, AddAssign};
 
+use itertools::Itertools;
+
 #[derive(Clone)]
 pub struct Graph<V, E>
 where
@@ -75,6 +77,11 @@ where
         self.map.get(a).unwrap().contains_key(b)
     }
 
+    #[allow(dead_code)]
+    pub fn nodes(&self) -> HashSet<V> {
+        self.map.keys().cloned().collect()
+    }
+
     pub fn edges(&self, node: &V) -> HashMap<V, E> {
         self.map.get(node).unwrap().clone()
     }
@@ -111,6 +118,49 @@ where
             }
         }
         visited.len()
+    }
+
+    pub fn is_clique(&self, nodes: &[V]) -> bool {
+        for (i, a) in nodes.iter().enumerate() {
+            for b in nodes.iter().skip(i + 1) {
+                if !self.contains_edge(a, b) {
+                    return false;
+                }
+            }
+        }
+        true
+    }
+
+    pub fn get_cliques(&self, size: usize) -> Vec<Vec<V>> {
+        let mut sets = Vec::new();
+        for set in self.map.keys().combinations(size) {
+            let mut clique: Vec<V> = Vec::new();
+            for s in set {
+                clique.push(s.clone());
+            }
+            if self.is_clique(&clique) {
+                sets.push(clique);
+            }
+        }
+        sets
+    }
+
+    pub fn get_containing_cliques(&self, clique: &HashSet<V>) -> Vec<HashSet<V>> {
+        let mut cliques = Vec::new();
+        'node: for a in self.map.keys() {
+            if clique.contains(a) {
+                continue;
+            }
+            for b in clique {
+                if !self.contains_edge(a, b) {
+                    continue 'node;
+                }
+            }
+            let mut new = clique.clone();
+            new.insert(a.clone());
+            cliques.push(new);
+        }
+        cliques
     }
 
     /// Calculate which edges to cut to form two unconnected subgraphs.
