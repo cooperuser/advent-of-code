@@ -95,23 +95,23 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut counts: Vec<i64> = Vec::new();
+        let mut sum = 0;
         for code in &self.codes {
             let length = self.get_code_length(code, 2);
             let number = Self::get_code_number(code);
-            counts.push(length * number);
+            sum += length * number;
         }
-        Some(counts.iter().sum())
+        Some(sum)
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut counts: Vec<i64> = Vec::new();
+        let mut sum = 0;
         for code in &self.codes {
             let length = self.get_code_length(code, 25);
             let number = Self::get_code_number(code);
-            counts.push(length * number);
+            sum += length * number;
         }
-        Some(counts.iter().sum())
+        Some(sum)
     }
 }
 
