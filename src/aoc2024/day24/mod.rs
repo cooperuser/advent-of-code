@@ -119,19 +119,14 @@ impl Day {
     }
 
     fn get_number(wires: &HashMap<String, bool>, prefix: &str) -> i64 {
-        let mut output = 0;
-        for (_, b) in wires
+        let number = wires
             .iter()
             .filter(|(s, _)| s.starts_with(prefix))
             .sorted_by_key(|(s, _)| *s)
+            .map(|(_, v)| if *v { 1 } else { 0 })
             .rev()
-        {
-            output <<= 1;
-            if *b {
-                output |= 1;
-            }
-        }
-        output
+            .join("");
+        i64::from_str_radix(&number, 2).unwrap()
     }
 
     fn is_base(wire: &str) -> bool {
