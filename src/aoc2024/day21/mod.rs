@@ -32,7 +32,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 126384,
-            answer_b: 0,
+            answer_b: 154115708116294,
         }
     }
 
@@ -105,10 +105,6 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        if self.codes[0][0] == Key::Number(0) {
-            return Some(0);
-        }
-
         let mut counts: Vec<i64> = Vec::new();
         for code in &self.codes {
             let length = self.get_code_length(code, 25);
@@ -122,21 +118,32 @@ impl crate::solution::Solution<i64, i64> for Day {
 impl Day {
     fn get_code_length(&self, code: &[Key], arrowpads: usize) -> i64 {
         let mut number_pos = Key::Enter;
-        let mut arrows = vec![Input::Enter; arrowpads];
-        let mut inputs: Vec<Input> = Vec::new();
+        let mut inputs: HashMap<(Input, Input), i64> = HashMap::new();
         for &key in code {
-            inputs.extend(self.keypad.get(&(number_pos, key)).unwrap());
+            let mut pos = Input::Enter;
+            let path = self.keypad.get(&(number_pos, key)).unwrap();
+            for &input in path {
+                *inputs.entry((pos, input)).or_default() += 1;
+                pos = input;
+            }
             number_pos = key;
         }
-        for arrow in &mut arrows {
-            let mut next: Vec<Input> = Vec::new();
-            for input in inputs {
-                next.extend(self.arrowpad.get(&(*arrow, input)).unwrap());
-                *arrow = input;
+
+        for _ in 0..arrowpads {
+            let mut next: HashMap<(Input, Input), i64> = HashMap::new();
+            for ((a, b), count) in inputs {
+                let path = self.arrowpad.get(&(a, b)).unwrap();
+                let mut arrow = *path.first().unwrap();
+                *next.entry((Input::Enter, arrow)).or_default() += count;
+                for &input in path.iter().skip(1) {
+                    *next.entry((arrow, input)).or_default() += count;
+                    arrow = input;
+                }
             }
             inputs = next;
         }
-        inputs.len() as i64
+
+        inputs.values().sum()
     }
 
     fn get_code_number(code: &[Key]) -> i64 {
