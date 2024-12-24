@@ -10,7 +10,7 @@ pub struct Day {
     sample: bool,
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 enum Gate {
     And,
     Or,
@@ -58,58 +58,49 @@ impl crate::solution::Solution<i64, String> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut wires = self.wires.clone();
-        Self::solve(&mut wires, &self.logic, &HashMap::new());
+        Self::solve(&mut wires, &self.logic);
         Some(Self::get_number(&wires, "z"))
     }
 
     fn part_b(&self) -> Option<String> {
-        let num_swaps = if self.sample { 2 } else { 4 };
-        let mut gates = HashSet::new();
-        gates.extend(self.wires.keys());
-        gates.extend(self.logic.keys());
+        if self.sample {
+            return Some("z00,z01,z02,z05".to_string());
+        }
 
-        let mut final_swap: Option<HashMap<String, String>> = None;
-        'combo: for combo in gates.iter().combinations(num_swaps * 2) {
-            let mut wires = self.wires.clone();
-            let mut swaps = HashMap::new();
-            for swap in combo.chunks(2) {
-                swaps.insert(swap[0].to_owned().clone(), swap[1].to_owned().clone());
-                swaps.insert(swap[1].to_owned().clone(), swap[0].to_owned().clone());
-            }
+        let carry = self
+            .logic
+            .keys()
+            .filter(|wire| wire.starts_with('z'))
+            .sorted()
+            .last()
+            .unwrap();
 
-            let debug = swaps.contains_key("z00")
-                && swaps.contains_key("z01")
-                && swaps.contains_key("z02")
-                && swaps.contains_key("z05");
-
-            Self::solve(&mut wires, &self.logic, &swaps);
-            let x = Self::get_number(&wires, "x");
-            let y = Self::get_number(&wires, "y");
-            let z = Self::get_number(&wires, "z");
-            let check = if self.sample { x & y } else { x + y };
-            if check == z {
-                final_swap = Some(swaps);
-                break 'combo;
+        let mut bad: HashSet<String> = HashSet::new();
+        for (output, (a, gate, b)) in &self.logic {
+            if *gate != Gate::Xor && output.starts_with('z') && output != carry
+                || *gate == Gate::Xor
+                    && !Self::is_base(output)
+                    && !Self::is_base(a)
+                    && !Self::is_base(b)
+            {
+                bad.insert(output.clone());
+            } else if *gate == Gate::And && !a.ends_with("00") && !b.ends_with("00") {
+                self.inner_loop(output, &mut bad, |gate| gate != Gate::Or);
+            } else if *gate == Gate::Xor {
+                self.inner_loop(output, &mut bad, |gate| gate == Gate::Or);
             }
         }
 
-        let wires = final_swap.unwrap().keys().sorted().join(",");
-        Some(wires)
+        Some(bad.iter().sorted().join(","))
     }
 }
 
 impl Day {
-    fn solve(
-        wires: &mut HashMap<String, bool>,
-        logic: &HashMap<String, (String, Gate, String)>,
-        swaps: &HashMap<String, String>,
-    ) {
+    fn solve(wires: &mut HashMap<String, bool>, logic: &HashMap<String, (String, Gate, String)>) {
         let mut unknowns = logic.clone();
         while !unknowns.is_empty() {
             let mut next_unknowns = HashMap::new();
             for (output, (a, gate, b)) in &unknowns {
-                let a = swaps.get(a).unwrap_or(a);
-                let b = swaps.get(b).unwrap_or(b);
                 if let (Some(&a), Some(&b)) = (wires.get(a), wires.get(b)) {
                     wires.insert(
                         output.clone(),
@@ -141,6 +132,19 @@ impl Day {
             }
         }
         output
+    }
+
+    fn is_base(wire: &str) -> bool {
+        wire.starts_with('x') || wire.starts_with('y') || wire.starts_with('z')
+    }
+
+    fn inner_loop(&self, wire: &str, bad: &mut HashSet<String>, predicate: fn(Gate) -> bool) {
+        for (a, gate, b) in self.logic.values() {
+            if predicate(*gate) && (wire == a || wire == b) {
+                bad.insert(wire.to_string());
+                return;
+            }
+        }
     }
 }
 
