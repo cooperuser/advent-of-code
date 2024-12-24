@@ -1,10 +1,13 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+use itertools::Itertools;
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
     wires: HashMap<String, bool>,
     logic: HashMap<String, (String, Gate, String)>,
+    sample: bool,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -49,21 +52,70 @@ impl crate::solution::Solution<i64, String> for Day {
             raw: raw.clone(),
             wires: wires_map,
             logic: logic_map,
+            sample: wires.len() < 15,
         }
     }
 
     fn part_a(&self) -> Option<i64> {
         let mut wires = self.wires.clone();
-        let mut unknowns = self.logic.clone();
+        Self::solve(&mut wires, &self.logic, &HashMap::new());
+        Some(Self::get_number(&wires, "z"))
+    }
+
+    fn part_b(&self) -> Option<String> {
+        let num_swaps = if self.sample { 2 } else { 4 };
+        let mut gates = HashSet::new();
+        gates.extend(self.wires.keys());
+        gates.extend(self.logic.keys());
+
+        let mut final_swap: Option<HashMap<String, String>> = None;
+        'combo: for combo in gates.iter().combinations(num_swaps * 2) {
+            let mut wires = self.wires.clone();
+            let mut swaps = HashMap::new();
+            for swap in combo.chunks(2) {
+                swaps.insert(swap[0].to_owned().clone(), swap[1].to_owned().clone());
+                swaps.insert(swap[1].to_owned().clone(), swap[0].to_owned().clone());
+            }
+
+            let debug = swaps.contains_key("z00")
+                && swaps.contains_key("z01")
+                && swaps.contains_key("z02")
+                && swaps.contains_key("z05");
+
+            Self::solve(&mut wires, &self.logic, &swaps);
+            let x = Self::get_number(&wires, "x");
+            let y = Self::get_number(&wires, "y");
+            let z = Self::get_number(&wires, "z");
+            let check = if self.sample { x & y } else { x + y };
+            if check == z {
+                final_swap = Some(swaps);
+                break 'combo;
+            }
+        }
+
+        let wires = final_swap.unwrap().keys().sorted().join(",");
+        Some(wires)
+    }
+}
+
+impl Day {
+    fn solve(
+        wires: &mut HashMap<String, bool>,
+        logic: &HashMap<String, (String, Gate, String)>,
+        swaps: &HashMap<String, String>,
+    ) {
+        let mut unknowns = logic.clone();
         while !unknowns.is_empty() {
             let mut next_unknowns = HashMap::new();
             for (output, (a, gate, b)) in &unknowns {
+                let a = swaps.get(a).unwrap_or(a);
+                let b = swaps.get(b).unwrap_or(b);
                 if let (Some(&a), Some(&b)) = (wires.get(a), wires.get(b)) {
                     wires.insert(
                         output.clone(),
                         match gate {
-                            Gate::And => a && b,
-                            Gate::Or => a || b,
+                            Gate::And => a & b,
+                            Gate::Or => a | b,
                             Gate::Xor => a ^ b,
                         },
                     );
@@ -73,24 +125,22 @@ impl crate::solution::Solution<i64, String> for Day {
             }
             unknowns = next_unknowns;
         }
+    }
 
-        let mut z: Vec<_> = wires.keys().filter(|s| s.starts_with("z")).collect();
-        z.sort();
-        z.reverse();
-
+    fn get_number(wires: &HashMap<String, bool>, prefix: &str) -> i64 {
         let mut output = 0;
-        for z in z {
+        for (_, b) in wires
+            .iter()
+            .filter(|(s, _)| s.starts_with(prefix))
+            .sorted_by_key(|(s, _)| *s)
+            .rev()
+        {
             output <<= 1;
-            if *wires.get(z).unwrap() {
+            if *b {
                 output |= 1;
             }
         }
-
-        Some(output)
-    }
-
-    fn part_b(&self) -> Option<String> {
-        None
+        output
     }
 }
 
