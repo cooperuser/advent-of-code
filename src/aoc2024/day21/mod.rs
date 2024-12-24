@@ -5,13 +5,13 @@ use crate::vector::Vector;
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    codes: Vec<Vec<Key>>,
-    keypad: HashMap<(Key, Key), Vec<Input>>,
+    codes: Vec<Vec<Number>>,
+    numberpad: HashMap<(Number, Number), Vec<Input>>,
     arrowpad: HashMap<(Input, Input), Vec<Input>>,
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-enum Key {
+enum Number {
     Number(usize),
     Enter,
 }
@@ -42,24 +42,24 @@ impl crate::solution::Solution<i64, i64> for Day {
             let mut input = Vec::new();
             for c in line.chars() {
                 input.push(match c {
-                    '0'..='9' => Key::Number(c as usize - '0' as usize),
-                    'A' => Key::Enter,
+                    '0'..='9' => Number::Number(c as usize - '0' as usize),
+                    'A' => Number::Enter,
                     _ => panic!(),
                 });
             }
             codes.push(input);
         }
 
-        let mut keypad = HashMap::new();
-        let mut keys = Vec::new();
-        keys.push(Key::Enter);
-        keys.extend((0..=9).map(Key::Number));
+        let mut numberpad = HashMap::new();
+        let mut numbers = Vec::new();
+        numbers.push(Number::Enter);
+        numbers.extend((0..=9).map(Number::Number));
 
-        for &start in &keys {
+        for &start in &numbers {
             let start_pos = Self::key_to_pos(start);
-            for &end in &keys {
+            for &end in &numbers {
                 let end_pos = Self::key_to_pos(end);
-                keypad.insert(
+                numberpad.insert(
                     (start, end),
                     Self::get_path(start_pos, end_pos, Vector::new(0, 3)),
                 );
@@ -89,7 +89,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         Self {
             raw: raw.clone(),
             codes,
-            keypad,
+            numberpad,
             arrowpad,
         }
     }
@@ -116,13 +116,13 @@ impl crate::solution::Solution<i64, i64> for Day {
 }
 
 impl Day {
-    fn get_code_length(&self, code: &[Key], arrowpads: usize) -> i64 {
+    fn get_code_length(&self, code: &[Number], arrowpads: usize) -> i64 {
         let mut inputs: HashMap<(Input, Input), i64> = HashMap::new();
 
-        let mut number = Key::Enter;
+        let mut number = Number::Enter;
         for &key in code {
             let mut arrow = Input::Enter;
-            for &input in self.keypad.get(&(number, key)).unwrap() {
+            for &input in self.numberpad.get(&(number, key)).unwrap() {
                 *inputs.entry((arrow, input)).or_default() += 1;
                 arrow = input;
             }
@@ -144,10 +144,10 @@ impl Day {
         inputs.values().sum()
     }
 
-    fn get_code_number(code: &[Key]) -> i64 {
+    fn get_code_number(code: &[Number]) -> i64 {
         let mut number = 0;
         for (i, &key) in code[0..code.len() - 1].iter().enumerate() {
-            let Key::Number(n) = key else {
+            let Number::Number(n) = key else {
                 continue;
             };
             number += 10i64.pow((code.len() - i - 2) as u32) * n as i64;
@@ -155,11 +155,11 @@ impl Day {
         number
     }
 
-    fn key_to_pos(value: Key) -> Vector {
+    fn key_to_pos(value: Number) -> Vector {
         match value {
-            Key::Enter => Vector::new(2, 3),
-            Key::Number(0) => Vector::new(1, 3),
-            Key::Number(n) => Vector::new_usize((n - 1) % 3, 2 - (n - 1) / 3),
+            Number::Enter => Vector::new(2, 3),
+            Number::Number(0) => Vector::new(1, 3),
+            Number::Number(n) => Vector::new_usize((n - 1) % 3, 2 - (n - 1) / 3),
         }
     }
 
@@ -225,14 +225,14 @@ impl Display for Input {
     }
 }
 
-impl Display for Key {
+impl Display for Number {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
             "{}",
             match self {
-                Key::Number(n) => format!("{}", n),
-                Key::Enter => "A".to_string(),
+                Number::Number(n) => format!("{}", n),
+                Number::Enter => "A".to_string(),
             }
         )
     }
@@ -249,7 +249,12 @@ mod test {
     fn a() {
         let meta = Day::meta();
         let solution = Day::new(crate::split(meta.input));
-        let code = [Key::Number(0), Key::Number(2), Key::Number(9), Key::Enter];
+        let code = [
+            Number::Number(0),
+            Number::Number(2),
+            Number::Number(9),
+            Number::Enter,
+        ];
         let answer = solution.get_code_length(&code, 2);
         assert_eq!(68, answer);
     }
@@ -258,7 +263,12 @@ mod test {
     fn b() {
         let meta = Day::meta();
         let solution = Day::new(crate::split(meta.input));
-        let code = [Key::Number(9), Key::Number(8), Key::Number(0), Key::Enter];
+        let code = [
+            Number::Number(9),
+            Number::Number(8),
+            Number::Number(0),
+            Number::Enter,
+        ];
         let answer = solution.get_code_length(&code, 2);
         assert_eq!(60, answer);
     }
@@ -267,7 +277,12 @@ mod test {
     fn c() {
         let meta = Day::meta();
         let solution = Day::new(crate::split(meta.input));
-        let code = [Key::Number(1), Key::Number(7), Key::Number(9), Key::Enter];
+        let code = [
+            Number::Number(1),
+            Number::Number(7),
+            Number::Number(9),
+            Number::Enter,
+        ];
         let answer = solution.get_code_length(&code, 2);
         assert_eq!(68, answer);
     }
@@ -276,7 +291,12 @@ mod test {
     fn d() {
         let meta = Day::meta();
         let solution = Day::new(crate::split(meta.input));
-        let code = [Key::Number(4), Key::Number(5), Key::Number(6), Key::Enter];
+        let code = [
+            Number::Number(4),
+            Number::Number(5),
+            Number::Number(6),
+            Number::Enter,
+        ];
         let answer = solution.get_code_length(&code, 2);
         assert_eq!(64, answer);
     }
@@ -285,7 +305,12 @@ mod test {
     fn e() {
         let meta = Day::meta();
         let solution = Day::new(crate::split(meta.input));
-        let code = [Key::Number(3), Key::Number(7), Key::Number(9), Key::Enter];
+        let code = [
+            Number::Number(3),
+            Number::Number(7),
+            Number::Number(9),
+            Number::Enter,
+        ];
         let answer = solution.get_code_length(&code, 2);
         assert_eq!(64, answer);
     }
