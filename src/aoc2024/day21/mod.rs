@@ -1,6 +1,6 @@
 use std::{collections::HashMap, fmt::Display};
 
-use crate::{direction::Direction, vector::Vector};
+use crate::vector::Vector;
 
 pub struct Day {
     #[allow(dead_code)]
@@ -117,25 +117,23 @@ impl crate::solution::Solution<i64, i64> for Day {
 
 impl Day {
     fn get_code_length(&self, code: &[Key], arrowpads: usize) -> i64 {
-        let mut number_pos = Key::Enter;
         let mut inputs: HashMap<(Input, Input), i64> = HashMap::new();
+
+        let mut number = Key::Enter;
         for &key in code {
-            let mut pos = Input::Enter;
-            let path = self.keypad.get(&(number_pos, key)).unwrap();
-            for &input in path {
-                *inputs.entry((pos, input)).or_default() += 1;
-                pos = input;
+            let mut arrow = Input::Enter;
+            for &input in self.keypad.get(&(number, key)).unwrap() {
+                *inputs.entry((arrow, input)).or_default() += 1;
+                arrow = input;
             }
-            number_pos = key;
+            number = key;
         }
 
         for _ in 0..arrowpads {
             let mut next: HashMap<(Input, Input), i64> = HashMap::new();
             for ((a, b), count) in inputs {
-                let path = self.arrowpad.get(&(a, b)).unwrap();
-                let mut arrow = *path.first().unwrap();
-                *next.entry((Input::Enter, arrow)).or_default() += count;
-                for &input in path.iter().skip(1) {
+                let mut arrow = Input::Enter;
+                for &input in self.arrowpad.get(&(a, b)).unwrap() {
                     *next.entry((arrow, input)).or_default() += count;
                     arrow = input;
                 }
@@ -208,17 +206,6 @@ impl Day {
 
         path.push(Input::Enter);
         path
-    }
-}
-
-impl From<Direction> for Input {
-    fn from(value: Direction) -> Self {
-        match value {
-            Direction::North => Self::Up,
-            Direction::South => Self::Down,
-            Direction::East => Self::Right,
-            Direction::West => Self::Left,
-        }
     }
 }
 
