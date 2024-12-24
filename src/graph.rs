@@ -1,9 +1,9 @@
 use std::cmp::Reverse;
-use std::collections::{BinaryHeap, HashMap, HashSet, VecDeque};
+use std::collections::{BTreeSet, BinaryHeap, HashMap, HashSet, VecDeque};
 use std::fmt::Debug;
 
 use std::hash::Hash;
-use std::ops::{Add, AddAssign};
+use std::ops::Add;
 
 use itertools::Itertools;
 
@@ -18,8 +18,8 @@ where
 
 impl<V, E> Graph<V, E>
 where
-    V: Debug + Clone + Eq + Hash,
-    E: Debug + Clone + Copy + Default + Ord + Add<Output = E> + AddAssign,
+    V: Clone + Eq + Hash,
+    E: Clone + Copy,
 {
     pub fn new() -> Self {
         Graph {
@@ -36,9 +36,6 @@ where
 
     #[allow(dead_code)]
     pub fn add_edge(&mut self, a: &V, b: &V, value: E) -> bool {
-        // if a == b {
-        //     return false;
-        // }
         self.map
             .entry(a.clone())
             .or_default()
@@ -57,7 +54,6 @@ where
     #[allow(dead_code)]
     pub fn remove_node(&mut self, node: &V) -> bool {
         for edge in self.map.remove(node).unwrap().keys() {
-            // self.map.get_mut(edge).unwrap().remove(node);
             if let Some(edges) = self.map.get_mut(edge) {
                 edges.remove(node);
             }
@@ -120,6 +116,7 @@ where
         visited.len()
     }
 
+    #[allow(dead_code)]
     pub fn is_clique(&self, nodes: &[V]) -> bool {
         for (i, a) in nodes.iter().enumerate() {
             for b in nodes.iter().skip(i + 1) {
@@ -131,7 +128,8 @@ where
         true
     }
 
-    pub fn get_cliques(&self, size: usize) -> Vec<Vec<V>> {
+    #[allow(dead_code)]
+    pub fn get_cliques_combo(&self, size: usize) -> Vec<Vec<V>> {
         let mut sets = Vec::new();
         for set in self.map.keys().combinations(size) {
             let mut clique: Vec<V> = Vec::new();
@@ -162,7 +160,13 @@ where
         }
         cliques
     }
+}
 
+impl<V, E> Graph<V, E>
+where
+    V: Clone + Eq + Hash,
+    E: Clone + Copy + Default + Ord + Add<Output = E>,
+{
     /// Calculate which edges to cut to form two unconnected subgraphs.
     /// An implementation of the [Stoer-Wagner](https://en.wikipedia.org/wiki/Stoer%E2%80%93Wagner_algorithm) algorithm.
     pub fn minimum_cut(&self) -> Option<Vec<(V, V)>> {
@@ -275,6 +279,37 @@ where
     //         index: 0,
     //     }
     // }
+}
+
+impl<V, E> Graph<V, E>
+where
+    V: Clone + Eq + Hash + Ord,
+    E: Clone + Copy,
+{
+    pub fn get_cliques(&self, size: usize) -> Vec<Vec<V>> {
+        let mut cliques: HashSet<BTreeSet<V>> = HashSet::new();
+        for node in self.nodes() {
+            cliques.insert(BTreeSet::from([node]));
+        }
+
+        for _ in 0..size - 1 {
+            if cliques.is_empty() {
+                break;
+            }
+            let mut next: HashSet<BTreeSet<V>> = HashSet::new();
+            for clique in &cliques {
+                for c in self.get_containing_cliques(&clique.iter().cloned().collect()) {
+                    next.insert(c.iter().cloned().collect());
+                }
+            }
+            cliques = next;
+        }
+
+        cliques
+            .iter()
+            .map(|c| c.iter().cloned().collect())
+            .collect()
+    }
 }
 
 impl<V, E> Graph<V, E>
