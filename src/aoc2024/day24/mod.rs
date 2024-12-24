@@ -29,29 +29,30 @@ impl crate::solution::Solution<i64, String> for Day {
     }
 
     fn new(raw: Vec<String>) -> Self {
-        let mut wires_map = HashMap::new();
-        let mut logic_map = HashMap::new();
         let (wires, logic) = raw.split_once(|line| line.is_empty()).unwrap();
-        for wire in wires {
-            let (name, value) = wire.split_once(": ").unwrap();
-            wires_map.insert(name.to_string(), value == "1");
-        }
-
-        for l in logic {
-            let l: Vec<_> = l.split_whitespace().collect();
-            let gate = match l[1] {
-                "AND" => Gate::And,
-                "OR" => Gate::Or,
-                "XOR" => Gate::Xor,
-                _ => panic!(""),
-            };
-            logic_map.insert(l[4].to_string(), (l[0].to_string(), gate, l[2].to_string()));
-        }
 
         Self {
             raw: raw.clone(),
-            wires: wires_map,
-            logic: logic_map,
+            wires: wires
+                .iter()
+                .map(|wire| {
+                    let (name, value) = wire.split_once(": ").unwrap();
+                    (name.to_string(), value == "1")
+                })
+                .collect(),
+            logic: logic
+                .iter()
+                .map(|line| {
+                    let l: Vec<_> = line.split_whitespace().collect();
+                    let gate = match l[1] {
+                        "AND" => Gate::And,
+                        "OR" => Gate::Or,
+                        "XOR" => Gate::Xor,
+                        _ => panic!("Invalid gate: {}", l[1]),
+                    };
+                    (l[4].to_string(), (l[0].to_string(), gate, l[2].to_string()))
+                })
+                .collect(),
             sample: wires.len() < 15,
         }
     }
