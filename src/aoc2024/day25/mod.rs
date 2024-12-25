@@ -18,13 +18,17 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<String>) -> Self {
-        let blocks: Vec<Vec<Vec<char>>> = raw
-            .split(|line| line.is_empty())
-            .map(|block| block.iter().map(|line| line.chars().collect()).collect())
-            .collect();
+        let blocks = raw.split(|line| line.is_empty()).map(|block| {
+            block
+                .iter()
+                .map(|line| line.chars().collect::<Vec<_>>())
+                .collect::<Vec<_>>()
+        });
         let mut locks = Vec::new();
         let mut keys = Vec::new();
-        for block in &blocks {
+        let mut height: Option<usize> = None;
+        for block in blocks {
+            height = Some(block.len());
             if block[0][0] == '.' {
                 let mut key = Vec::new();
                 for col in 0..block[0].len() {
@@ -53,7 +57,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             raw: raw.clone(),
             locks,
             keys,
-            height: blocks[0].len(),
+            height: height.unwrap(),
         }
     }
 
