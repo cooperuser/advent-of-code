@@ -1,6 +1,12 @@
+use std::collections::HashSet;
+
+use crate::vector::Vector;
+
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
+    locks: Vec<HashSet<Vector>>,
+    keys: Vec<HashSet<Vector>>,
 }
 
 impl crate::solution::Solution<i64, i64> for Day {
@@ -9,21 +15,63 @@ impl crate::solution::Solution<i64, i64> for Day {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
-            answer_a: 0,
+            answer_a: 3,
             answer_b: 0,
         }
     }
 
     fn new(raw: Vec<String>) -> Self {
-        Self { raw: raw.clone() }
+        let blocks: Vec<Vec<Vec<char>>> = raw
+            .split(|line| line.is_empty())
+            .map(|block| block.iter().map(|line| line.chars().collect()).collect())
+            .collect();
+        let mut locks = Vec::new();
+        let mut keys = Vec::new();
+        for block in &blocks {
+            if block[0][0] == '.' {
+                let mut key = HashSet::new();
+                for col in 0..block[0].len() {
+                    for (row, line) in block.iter().enumerate().rev() {
+                        if line[col] == '#' {
+                            key.insert(Vector::new_usize(col, row));
+                        }
+                    }
+                }
+                keys.push(key);
+            } else {
+                let mut lock = HashSet::new();
+                for col in 0..block[0].len() {
+                    for (row, line) in block.iter().enumerate() {
+                        if line[col] == '#' {
+                            lock.insert(Vector::new_usize(col, row));
+                        }
+                    }
+                }
+                locks.push(lock);
+            }
+        }
+        Self {
+            raw: raw.clone(),
+            locks,
+            keys,
+        }
     }
 
     fn part_a(&self) -> Option<i64> {
-        None
+        let mut combos = 0;
+        for lock in &self.locks {
+            for key in &self.keys {
+                let intersection: HashSet<_> = lock.intersection(key).collect();
+                if intersection.is_empty() {
+                    combos += 1;
+                }
+            }
+        }
+        Some(combos)
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        Some(0)
     }
 }
 
