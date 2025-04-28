@@ -18,7 +18,7 @@ impl crate::solution::Solution<usize, usize> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 8,
-            answer_b: 0,
+            answer_b: 2286,
         }
     }
 
@@ -80,7 +80,25 @@ impl crate::solution::Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        None
+        let mut sum = 0;
+
+        for game in &self.games {
+            let mut min = Set {
+                red: 0,
+                green: 0,
+                blue: 0,
+            };
+
+            for set in game {
+                min.red = min.red.max(set.red);
+                min.green = min.green.max(set.green);
+                min.blue = min.blue.max(set.blue);
+            }
+
+            sum += min.red * min.green * min.blue;
+        }
+
+        Some(sum)
     }
 }
 
