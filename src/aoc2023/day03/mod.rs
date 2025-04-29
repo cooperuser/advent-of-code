@@ -13,7 +13,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 4361,
-            answer_b: 0,
+            answer_b: 467835,
         }
     }
 
@@ -81,7 +81,15 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut sum = 0;
+
+        for (_, numbers) in self.parts.iter() {
+            if numbers.len() == 2 {
+                sum += numbers[0] * numbers[1];
+            }
+        }
+
+        Some(sum)
     }
 }
 
