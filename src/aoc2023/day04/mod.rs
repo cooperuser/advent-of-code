@@ -3,18 +3,12 @@ use std::collections::HashSet;
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    cards: Vec<Card>,
+    cards: Vec<u32>,
 }
 
-struct Card {
-    winning: HashSet<u8>,
-    numbers: HashSet<u8>,
-    points: usize,
-}
-
-impl crate::solution::Solution<i64, i64> for Day {
-    fn meta() -> crate::solution::Meta<i64, i64> {
-        crate::solution::Meta::<i64, i64> {
+impl crate::solution::Solution<u32, u32> for Day {
+    fn meta() -> crate::solution::Meta<u32, u32> {
+        crate::solution::Meta::<u32, u32> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -36,12 +30,7 @@ impl crate::solution::Solution<i64, i64> for Day {
                 .split_whitespace()
                 .map(|n| n.parse().unwrap())
                 .collect();
-            let points = winning.intersection(&numbers).count();
-            cards.push(Card {
-                winning,
-                numbers,
-                points,
-            });
+            cards.push(winning.intersection(&numbers).count() as u32);
         }
 
         Self {
@@ -50,24 +39,19 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn part_a(&self) -> Option<i64> {
-        Some(
-            self.cards
-                .iter()
-                .map(|c| 2i64.pow(c.points as u32 - 1))
-                .sum(),
-        )
+    fn part_a(&self) -> Option<u32> {
+        Some(self.cards.iter().map(|&c| 2u32.pow(c - 1)).sum())
     }
 
-    fn part_b(&self) -> Option<i64> {
+    fn part_b(&self) -> Option<u32> {
         let mut copies = vec![1; self.cards.len()];
-        for (i, card) in self.cards.iter().enumerate() {
+        for (i, &card) in self.cards.iter().enumerate() {
             let count = copies[i];
-            for p in 1..=card.points {
+            for p in 1..=card as usize {
                 copies[i + p] += count;
             }
         }
-        Some(copies.into_iter().sum::<usize>() as i64)
+        Some(copies.into_iter().sum())
     }
 }
 
