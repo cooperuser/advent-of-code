@@ -19,7 +19,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 13,
-            answer_b: 0,
+            answer_b: 30,
         }
     }
 
@@ -60,7 +60,14 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut copies = vec![1; self.cards.len()];
+        for (i, card) in self.cards.iter().enumerate() {
+            let count = copies[i];
+            for p in 1..=card.points {
+                copies[i + p] += count;
+            }
+        }
+        Some(copies.into_iter().sum::<usize>() as i64)
     }
 }
 
