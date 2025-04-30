@@ -13,17 +13,74 @@ struct Mapping {
 }
 
 trait Convertable<T> {
-    fn convert(&self, value: T) -> Vec<T>;
+    fn convert(&self, value: &T) -> Vec<T>;
 }
 
 impl Convertable<i64> for Vec<Mapping> {
-    fn convert(&self, value: i64) -> Vec<i64> {
+    fn convert(&self, value: &i64) -> Vec<i64> {
         for mapping in self {
-            if mapping.range.contains(&value) {
+            if mapping.range.contains(value) {
                 return vec![value + mapping.offset];
             }
         }
-        vec![value]
+        vec![*value]
+    }
+}
+
+impl Convertable<Range<i64>> for Vec<Mapping> {
+    fn convert(&self, value: &Range<i64>) -> Vec<Range<i64>> {
+        #![allow(clippy::collapsible_else_if)]
+        let mut range = value.clone();
+        let mut ranges = Vec::new();
+
+        for map in self {
+            let a = range.start;
+            let b = range.end;
+            let c = map.range.start;
+            let d = map.range.end;
+
+            if b < c {
+                // a---b
+                //       c---d
+                break;
+            }
+
+            if a < d {
+                if a < c {
+                    if b < d {
+                        // a---b
+                        //   c---d
+                        ranges.push(a..c);
+                        ranges.push(c + map.offset..b + map.offset);
+                        return ranges;
+                    } else {
+                        // a-------b
+                        //   c---d
+                        ranges.push(a..c);
+                        ranges.push(c + map.offset..d + map.offset);
+                        range.start = d;
+                    }
+                } else {
+                    if b < d {
+                        //   a---b
+                        // c-------d
+                        ranges.push(a + map.offset..b + map.offset);
+                        return ranges;
+                    } else {
+                        //   a---b
+                        // c---d
+                        ranges.push(a + map.offset..d + map.offset);
+                        range.start = d;
+                    }
+                }
+            }
+        }
+
+        if range.start < range.end {
+            ranges.push(range);
+        }
+
+        ranges
     }
 }
 
@@ -34,7 +91,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 35,
-            answer_b: 0,
+            answer_b: 46,
         }
     }
 
@@ -49,10 +106,11 @@ impl crate::solution::Solution<i64, i64> for Day {
 
         let mut maps = Vec::new();
         for map_section in map_sections {
-            let mut map = Vec::new();
+            let mut map: Vec<Mapping> = Vec::new();
             for line in map_section.iter().skip(1) {
                 map.push(line.parse().unwrap());
             }
+            map.sort_by_key(|m| m.range.start);
             maps.push(map);
         }
 
@@ -66,13 +124,17 @@ impl crate::solution::Solution<i64, i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let mut spots = self.seeds.clone();
         for map in &self.maps {
-            spots = spots.iter().flat_map(|&seed| map.convert(seed)).collect();
+            spots = spots.iter().flat_map(|seed| map.convert(seed)).collect();
         }
         Some(*spots.iter().min().unwrap())
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut spots: Vec<_> = self.seeds.chunks(2).map(|c| c[0]..c[0] + c[1]).collect();
+        for map in &self.maps {
+            spots = spots.iter().flat_map(|range| map.convert(range)).collect();
+        }
+        Some(spots.iter().map(|r| r.start).min().unwrap())
     }
 }
 
