@@ -2,6 +2,7 @@ pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
     races: Vec<Race>,
+    race: Race,
 }
 
 struct Race {
@@ -35,7 +36,7 @@ impl crate::solution::Solution<usize, usize> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 288,
-            answer_b: 0,
+            answer_b: 71503,
         }
     }
 
@@ -57,6 +58,22 @@ impl crate::solution::Solution<usize, usize> for Day {
                 .zip(distances)
                 .map(|(time, distance)| Race { time, distance })
                 .collect(),
+            race: Race {
+                time: raw[0]
+                    .split_whitespace()
+                    .skip(1)
+                    .collect::<Vec<_>>()
+                    .join("")
+                    .parse()
+                    .unwrap(),
+                distance: raw[1]
+                    .split_whitespace()
+                    .skip(1)
+                    .collect::<Vec<_>>()
+                    .join("")
+                    .parse()
+                    .unwrap(),
+            },
         }
     }
 
@@ -65,7 +82,7 @@ impl crate::solution::Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        None
+        Some(self.race.count())
     }
 }
 
