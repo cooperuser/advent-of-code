@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -39,7 +39,14 @@ impl crate::solution::Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        None
+        let loops: Vec<u64> = self
+            .map
+            .keys()
+            .filter(|p| p.ends_with('A'))
+            .map(|p| self.count(p, "Z") as u64)
+            .collect();
+        let primes: HashSet<_> = loops.into_iter().flat_map(primes::factors_uniq).collect();
+        Some(primes.iter().product::<u64>() as usize)
     }
 }
 
