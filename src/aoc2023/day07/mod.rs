@@ -62,6 +62,18 @@ fn sort(a: &Hand, b: &Hand, j: i64) -> Ordering {
     }
 }
 
+fn substitute_jokers(cards: &str) -> Name {
+    let chars = "23456789TQKA";
+    let mut name = Name::HighCard;
+    for p in chars.chars().map(|c| cards.replace('J', &c.to_string())) {
+        let n = Name::new(&p);
+        if n > name {
+            name = n;
+        }
+    }
+    name
+}
+
 impl Name {
     fn new(cards: &str) -> Self {
         let mut map: HashMap<char, usize> = HashMap::new();
@@ -95,7 +107,7 @@ impl crate::solution::Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 6440,
-            answer_b: 0,
+            answer_b: 5905,
         }
     }
 
@@ -119,7 +131,23 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut hands: Vec<_> = self
+            .hands
+            .iter()
+            .map(|hand| Hand {
+                name: substitute_jokers(&hand.cards),
+                cards: hand.cards.clone(),
+                bid: hand.bid,
+            })
+            .collect();
+        hands.sort_by(|a, b| sort(a, b, 1));
+
+        let mut total = 0;
+        for (rank, hand) in hands.iter().enumerate() {
+            total += (rank as i64 + 1) * hand.bid;
+        }
+
+        Some(total)
     }
 }
 
