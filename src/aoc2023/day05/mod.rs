@@ -1,32 +1,35 @@
-use std::{collections::HashSet, str::FromStr};
+use std::{ops::Range, str::FromStr};
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
-    seeds: HashSet<usize>,
-    maps: Vec<Vec<Range>>,
+    seeds: Vec<i64>,
+    maps: Vec<Vec<Mapping>>,
 }
 
-#[derive(Debug)]
-struct Range {
-    source: usize,
-    destination: usize,
-    length: usize,
+struct Mapping {
+    range: Range<i64>,
+    offset: i64,
 }
 
-impl Range {
-    fn contains(&self, value: usize) -> bool {
-        value >= self.source && value < self.source + self.length
+trait Convertable<T> {
+    fn convert(&self, value: T) -> Vec<T>;
+}
+
+impl Convertable<i64> for Vec<Mapping> {
+    fn convert(&self, value: i64) -> Vec<i64> {
+        for mapping in self {
+            if mapping.range.contains(&value) {
+                return vec![value + mapping.offset];
+            }
+        }
+        vec![value]
     }
-
-    fn offset(&self, value: usize) -> usize {
-        self.destination + value - self.source
-    }
 }
 
-impl crate::solution::Solution<usize, i64> for Day {
-    fn meta() -> crate::solution::Meta<usize, i64> {
-        crate::solution::Meta::<usize, i64> {
+impl crate::solution::Solution<i64, i64> for Day {
+    fn meta() -> crate::solution::Meta<i64, i64> {
+        crate::solution::Meta::<i64, i64> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -39,7 +42,7 @@ impl crate::solution::Solution<usize, i64> for Day {
         let (seeds, map_sections) = raw.split_once(|line| line.is_empty()).unwrap();
         let map_sections: Vec<_> = map_sections.split(|line| line.is_empty()).collect();
         let seeds = seeds[0].split_once(": ").unwrap().1;
-        let seeds: HashSet<usize> = seeds
+        let seeds = seeds
             .split_whitespace()
             .map(|s| s.parse().unwrap())
             .collect();
@@ -60,20 +63,10 @@ impl crate::solution::Solution<usize, i64> for Day {
         }
     }
 
-    fn part_a(&self) -> Option<usize> {
+    fn part_a(&self) -> Option<i64> {
         let mut spots = self.seeds.clone();
-        for map in self.maps.iter() {
-            let mut next = HashSet::new();
-            'spot: for spot in spots {
-                for range in map {
-                    if range.contains(spot) {
-                        next.insert(range.offset(spot));
-                        continue 'spot;
-                    }
-                }
-                next.insert(spot);
-            }
-            spots = next;
+        for map in &self.maps {
+            spots = spots.iter().flat_map(|&seed| map.convert(seed)).collect();
         }
         Some(*spots.iter().min().unwrap())
     }
@@ -83,15 +76,15 @@ impl crate::solution::Solution<usize, i64> for Day {
     }
 }
 
-impl FromStr for Range {
+impl FromStr for Mapping {
     type Err = ();
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let s: Vec<usize> = s.split_whitespace().map(|s| s.parse().unwrap()).collect();
-        Ok(Self {
-            source: s[1],
-            destination: s[0],
-            length: s[2],
+        let parts: Vec<_> = s.split_whitespace().collect();
+        let parts: Vec<i64> = parts.iter().map(|p| p.parse().unwrap()).collect();
+        Ok(Mapping {
+            range: parts[1]..parts[1] + parts[2],
+            offset: parts[0] - parts[1],
         })
     }
 }
