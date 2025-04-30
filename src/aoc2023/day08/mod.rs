@@ -1,11 +1,15 @@
+use std::collections::HashMap;
+
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<String>,
+    dirs: Vec<bool>,
+    map: HashMap<String, (String, String)>,
 }
 
-impl crate::solution::Solution<i64, i64> for Day {
-    fn meta() -> crate::solution::Meta<i64, i64> {
-        crate::solution::Meta::<i64, i64> {
+impl crate::solution::Solution<usize, usize> for Day {
+    fn meta() -> crate::solution::Meta<usize, usize> {
+        crate::solution::Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample_a.txt").to_string(),
             sample_b: include_str!("input_sample_b.txt").to_string(),
@@ -15,15 +19,46 @@ impl crate::solution::Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<String>) -> Self {
-        Self { raw: raw.clone() }
+        let mut map = HashMap::new();
+        for line in raw.iter().skip(2) {
+            let name = line[0..3].to_string();
+            let left = line[7..10].to_string();
+            let right = line[12..15].to_string();
+            map.insert(name, (left, right));
+        }
+
+        Self {
+            raw: raw.clone(),
+            dirs: raw[0].chars().map(|c| c == 'R').collect(),
+            map,
+        }
     }
 
-    fn part_a(&self) -> Option<i64> {
-        None
+    fn part_a(&self) -> Option<usize> {
+        Some(self.count("AAA", "ZZZ"))
     }
 
-    fn part_b(&self) -> Option<i64> {
+    fn part_b(&self) -> Option<usize> {
         None
+    }
+}
+
+impl Day {
+    fn count(&self, start: &str, end: &str) -> usize {
+        let mut place = start;
+        let mut step = 0;
+
+        while !place.ends_with(end) {
+            let dir = self.dirs[step % self.dirs.len()];
+            let next = self.map.get(place).unwrap();
+            place = match dir {
+                true => &next.1,
+                false => &next.0,
+            };
+            step += 1;
+        }
+
+        step
     }
 }
 
