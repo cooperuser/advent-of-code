@@ -1,7 +1,5 @@
-use std::{
-    collections::{HashMap, HashSet},
-    rc::Rc,
-};
+use crate::prelude::*;
+use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
@@ -20,9 +18,9 @@ enum Gate {
     Xor,
 }
 
-impl crate::solution::Solution<i64, String> for Day {
-    fn meta() -> crate::solution::Meta<i64, String> {
-        crate::solution::Meta::<i64, String> {
+impl Solution<i64, String> for Day {
+    fn meta() -> Meta<i64, String> {
+        Meta::<i64, String> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample_a.txt").to_string(),
             sample_b: include_str!("input_sample_b.txt").to_string(),

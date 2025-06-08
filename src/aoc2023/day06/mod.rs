@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use crate::prelude::*;
 
 pub struct Day {
     #[allow(dead_code)]
@@ -31,9 +31,9 @@ impl Race {
     }
 }
 
-impl crate::solution::Solution<usize, usize> for Day {
-    fn meta() -> crate::solution::Meta<usize, usize> {
-        crate::solution::Meta::<usize, usize> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),

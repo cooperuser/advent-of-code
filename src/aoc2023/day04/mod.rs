@@ -1,4 +1,5 @@
-use std::{collections::HashSet, rc::Rc};
+use crate::prelude::*;
+use std::collections::HashSet;
 
 pub struct Day {
     #[allow(dead_code)]
@@ -6,9 +7,9 @@ pub struct Day {
     cards: Vec<u32>,
 }
 
-impl crate::solution::Solution<u32, u32> for Day {
-    fn meta() -> crate::solution::Meta<u32, u32> {
-        crate::solution::Meta::<u32, u32> {
+impl Solution<u32, u32> for Day {
+    fn meta() -> Meta<u32, u32> {
+        Meta::<u32, u32> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),

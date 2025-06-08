@@ -1,7 +1,5 @@
-use std::{
-    collections::{BinaryHeap, HashSet, VecDeque},
-    rc::Rc,
-};
+use crate::prelude::*;
+use std::collections::{BinaryHeap, HashSet, VecDeque};
 
 use crate::{
     direction::{Direction, DIRS},
@@ -23,9 +21,9 @@ enum Tile {
     Slope(Direction),
 }
 
-impl crate::solution::Solution<i64, i64> for Day {
-    fn meta() -> crate::solution::Meta<i64, i64> {
-        crate::solution::Meta::<i64, i64> {
+impl Solution<i64, i64> for Day {
+    fn meta() -> Meta<i64, i64> {
+        Meta::<i64, i64> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),

@@ -1,7 +1,5 @@
-use std::{
-    collections::{HashMap, HashSet},
-    rc::Rc,
-};
+use crate::prelude::*;
+use std::collections::{HashMap, HashSet};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -10,9 +8,9 @@ pub struct Day {
     map: HashMap<Rc<str>, (Rc<str>, Rc<str>)>,
 }
 
-impl crate::solution::Solution<usize, usize> for Day {
-    fn meta() -> crate::solution::Meta<usize, usize> {
-        crate::solution::Meta::<usize, usize> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample_a.txt").to_string(),
             sample_b: include_str!("input_sample_b.txt").to_string(),

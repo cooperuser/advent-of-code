@@ -7,6 +7,7 @@ use solution::Solution;
 
 mod direction;
 mod graph;
+mod prelude;
 mod solution;
 mod vector;
 mod vector3;
