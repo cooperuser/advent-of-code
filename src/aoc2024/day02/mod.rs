@@ -1,7 +1,9 @@
+use std::rc::Rc;
+
 #[derive(Default)]
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     reports: Vec<Vec<i64>>,
 }
 
@@ -28,7 +30,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             reports: raw

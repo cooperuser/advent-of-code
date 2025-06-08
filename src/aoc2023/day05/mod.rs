@@ -1,8 +1,8 @@
-use std::{ops::Range, str::FromStr};
+use std::{ops::Range, rc::Rc, str::FromStr};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     seeds: Vec<i64>,
     maps: Vec<Vec<Mapping>>,
 }
@@ -95,7 +95,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let (seeds, map_sections) = raw.split_once(|line| line.is_empty()).unwrap();
         let map_sections: Vec<_> = map_sections.split(|line| line.is_empty()).collect();
         let seeds = seeds[0].split_once(": ").unwrap().1;

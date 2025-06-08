@@ -1,10 +1,10 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::vector::{Vector, VectorSet};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     antennae: HashMap<char, Vec<Vector>>,
     size: Vector,
 }
@@ -20,7 +20,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let mut antennae = HashMap::new();
         for (y, line) in raw.iter().enumerate() {

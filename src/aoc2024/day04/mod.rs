@@ -1,9 +1,9 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, rc::Rc};
 
 #[derive(Default)]
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     grid: Vec<Vec<char>>,
     length: i64,
     width: i64,
@@ -32,7 +32,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             grid: raw.iter().map(|line| line.chars().collect()).collect(),

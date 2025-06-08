@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     filesystem: Vec<Space>,
 }
 
@@ -21,7 +23,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             filesystem: raw[0]

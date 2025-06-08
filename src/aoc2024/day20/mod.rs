@@ -1,6 +1,6 @@
 // tags: flood fill, pathfinding
 
-use std::collections::VecDeque;
+use std::{collections::VecDeque, rc::Rc};
 
 use crate::{
     direction::{self, DIRS},
@@ -9,7 +9,7 @@ use crate::{
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     path: VectorMap<i64>,
     sample: bool,
 }
@@ -25,7 +25,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let mut grid = VectorSet::new(size);
         let mut start: Option<Vector> = None;

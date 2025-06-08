@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     stones: HashMap<i64, i64>,
 }
 
@@ -17,7 +17,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut stones = HashMap::new();
         for number in raw[0].split_whitespace() {
             stones.entry(number.parse().unwrap()).or_insert(1);

@@ -1,10 +1,13 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     dirs: Vec<bool>,
-    map: HashMap<String, (String, String)>,
+    map: HashMap<Rc<str>, (Rc<str>, Rc<str>)>,
 }
 
 impl crate::solution::Solution<usize, usize> for Day {
@@ -18,12 +21,12 @@ impl crate::solution::Solution<usize, usize> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut map = HashMap::new();
         for line in raw.iter().skip(2) {
-            let name = line[0..3].to_string();
-            let left = line[7..10].to_string();
-            let right = line[12..15].to_string();
+            let name = line[0..3].into();
+            let left = line[7..10].into();
+            let right = line[12..15].into();
             map.insert(name, (left, right));
         }
 

@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     races: Vec<Race>,
     race: Race,
 }
@@ -40,7 +42,7 @@ impl crate::solution::Solution<usize, usize> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let times: Vec<i64> = raw[0]
             .split_whitespace()
             .skip(1)

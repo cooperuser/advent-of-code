@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::vector3::{Vector3, Vector3f};
 
 use ndarray::prelude::*;
@@ -5,7 +7,7 @@ use ndarray_linalg::*;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     stones: Vec<Stone>,
     area: (Vector3f, Vector3f),
 }
@@ -27,7 +29,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             stones: raw.iter().map(|line| line.parse().unwrap()).collect(),

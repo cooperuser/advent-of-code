@@ -1,12 +1,15 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    rc::Rc,
+};
 
 use itertools::Itertools;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
-    wires: HashMap<String, bool>,
-    logic: HashMap<String, (String, Gate, String)>,
+    raw: Vec<Rc<str>>,
+    wires: HashMap<Rc<str>, bool>,
+    logic: HashMap<Rc<str>, (Rc<str>, Gate, Rc<str>)>,
     sample: bool,
 }
 
@@ -28,7 +31,7 @@ impl crate::solution::Solution<i64, String> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let (wires, logic) = raw.split_once(|line| line.is_empty()).unwrap();
 
         Self {
@@ -37,7 +40,7 @@ impl crate::solution::Solution<i64, String> for Day {
                 .iter()
                 .map(|wire| {
                     let (name, value) = wire.split_once(": ").unwrap();
-                    (name.to_string(), value == "1")
+                    (name.into(), value == "1")
                 })
                 .collect(),
             logic: logic
@@ -50,7 +53,7 @@ impl crate::solution::Solution<i64, String> for Day {
                         "XOR" => Gate::Xor,
                         _ => panic!("Invalid gate: {}", l[1]),
                     };
-                    (l[4].to_string(), (l[0].to_string(), gate, l[2].to_string()))
+                    (l[4].into(), (l[0].into(), gate, l[2].into()))
                 })
                 .collect(),
             sample: wires.len() < 15,
@@ -76,7 +79,7 @@ impl crate::solution::Solution<i64, String> for Day {
             .last()
             .unwrap();
 
-        let mut bad: HashSet<String> = HashSet::new();
+        let mut bad: HashSet<Rc<str>> = HashSet::new();
         for (output, (a, gate, b)) in &self.logic {
             if *gate != Gate::Xor && output.starts_with('z') && output != carry
                 || *gate == Gate::Xor
@@ -97,7 +100,10 @@ impl crate::solution::Solution<i64, String> for Day {
 }
 
 impl Day {
-    fn solve(wires: &mut HashMap<String, bool>, logic: &HashMap<String, (String, Gate, String)>) {
+    fn solve(
+        wires: &mut HashMap<Rc<str>, bool>,
+        logic: &HashMap<Rc<str>, (Rc<str>, Gate, Rc<str>)>,
+    ) {
         let mut unknowns = logic.clone();
         while !unknowns.is_empty() {
             let mut next_unknowns = HashMap::new();
@@ -119,7 +125,7 @@ impl Day {
         }
     }
 
-    fn get_number(wires: &HashMap<String, bool>, prefix: &str) -> i64 {
+    fn get_number(wires: &HashMap<Rc<str>, bool>, prefix: &str) -> i64 {
         let number = wires
             .iter()
             .filter(|(s, _)| s.starts_with(prefix))
@@ -134,10 +140,10 @@ impl Day {
         wire.starts_with('x') || wire.starts_with('y') || wire.starts_with('z')
     }
 
-    fn inner_loop(&self, wire: &str, bad: &mut HashSet<String>, predicate: fn(Gate) -> bool) {
+    fn inner_loop(&self, wire: &str, bad: &mut HashSet<Rc<str>>, predicate: fn(Gate) -> bool) {
         for (a, gate, b) in self.logic.values() {
-            if predicate(*gate) && (wire == a || wire == b) {
-                bad.insert(wire.to_string());
+            if predicate(*gate) && (*wire == **a || *wire == **b) {
+                bad.insert(wire.into());
                 return;
             }
         }

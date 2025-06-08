@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     locks: Vec<Vec<usize>>,
     keys: Vec<Vec<usize>>,
     height: usize,
@@ -17,7 +19,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let blocks = raw.split(|line| line.is_empty()).map(|block| {
             block
                 .iter()

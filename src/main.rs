@@ -1,4 +1,6 @@
 #![feature(slice_split_once)]
+use std::rc::Rc;
+
 use clap::Parser;
 
 use solution::Solution;
@@ -63,10 +65,6 @@ fn main() {
     days[day - 1](false);
 }
 
-pub fn split(input: String) -> Vec<String> {
-    input
-        .trim_end()
-        .split('\n')
-        .map(|s| s.trim().to_string())
-        .collect()
+pub fn split(input: String) -> Vec<Rc<str>> {
+    input.trim_end().split('\n').map(Rc::from).collect()
 }

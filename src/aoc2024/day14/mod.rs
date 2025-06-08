@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use crate::vector::{Vector, VectorMap, VectorSet};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     robots: Vec<Robot>,
     size: Vector,
 }
@@ -24,7 +26,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             robots: raw.iter().map(|line| line.parse().unwrap()).collect(),

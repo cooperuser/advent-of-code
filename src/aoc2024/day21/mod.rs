@@ -1,10 +1,10 @@
-use std::{collections::HashMap, fmt::Display};
+use std::{collections::HashMap, fmt::Display, rc::Rc};
 
 use crate::vector::Vector;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     codes: Vec<Vec<Number>>,
     numberpad: HashMap<(Number, Number), Vec<Input>>,
     arrowpad: HashMap<(Input, Input), Vec<Input>>,
@@ -36,7 +36,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut codes = Vec::new();
         for line in raw.iter() {
             let mut input = Vec::new();

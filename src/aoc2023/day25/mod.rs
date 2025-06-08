@@ -1,9 +1,11 @@
+use std::rc::Rc;
+
 use crate::graph::Graph;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
-    graph: Graph<String, i64>,
+    raw: Vec<Rc<str>>,
+    graph: Graph<Rc<str>, i64>,
 }
 
 impl crate::solution::Solution<i64, i64> for Day {
@@ -17,13 +19,13 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut graph = Graph::new();
         for line in raw.iter() {
             let (left, right) = line.split_once(": ").unwrap();
-            let left = left.to_string();
+            let left = left.into();
             for right in right.split_whitespace() {
-                graph.add_edge(&left, &right.to_string(), 1);
+                graph.add_edge(&left, &right.into(), 1);
             }
         }
 

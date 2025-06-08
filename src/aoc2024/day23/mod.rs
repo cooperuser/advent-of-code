@@ -1,11 +1,14 @@
-use std::collections::{BTreeSet, HashSet};
+use std::{
+    collections::{BTreeSet, HashSet},
+    rc::Rc,
+};
 
 use crate::graph::Graph;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
-    graph: Graph<String, i64>,
+    raw: Vec<Rc<str>>,
+    graph: Graph<Rc<str>, i64>,
 }
 
 impl crate::solution::Solution<i64, String> for Day {
@@ -19,7 +22,7 @@ impl crate::solution::Solution<i64, String> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut links = HashSet::new();
         for line in raw.iter() {
             let (left, right) = line.split_once("-").unwrap();
@@ -27,9 +30,9 @@ impl crate::solution::Solution<i64, String> for Day {
             links.insert((right.to_string(), left.to_string()));
         }
 
-        let mut graph: Graph<String, i64> = Graph::new();
+        let mut graph: Graph<Rc<str>, i64> = Graph::new();
         for link in links {
-            graph.add_edge(&link.0.clone(), &link.1.clone(), 1);
+            graph.add_edge(&link.0.into(), &link.1.into(), 1);
         }
 
         Self {
@@ -52,13 +55,13 @@ impl crate::solution::Solution<i64, String> for Day {
     }
 
     fn part_b(&self) -> Option<String> {
-        let mut cliques: HashSet<BTreeSet<String>> = HashSet::new();
+        let mut cliques: HashSet<BTreeSet<Rc<str>>> = HashSet::new();
         for node in self.graph.nodes() {
             cliques.insert(BTreeSet::from([node]));
         }
 
         loop {
-            let mut next: HashSet<BTreeSet<String>> = HashSet::new();
+            let mut next: HashSet<BTreeSet<Rc<str>>> = HashSet::new();
             for clique in &cliques {
                 for c in self
                     .graph

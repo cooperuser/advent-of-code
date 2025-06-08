@@ -1,13 +1,14 @@
 use std::{
     cmp::Reverse,
     collections::{BinaryHeap, HashMap, HashSet},
+    rc::Rc,
 };
 
 use crate::{vector::Vector, vector3::Vector3};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     blocks: Vec<Link>,
 }
 
@@ -34,7 +35,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let one = Vector3::new(1, 1, 1);
         let mut blocks: Vec<_> = raw
             .iter()

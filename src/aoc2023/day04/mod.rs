@@ -1,8 +1,8 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, rc::Rc};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     cards: Vec<u32>,
 }
 
@@ -17,7 +17,7 @@ impl crate::solution::Solution<u32, u32> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut cards = Vec::new();
         for line in raw.iter() {
             let parts = line.split_once(": ").unwrap().1;

@@ -1,4 +1,7 @@
-use std::collections::{BinaryHeap, HashSet, VecDeque};
+use std::{
+    collections::{BinaryHeap, HashSet, VecDeque},
+    rc::Rc,
+};
 
 use crate::{
     direction::{Direction, DIRS},
@@ -7,7 +10,7 @@ use crate::{
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     grid: VectorMap<Tile>,
     start: Vector,
     size: Vector,
@@ -31,7 +34,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let mut grid = VectorMap::new(size);
         let mut start = None;

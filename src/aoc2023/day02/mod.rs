@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     games: Vec<Vec<Set>>,
 }
 
@@ -22,7 +24,7 @@ impl crate::solution::Solution<usize, usize> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut games = Vec::new();
 
         for line in raw.iter() {

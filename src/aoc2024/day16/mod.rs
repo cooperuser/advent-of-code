@@ -1,4 +1,7 @@
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::{
+    collections::{BinaryHeap, HashMap, HashSet},
+    rc::Rc,
+};
 
 use crate::{
     direction::{Direction, DIRS},
@@ -9,7 +12,7 @@ type Node = HashMap<Direction, (i64, Vector, Direction, HashSet<Vector>)>;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     graph: HashMap<Vector, Node>,
     size: Vector,
     start: Vector,
@@ -27,7 +30,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let mut grid = VectorSet::new(size);
         let mut start: Option<Vector> = None;

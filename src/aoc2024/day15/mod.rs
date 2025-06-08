@@ -1,4 +1,7 @@
-use std::collections::{HashSet, VecDeque};
+use std::{
+    collections::{HashSet, VecDeque},
+    rc::Rc,
+};
 
 use crate::{
     direction::Direction,
@@ -7,7 +10,7 @@ use crate::{
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     inputs: Vec<Direction>,
     walls: VectorSet,
     boxes: VectorSet,
@@ -26,7 +29,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let (map, inputs) = raw.split_once(|line| line.is_empty()).unwrap();
         let size = Vector::new_usize(map[0].len(), map.len());
         let mut walls = VectorSet::new(size);

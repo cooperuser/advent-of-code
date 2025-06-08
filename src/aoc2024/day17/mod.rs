@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     registers: Vec<i64>,
     instructions: Vec<i64>,
 }
@@ -27,7 +29,7 @@ impl crate::solution::Solution<String, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let (registers, program) = raw.split_once(|line| line.is_empty()).unwrap();
         let registers = registers
             .iter()

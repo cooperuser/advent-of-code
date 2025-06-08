@@ -1,8 +1,10 @@
+use std::rc::Rc;
+
 use crate::vector::Vector;
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     machines: Vec<Machine>,
 }
 
@@ -23,7 +25,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let mut machines = Vec::new();
         for m in raw.split(|line| line.is_empty()) {
             let a = m[0].split_once(": ").unwrap().1.split_once(", ").unwrap();

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 pub type Run = Option<(
     std::time::Duration,
     std::time::Duration,
@@ -8,7 +10,7 @@ pub trait Solution<T: std::fmt::Display + Eq, U: std::fmt::Display + Eq> {
     fn meta() -> Meta<T, U>
     where
         Self: Sized;
-    fn new(raw: Vec<String>) -> Self
+    fn new(raw: Vec<Rc<str>>) -> Self
     where
         Self: Sized;
     fn part_a(&self) -> Option<T>;

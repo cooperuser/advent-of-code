@@ -1,8 +1,8 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     towels: Vec<Vec<Color>>,
     patterns: HashMap<Color, Vec<Pattern>>,
 }
@@ -30,7 +30,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let (patterns, towels) = raw.split_once(|line| line.is_empty()).unwrap();
         let patterns: Vec<Pattern> = patterns[0]
             .split(", ")

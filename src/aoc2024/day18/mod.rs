@@ -1,6 +1,6 @@
 // tags: binary search, path finding
 
-use std::collections::VecDeque;
+use std::{collections::VecDeque, rc::Rc};
 
 use crate::{
     direction::DIRS,
@@ -9,7 +9,7 @@ use crate::{
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     intial: usize,
     bytes: Vec<Vector>,
     size: Vector,
@@ -27,7 +27,7 @@ impl crate::solution::Solution<i64, String> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         let size = if raw.len() < 50 {
             Vector::new(7, 7)
         } else {

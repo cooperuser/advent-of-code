@@ -1,6 +1,8 @@
+use std::rc::Rc;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     lines: Vec<Vec<char>>,
 }
 
@@ -15,7 +17,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             lines: raw.iter().map(|line| line.chars().collect()).collect(),
@@ -39,9 +41,9 @@ impl crate::solution::Solution<i64, i64> for Day {
 
         for line in &self.lines {
             let mut nums: Vec<u32> = Vec::new();
-            let mut three: Vec<String> = Vec::new();
-            let mut four: Vec<String> = Vec::new();
-            let mut five: Vec<String> = Vec::new();
+            let mut three: Vec<Rc<str>> = Vec::new();
+            let mut four: Vec<Rc<str>> = Vec::new();
+            let mut five: Vec<Rc<str>> = Vec::new();
 
             for c in line {
                 if let Some(num) = c.to_digit(10) {
@@ -49,9 +51,9 @@ impl crate::solution::Solution<i64, i64> for Day {
                     continue;
                 }
 
-                three.push(c.to_string());
-                four.push(c.to_string());
-                five.push(c.to_string());
+                three.push(c.to_string().into());
+                four.push(c.to_string().into());
+                five.push(c.to_string().into());
 
                 if three.len() > 3 {
                     three.remove(0);

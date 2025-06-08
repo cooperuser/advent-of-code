@@ -1,19 +1,20 @@
 use std::{
     cmp::Ordering,
     collections::{HashMap, HashSet},
+    rc::Rc,
     str::FromStr,
 };
 
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<String>,
+    raw: Vec<Rc<str>>,
     hands: Vec<Hand>,
 }
 
 #[derive(PartialEq, Clone)]
 struct Hand {
     name: Name,
-    cards: String,
+    cards: Rc<str>,
     bid: i64,
 }
 
@@ -111,7 +112,7 @@ impl crate::solution::Solution<i64, i64> for Day {
         }
     }
 
-    fn new(raw: Vec<String>) -> Self {
+    fn new(raw: Vec<Rc<str>>) -> Self {
         Self {
             raw: raw.clone(),
             hands: raw.iter().map(|h| h.parse().unwrap()).collect(),
@@ -159,7 +160,7 @@ impl FromStr for Hand {
         let bid: i64 = bid.parse().unwrap();
         Ok(Hand {
             name: Name::new(cards),
-            cards: cards.to_string(),
+            cards: cards.into(),
             bid,
         })
     }
