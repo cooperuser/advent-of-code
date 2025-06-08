@@ -56,9 +56,9 @@ fn main() {
         let b = times.iter().map(|(_, _, b)| b).sum::<std::time::Duration>() / count;
         println!("======= {} Day {day:0>2} =======", args.year);
         println!("(average over {count} runs)");
-        println!("parse :\t{:?}", parse);
-        println!("part_a:\t{:?}", a);
-        println!("part_b:\t{:?}", b);
+        println!("parse :\t{parse:?}");
+        println!("part_a:\t{a:?}");
+        println!("part_b:\t{b:?}");
         return;
     }
 

@@ -232,7 +232,7 @@ impl Display for Number {
             f,
             "{}",
             match self {
-                Number::Number(n) => format!("{}", n),
+                Number::Number(n) => format!("{n}"),
                 Number::Enter => "A".to_string(),
             }
         )

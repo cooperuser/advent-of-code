@@ -36,19 +36,19 @@ pub trait Solution<T: std::fmt::Display + Eq, U: std::fmt::Display + Eq> {
 
         let sample_a = Self::new(crate::split(meta.sample_a));
         let sample_b = Self::new(crate::split(meta.sample_b));
-        println!("parse :\t{:?}\n", duration);
+        println!("parse :\t{duration:?}\n");
         match sample_a.part_a() {
             Some(received) if received == meta.answer_a => {
                 let start = std::time::Instant::now();
                 let answer = real.part_a();
                 let duration = start.elapsed();
                 println!("part_a:\t{}", answer.unwrap());
-                println!(" ** in:\t{:?}", duration);
+                println!(" ** in:\t{duration:?}");
             }
             Some(received) => {
                 println!("part_a: failed!");
                 println!("\texpected: {}", meta.answer_a);
-                println!("\treceived: {}", received);
+                println!("\treceived: {received}");
             }
             None => {
                 println!("part_a: unsolved!");
@@ -61,12 +61,12 @@ pub trait Solution<T: std::fmt::Display + Eq, U: std::fmt::Display + Eq> {
                 let answer = real.part_b();
                 let duration = start.elapsed();
                 println!("part_b:\t{}", answer.unwrap());
-                println!(" ** in:\t{:?}", duration);
+                println!(" ** in:\t{duration:?}");
             }
             Some(received) => {
                 println!("part_b: failed!");
                 println!("\texpected: {}", meta.answer_b);
-                println!("\treceived: {}", received);
+                println!("\treceived: {received}");
             }
             None => {
                 println!("part_b: unsolved!");

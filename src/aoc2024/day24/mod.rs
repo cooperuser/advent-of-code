@@ -3,11 +3,13 @@ use std::collections::{HashMap, HashSet};
 
 use itertools::Itertools;
 
+type Str = Rc<str>;
+
 pub struct Day {
     #[allow(dead_code)]
-    raw: Vec<Rc<str>>,
-    wires: HashMap<Rc<str>, bool>,
-    logic: HashMap<Rc<str>, (Rc<str>, Gate, Rc<str>)>,
+    raw: Vec<Str>,
+    wires: HashMap<Str, bool>,
+    logic: HashMap<Str, (Str, Gate, Str)>,
     sample: bool,
 }
 
@@ -29,7 +31,7 @@ impl Solution<i64, String> for Day {
         }
     }
 
-    fn new(raw: Vec<Rc<str>>) -> Self {
+    fn new(raw: Vec<Str>) -> Self {
         let (wires, logic) = raw.split_once(|line| line.is_empty()).unwrap();
 
         Self {
@@ -77,7 +79,7 @@ impl Solution<i64, String> for Day {
             .last()
             .unwrap();
 
-        let mut bad: HashSet<Rc<str>> = HashSet::new();
+        let mut bad: HashSet<Str> = HashSet::new();
         for (output, (a, gate, b)) in &self.logic {
             if *gate != Gate::Xor && output.starts_with('z') && output != carry
                 || *gate == Gate::Xor
@@ -98,10 +100,7 @@ impl Solution<i64, String> for Day {
 }
 
 impl Day {
-    fn solve(
-        wires: &mut HashMap<Rc<str>, bool>,
-        logic: &HashMap<Rc<str>, (Rc<str>, Gate, Rc<str>)>,
-    ) {
+    fn solve(wires: &mut HashMap<Str, bool>, logic: &HashMap<Str, (Str, Gate, Str)>) {
         let mut unknowns = logic.clone();
         while !unknowns.is_empty() {
             let mut next_unknowns = HashMap::new();
@@ -123,7 +122,7 @@ impl Day {
         }
     }
 
-    fn get_number(wires: &HashMap<Rc<str>, bool>, prefix: &str) -> i64 {
+    fn get_number(wires: &HashMap<Str, bool>, prefix: &str) -> i64 {
         let number = wires
             .iter()
             .filter(|(s, _)| s.starts_with(prefix))
@@ -138,7 +137,7 @@ impl Day {
         wire.starts_with('x') || wire.starts_with('y') || wire.starts_with('z')
     }
 
-    fn inner_loop(&self, wire: &str, bad: &mut HashSet<Rc<str>>, predicate: fn(Gate) -> bool) {
+    fn inner_loop(&self, wire: &str, bad: &mut HashSet<Str>, predicate: fn(Gate) -> bool) {
         for (a, gate, b) in self.logic.values() {
             if predicate(*gate) && (*wire == **a || *wire == **b) {
                 bad.insert(wire.into());
