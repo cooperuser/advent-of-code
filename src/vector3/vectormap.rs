@@ -97,7 +97,7 @@ impl<T: Clone> Vector3Map<T> {
     }
 
     #[allow(dead_code)]
-    pub fn iter(&self) -> Vector3MapIterator<T> {
+    pub fn iter(&self) -> Vector3MapIterator<'_, T> {
         Vector3MapIterator {
             map: self,
             index: 0,

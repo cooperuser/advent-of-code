@@ -47,7 +47,7 @@ impl Vector3Set {
     }
 
     #[allow(dead_code)]
-    pub fn iter(&self) -> Vector3SetIterator {
+    pub fn iter(&self) -> Vector3SetIterator<'_> {
         Vector3SetIterator {
             set: self,
             index: 0,

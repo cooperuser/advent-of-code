@@ -55,7 +55,7 @@ impl VectorSet {
     }
 
     #[allow(dead_code)]
-    pub fn iter(&self) -> VectorSetIterator {
+    pub fn iter(&self) -> VectorSetIterator<'_> {
         VectorSetIterator {
             set: self,
             index: 0,
