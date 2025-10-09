@@ -1,11 +1,75 @@
 [package]
 name = "aoc"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+
+[workspace]
+resolver = "3"
+members = [
+	"utils",
+	"aoc2023/*",
+	"aoc2024/*",
+]
 
 [dependencies]
 clap = { version = "4.5.23", features = ["derive"] }
-itertools = "0.13.0"
-ndarray = "0.14"
-ndarray-linalg = { version = "0.13", features = ["openblas-static"] }
-primes = "0.3.0"
+utils = { path = "utils" }
+
+# Advent of Code 2023
+aoc2023_day01 = { path = "aoc2023/day01" }
+aoc2023_day02 = { path = "aoc2023/day02" }
+aoc2023_day03 = { path = "aoc2023/day03" }
+aoc2023_day04 = { path = "aoc2023/day04" }
+aoc2023_day05 = { path = "aoc2023/day05" }
+aoc2023_day06 = { path = "aoc2023/day06" }
+aoc2023_day07 = { path = "aoc2023/day07" }
+aoc2023_day08 = { path = "aoc2023/day08" }
+# aoc2023_day09 = { path = "aoc2023/day09" }
+# aoc2023_day10 = { path = "aoc2023/day10" }
+# aoc2023_day11 = { path = "aoc2023/day11" }
+# aoc2023_day12 = { path = "aoc2023/day12" }
+# aoc2023_day13 = { path = "aoc2023/day13" }
+# aoc2023_day14 = { path = "aoc2023/day14" }
+# aoc2023_day15 = { path = "aoc2023/day15" }
+# aoc2023_day16 = { path = "aoc2023/day16" }
+# aoc2023_day17 = { path = "aoc2023/day17" }
+# aoc2023_day18 = { path = "aoc2023/day18" }
+# aoc2023_day19 = { path = "aoc2023/day19" }
+# aoc2023_day20 = { path = "aoc2023/day20" }
+aoc2023_day21 = { path = "aoc2023/day21" }
+aoc2023_day22 = { path = "aoc2023/day22" }
+aoc2023_day23 = { path = "aoc2023/day23" }
+# aoc2023_day24 = { path = "aoc2023/day24" }
+# aoc2023_day25 = { path = "aoc2023/day25" }
+
+# Advent of Code 2024
+aoc2024_day01 = { path = "aoc2024/day01" }
+# aoc2024_day02 = { path = "aoc2024/day02" }
+# aoc2024_day03 = { path = "aoc2024/day03" }
+# aoc2024_day04 = { path = "aoc2024/day04" }
+# aoc2024_day05 = { path = "aoc2024/day05" }
+# aoc2024_day06 = { path = "aoc2024/day06" }
+# aoc2024_day07 = { path = "aoc2024/day07" }
+# aoc2024_day08 = { path = "aoc2024/day08" }
+# aoc2024_day09 = { path = "aoc2024/day09" }
+# aoc2024_day10 = { path = "aoc2024/day10" }
+# aoc2024_day11 = { path = "aoc2024/day11" }
+# aoc2024_day12 = { path = "aoc2024/day12" }
+# aoc2024_day13 = { path = "aoc2024/day13" }
+# aoc2024_day14 = { path = "aoc2024/day14" }
+# aoc2024_day15 = { path = "aoc2024/day15" }
+# aoc2024_day16 = { path = "aoc2024/day16" }
+# aoc2024_day17 = { path = "aoc2024/day17" }
+# aoc2024_day18 = { path = "aoc2024/day18" }
+# aoc2024_day19 = { path = "aoc2024/day19" }
+# aoc2024_day20 = { path = "aoc2024/day20" }
+# aoc2024_day21 = { path = "aoc2024/day21" }
+# aoc2024_day22 = { path = "aoc2024/day22" }
+# aoc2024_day23 = { path = "aoc2024/day23" }
+# aoc2024_day24 = { path = "aoc2024/day24" }
+# aoc2024_day25 = { path = "aoc2024/day25" }
+
+# itertools = "0.13.0"
+# ndarray = "0.14"
+# ndarray-linalg = { version = "0.13", features = ["openblas-static"] }
+# primes = "0.3.0"
