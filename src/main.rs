@@ -2,11 +2,12 @@ use clap::Parser;
 
 mod aoc2023;
 mod aoc2024;
+mod aoc2025;
 
 #[derive(Parser, Debug)]
 struct Args {
     /// Which year to select
-    #[arg(short, long, default_value_t = 2024)]
+    #[arg(short, long, default_value_t = 2025)]
     year: usize,
     /// Which day to run
     #[arg(short, long)]
@@ -24,7 +25,7 @@ struct Args {
 
 fn main() {
     let args = Args::parse();
-    let years = &[aoc2023::DAYS, aoc2024::DAYS];
+    let years = &[aoc2023::DAYS, aoc2024::DAYS, aoc2025::DAYS];
     let days = years[args.year - 2023];
 
     if args.all {
