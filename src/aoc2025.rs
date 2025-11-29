@@ -1,7 +1,7 @@
 use utils::solution::{Run, Solution};
 
 pub const DAYS: &[fn(bool) -> Run] = &[
-    // aoc2025_day01::Day::run,
+    aoc2025_day01::Day::run,
     // aoc2025_day02::Day::run,
     // aoc2025_day03::Day::run,
     // aoc2025_day04::Day::run,
