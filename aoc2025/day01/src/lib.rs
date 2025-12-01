@@ -20,9 +20,9 @@ impl Solution<i64, i64> for Day {
     fn new(raw: Vec<Rc<str>>) -> Self {
         let mut rotations = Vec::new();
         for line in &raw {
-            let (l, r) = line.split_at(1);
-            let value: i64 = r.parse().unwrap();
-            rotations.push(value * if l == "R" { 1 } else { -1 });
+            let (sign, value) = line.split_at(1);
+            let value: i64 = value.parse().unwrap();
+            rotations.push(value * if sign == "R" { 1 } else { -1 });
         }
         Self { raw, rotations }
     }
@@ -30,28 +30,70 @@ impl Solution<i64, i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let mut dial = 50;
         let mut count = 0;
-        for rot in &self.rotations {
-            dial += rot;
+
+        for &rotation in &self.rotations {
+            dial += rotation;
             if dial.rem_euclid(100) == 0 {
                 count += 1;
             }
         }
+
         Some(count)
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut dial = 50;
+        let mut dial: i64 = 50;
         let mut count = 0;
-        for rot in &self.rotations {
-            for _ in 0..rot.abs() {
-                dial += rot.signum();
-                if dial.rem_euclid(100) == 0 {
-                    count += 1;
-                }
+
+        for &rotation in &self.rotations {
+            let next = dial.rem_euclid(100) + rotation;
+
+            if dial.rem_euclid(100) == 0 {
+                count += rotation.abs() / 100;
+            } else if next <= 0 {
+                count += 1 + next.abs() / 100;
+            } else if next >= 100 {
+                count += next.abs() / 100;
             }
+
+            dial += rotation;
         }
+
         Some(count)
     }
 }
 
 utils::solution::test_solution!(aoc2025, day01);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn r1000() {
+        let input = ["R1000"];
+        let solution = Day::new(input.iter().map(|&s| s.into()).collect());
+        assert_eq!(solution.part_b(), Some(10));
+    }
+
+    #[test]
+    fn r50() {
+        let input = ["R50", "R100"];
+        let solution = Day::new(input.iter().map(|&s| s.into()).collect());
+        assert_eq!(solution.part_b(), Some(2));
+    }
+
+    #[test]
+    fn l1000() {
+        let input = ["R50", "L1000"];
+        let solution = Day::new(input.iter().map(|&s| s.into()).collect());
+        assert_eq!(solution.part_b(), Some(11));
+    }
+
+    #[test]
+    fn r50_l1_r1() {
+        let input = ["R50", "L1", "R1"];
+        let solution = Day::new(input.iter().map(|&s| s.into()).collect());
+        assert_eq!(solution.part_b(), Some(2));
+    }
+}
