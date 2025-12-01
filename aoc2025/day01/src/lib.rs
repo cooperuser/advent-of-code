@@ -13,7 +13,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 3,
-            answer_b: 0,
+            answer_b: 6,
         }
     }
 
@@ -32,7 +32,7 @@ impl Solution<i64, i64> for Day {
         let mut count = 0;
         for rot in &self.rotations {
             dial += rot;
-            if dial % 100 == 0 {
+            if dial.rem_euclid(100) == 0 {
                 count += 1;
             }
         }
@@ -40,7 +40,17 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut dial = 50;
+        let mut count = 0;
+        for rot in &self.rotations {
+            for _ in 0..rot.abs() {
+                dial += rot.signum();
+                if dial.rem_euclid(100) == 0 {
+                    count += 1;
+                }
+            }
+        }
+        Some(count)
     }
 }
 
