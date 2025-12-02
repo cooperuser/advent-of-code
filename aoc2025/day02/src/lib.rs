@@ -1,8 +1,11 @@
+use std::ops::RangeInclusive;
+
 use utils::prelude::*;
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
+    ranges: Vec<RangeInclusive<i64>>,
 }
 
 impl Solution<i64, i64> for Day {
@@ -11,17 +14,41 @@ impl Solution<i64, i64> for Day {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
-            answer_a: 0,
+            answer_a: 1227775554,
             answer_b: 0,
         }
     }
 
     fn new(raw: Vec<Rc<str>>) -> Self {
-        Self { raw }
+        let mut ranges = Vec::new();
+
+        for range in raw[0].split(',') {
+            let (start, end) = range.split_once('-').unwrap();
+            let start = start.parse().unwrap();
+            let end = end.parse().unwrap();
+            ranges.push(start..=end);
+        }
+
+        Self { raw, ranges }
     }
 
     fn part_a(&self) -> Option<i64> {
-        None
+        let mut invalid: Vec<i64> = Vec::new();
+
+        for range in &self.ranges {
+            for i in range.clone() {
+                let s = format!("{i}");
+                if s.len() % 2 != 0 {
+                    continue;
+                }
+                let (a, b) = s.split_at(s.len() / 2);
+                if a == b {
+                    invalid.push(i);
+                }
+            }
+        }
+
+        Some(invalid.iter().sum())
     }
 
     fn part_b(&self) -> Option<i64> {
