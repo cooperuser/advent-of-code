@@ -33,54 +33,57 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut invalid: Vec<i64> = Vec::new();
+        let mut invalid = 0;
 
         for range in &self.ranges {
-            for i in range.clone() {
-                let s = format!("{i}");
-                if s.len() % 2 != 0 {
+            for step in range.clone() {
+                let string = format!("{step}");
+                if string.len() % 2 != 0 {
                     continue;
                 }
-                let (a, b) = s.split_at(s.len() / 2);
+                let (a, b) = string.split_at(string.len() / 2);
                 if a == b {
-                    invalid.push(i);
+                    invalid += step;
                 }
             }
         }
 
-        Some(invalid.iter().sum())
+        Some(invalid)
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut invalid: Vec<i64> = Vec::new();
+        let mut invalid = 0;
 
         for range in &self.ranges {
             let mut set: HashSet<i64> = HashSet::new();
-            for i in range.clone() {
-                let s = format!("{i}");
-                let chars: Vec<_> = s.chars().collect();
-                let len = s.len();
+            for step in range.clone() {
+                let string = format!("{step}");
+                let chars: Vec<_> = string.chars().collect();
+                let len = string.len();
 
-                for w in 2..=len {
-                    if len % w != 0 {
+                'outer: for width in 2..=len {
+                    if len % width != 0 {
                         continue;
                     }
 
-                    let size = len / w;
-
-                    let sub: HashSet<_> = chars.chunks(size).collect();
-                    if sub.len() == 1 {
-                        set.insert(i);
+                    let mut chunks = chars.chunks(len / width);
+                    let first = chunks.next().unwrap();
+                    for chunk in chunks {
+                        if chunk != first {
+                            continue 'outer;
+                        }
                     }
+
+                    set.insert(step);
                 }
             }
 
             for i in set {
-                invalid.push(i);
+                invalid += i;
             }
         }
 
-        Some(invalid.iter().sum())
+        Some(invalid)
     }
 }
 
