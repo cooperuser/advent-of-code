@@ -61,16 +61,16 @@ impl Solution<i64, i64> for Day {
                 let chars: Vec<_> = string.chars().collect();
                 let len = string.len();
 
-                'outer: for width in 2..=len {
-                    if len % width != 0 {
+                'parts: for parts in 2..=len {
+                    if len % parts != 0 {
                         continue;
                     }
 
-                    let mut chunks = chars.chunks(len / width);
+                    let mut chunks = chars.chunks(len / parts);
                     let first = chunks.next().unwrap();
                     for chunk in chunks {
                         if chunk != first {
-                            continue 'outer;
+                            continue 'parts;
                         }
                     }
 
