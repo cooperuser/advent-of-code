@@ -1,4 +1,4 @@
-use std::{collections::HashSet, ops::RangeInclusive};
+use std::ops::RangeInclusive;
 
 use utils::prelude::*;
 
@@ -6,6 +6,7 @@ pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     ranges: Vec<RangeInclusive<i64>>,
+    max: i64,
 }
 
 impl Solution<i64, i64> for Day {
@@ -21,15 +22,17 @@ impl Solution<i64, i64> for Day {
 
     fn new(raw: Vec<Rc<str>>) -> Self {
         let mut ranges = Vec::new();
+        let mut max = 0;
 
         for range in raw[0].split(',') {
             let (start, end) = range.split_once('-').unwrap();
             let start = start.parse().unwrap();
             let end = end.parse().unwrap();
+            max = max.max(end);
             ranges.push(start..=end);
         }
 
-        Self { raw, ranges }
+        Self { raw, ranges, max }
     }
 
     fn part_a(&self) -> Option<i64> {
@@ -54,36 +57,45 @@ impl Solution<i64, i64> for Day {
     fn part_b(&self) -> Option<i64> {
         let mut invalid = 0;
 
+        let patterns = Self::gen_patterns(self.max.ilog10());
+
         for range in &self.ranges {
-            let mut set: HashSet<i64> = HashSet::new();
-            for step in range.clone() {
-                let string = format!("{step}");
-                let chars: Vec<_> = string.chars().collect();
-                let len = string.len();
-
-                'parts: for parts in 2..=len {
-                    if len % parts != 0 {
-                        continue;
+            'step: for step in range.clone() {
+                let len = step.ilog10() as usize;
+                for pattern in patterns.get(len).unwrap() {
+                    if step % pattern == 0 {
+                        invalid += step;
+                        continue 'step;
                     }
-
-                    let mut chunks = chars.chunks(len / parts);
-                    let first = chunks.next().unwrap();
-                    for chunk in chunks {
-                        if chunk != first {
-                            continue 'parts;
-                        }
-                    }
-
-                    set.insert(step);
                 }
-            }
-
-            for i in set {
-                invalid += i;
             }
         }
 
         Some(invalid)
+    }
+}
+
+impl Day {
+    fn gen_patterns(max: u32) -> Vec<Vec<i64>> {
+        let mut all_patterns: Vec<Vec<i64>> = Vec::new();
+
+        for len in 1..=max + 1 {
+            let mut patterns = Vec::new();
+
+            for divisor in 1..=len / 2 {
+                if len % divisor == 0 {
+                    let mut pattern = 1;
+                    for i in 1..len / divisor {
+                        pattern += 10i64.pow(i * divisor);
+                    }
+                    patterns.push(pattern);
+                }
+            }
+
+            all_patterns.push(patterns);
+        }
+
+        all_patterns
     }
 }
 
