@@ -71,7 +71,7 @@ aoc2024_day01 = { path = "aoc2024/day01" }
 
 # Advent of Code 2025
 aoc2025_day01 = { path = "aoc2025/day01" }
-# aoc2025_day02 = { path = "aoc2025/day02" }
+aoc2025_day02 = { path = "aoc2025/day02" }
 # aoc2025_day03 = { path = "aoc2025/day03" }
 # aoc2025_day04 = { path = "aoc2025/day04" }
 # aoc2025_day05 = { path = "aoc2025/day05" }
