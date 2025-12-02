@@ -1,4 +1,4 @@
-use std::ops::RangeInclusive;
+use std::{collections::HashSet, ops::RangeInclusive};
 
 use utils::prelude::*;
 
@@ -15,7 +15,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 1227775554,
-            answer_b: 0,
+            answer_b: 4174379265,
         }
     }
 
@@ -52,7 +52,35 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut invalid: Vec<i64> = Vec::new();
+
+        for range in &self.ranges {
+            let mut set: HashSet<i64> = HashSet::new();
+            for i in range.clone() {
+                let s = format!("{i}");
+                let chars: Vec<_> = s.chars().collect();
+                let len = s.len();
+
+                for w in 2..=len {
+                    if len % w != 0 {
+                        continue;
+                    }
+
+                    let size = len / w;
+
+                    let sub: HashSet<_> = chars.chunks(size).collect();
+                    if sub.len() == 1 {
+                        set.insert(i);
+                    }
+                }
+            }
+
+            for i in set {
+                invalid.push(i);
+            }
+        }
+
+        Some(invalid.iter().sum())
     }
 }
 
