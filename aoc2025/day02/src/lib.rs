@@ -42,11 +42,11 @@ impl Solution<i64, i64> for Day {
         for range in &self.ranges {
             'step: for step in range.clone() {
                 let len = step.ilog10() as usize;
-                for pattern in patterns.get(len).unwrap() {
-                    if step % pattern == 0 {
-                        invalid += step;
-                        continue 'step;
-                    }
+                if let Some(Some(pattern)) = patterns.get(len)
+                    && step % pattern == 0
+                {
+                    invalid += step;
+                    continue 'step;
                 }
             }
         }
@@ -75,20 +75,13 @@ impl Solution<i64, i64> for Day {
 }
 
 impl Day {
-    fn gen_patterns_a(max: u32) -> Vec<Vec<i64>> {
-        let mut all_patterns: Vec<Vec<i64>> = Vec::new();
-
-        for len in 0..=max + 1 {
-            let mut patterns = Vec::new();
-
-            if len % 2 != 0 {
-                patterns.push(1 + 10i64.pow(len / 2 + 1));
-            }
-
-            all_patterns.push(patterns);
-        }
-
-        all_patterns
+    fn gen_patterns_a(max: u32) -> Vec<Option<i64>> {
+        (0..=max + 1)
+            .map(|len| match len % 2 {
+                1 => Some(1 + 10i64.pow(len / 2 + 1)),
+                _ => None,
+            })
+            .collect()
     }
 
     fn gen_patterns_b(max: u32) -> Vec<Vec<i64>> {
@@ -99,11 +92,11 @@ impl Day {
 
             for divisor in 1..=len / 2 {
                 if len % divisor == 0 {
-                    let mut pattern = 1;
-                    for i in 1..len / divisor {
-                        pattern += 10i64.pow(i * divisor);
-                    }
-                    patterns.push(pattern);
+                    patterns.push(
+                        (0..len / divisor)
+                            .map(|power| 10i64.pow(power * divisor))
+                            .sum(),
+                    );
                 }
             }
 
