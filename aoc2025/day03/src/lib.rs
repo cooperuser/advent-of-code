@@ -13,7 +13,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 357,
-            answer_b: 0,
+            answer_b: 3121910778619,
         }
     }
 
@@ -61,7 +61,30 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut total = 0;
+
+        for bank in &self.banks {
+            let mut joltage = 0;
+            let mut last = 0;
+
+            for i in 0..12 {
+                let max = bank
+                    .iter()
+                    .enumerate()
+                    .skip(last)
+                    .take(bank.len() - last - (11 - i))
+                    .rev()
+                    .max_by_key(|m| m.1)
+                    .unwrap();
+
+                last = max.0 + 1;
+                joltage = joltage * 10 + max.1;
+            }
+
+            total += joltage;
+        }
+
+        Some(total)
     }
 }
 
