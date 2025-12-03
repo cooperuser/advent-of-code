@@ -3,12 +3,12 @@ use utils::prelude::*;
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
-    banks: Vec<Vec<i64>>,
+    banks: Vec<Vec<u64>>,
 }
 
-impl Solution<i64, i64> for Day {
-    fn meta() -> Meta<i64, i64> {
-        Meta::<i64, i64> {
+impl Solution<u64, u64> for Day {
+    fn meta() -> Meta<u64, u64> {
+        Meta::<u64, u64> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -18,22 +18,19 @@ impl Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<Rc<str>>) -> Self {
-        let mut banks = Vec::new();
-
-        for line in &raw {
-            let mut bank: Vec<i64> = Vec::new();
-
-            for c in line.chars() {
-                bank.push(c.to_string().parse().unwrap());
-            }
-
-            banks.push(bank);
-        }
+        let banks = raw
+            .iter()
+            .map(|line| {
+                line.chars()
+                    .map(|c| c.to_digit(10).unwrap() as u64)
+                    .collect()
+            })
+            .collect();
 
         Self { raw, banks }
     }
 
-    fn part_a(&self) -> Option<i64> {
+    fn part_a(&self) -> Option<u64> {
         let mut total = 0;
 
         for bank in &self.banks {
@@ -60,7 +57,7 @@ impl Solution<i64, i64> for Day {
         Some(total)
     }
 
-    fn part_b(&self) -> Option<i64> {
+    fn part_b(&self) -> Option<u64> {
         let mut total = 0;
 
         for bank in &self.banks {
