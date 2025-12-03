@@ -36,17 +36,17 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
+        let patterns = Self::gen_patterns_a(self.max.ilog10());
         let mut invalid = 0;
 
         for range in &self.ranges {
-            for step in range.clone() {
-                let string = format!("{step}");
-                if string.len() % 2 != 0 {
-                    continue;
-                }
-                let (a, b) = string.split_at(string.len() / 2);
-                if a == b {
-                    invalid += step;
+            'step: for step in range.clone() {
+                let len = step.ilog10() as usize;
+                for pattern in patterns.get(len).unwrap() {
+                    if step % pattern == 0 {
+                        invalid += step;
+                        continue 'step;
+                    }
                 }
             }
         }
@@ -55,9 +55,8 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
+        let patterns = Self::gen_patterns_b(self.max.ilog10());
         let mut invalid = 0;
-
-        let patterns = Self::gen_patterns(self.max.ilog10());
 
         for range in &self.ranges {
             'step: for step in range.clone() {
@@ -76,7 +75,23 @@ impl Solution<i64, i64> for Day {
 }
 
 impl Day {
-    fn gen_patterns(max: u32) -> Vec<Vec<i64>> {
+    fn gen_patterns_a(max: u32) -> Vec<Vec<i64>> {
+        let mut all_patterns: Vec<Vec<i64>> = Vec::new();
+
+        for len in 0..=max + 1 {
+            let mut patterns = Vec::new();
+
+            if len % 2 != 0 {
+                patterns.push(1 + 10i64.pow(len / 2 + 1));
+            }
+
+            all_patterns.push(patterns);
+        }
+
+        all_patterns
+    }
+
+    fn gen_patterns_b(max: u32) -> Vec<Vec<i64>> {
         let mut all_patterns: Vec<Vec<i64>> = Vec::new();
 
         for len in 1..=max + 1 {
