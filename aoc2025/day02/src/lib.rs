@@ -76,7 +76,7 @@ impl Solution<i64, i64> for Day {
 
 impl Day {
     fn gen_patterns_a(max: u32) -> Vec<Option<i64>> {
-        (0..=max + 1)
+        (0..=max)
             .map(|len| match len % 2 {
                 1 => Some(1 + 10i64.pow(len / 2 + 1)),
                 _ => None,
@@ -85,25 +85,18 @@ impl Day {
     }
 
     fn gen_patterns_b(max: u32) -> Vec<Vec<i64>> {
-        let mut all_patterns: Vec<Vec<i64>> = Vec::new();
-
-        for len in 1..=max + 1 {
-            let mut patterns = Vec::new();
-
-            for divisor in 1..=len / 2 {
-                if len % divisor == 0 {
-                    patterns.push(
+        (1..=max + 1)
+            .map(|len| {
+                (1..=len / 2)
+                    .filter(|divisor| len % divisor == 0)
+                    .map(|divisor| {
                         (0..len / divisor)
                             .map(|power| 10i64.pow(power * divisor))
-                            .sum(),
-                    );
-                }
-            }
-
-            all_patterns.push(patterns);
-        }
-
-        all_patterns
+                            .sum()
+                    })
+                    .collect()
+            })
+            .collect()
     }
 }
 
