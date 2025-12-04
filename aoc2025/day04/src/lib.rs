@@ -1,6 +1,6 @@
 use utils::{
     prelude::*,
-    vector::{Vector, VectorSet},
+    vector::{KINGS, VectorSet},
 };
 
 pub struct Day {
@@ -8,17 +8,6 @@ pub struct Day {
     raw: Vec<Rc<str>>,
     paper: VectorSet,
 }
-
-const ADJACENT: [Vector; 8] = [
-    Vector::new(-1, -1),
-    Vector::new(-1, 0),
-    Vector::new(-1, 1),
-    Vector::new(0, -1),
-    Vector::new(0, 1),
-    Vector::new(1, -1),
-    Vector::new(1, 0),
-    Vector::new(1, 1),
-];
 
 impl Solution<i64, i64> for Day {
     fn meta() -> Meta<i64, i64> {
@@ -40,7 +29,7 @@ impl Solution<i64, i64> for Day {
         let mut accessible = 0;
 
         for pos in self.paper.iter() {
-            let neighbors = ADJACENT
+            let neighbors = KINGS
                 .iter()
                 .filter(|&&adj| self.paper.contains(pos + adj))
                 .count();
@@ -63,7 +52,7 @@ impl Solution<i64, i64> for Day {
             let mut next_paper = paper.clone();
 
             for pos in paper.iter() {
-                let neighbors = ADJACENT
+                let neighbors = KINGS
                     .iter()
                     .filter(|&&adj| paper.contains(pos + adj))
                     .count();

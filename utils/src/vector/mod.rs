@@ -13,6 +13,28 @@ pub const SOUTH: Vector = Vector::new(0, 1);
 pub const EAST: Vector = Vector::new(1, 0);
 pub const WEST: Vector = Vector::new(-1, 0);
 
+pub const KINGS: [Vector; 8] = [
+    Vector::new(-1, -1),
+    Vector::new(-1, 0),
+    Vector::new(-1, 1),
+    Vector::new(0, -1),
+    Vector::new(0, 1),
+    Vector::new(1, -1),
+    Vector::new(1, 0),
+    Vector::new(1, 1),
+];
+
+pub const KNIGHTS: [Vector; 8] = [
+    Vector::new(-2, -1),
+    Vector::new(-2, 1),
+    Vector::new(-1, -2),
+    Vector::new(-1, 2),
+    Vector::new(1, -2),
+    Vector::new(1, 2),
+    Vector::new(2, -1),
+    Vector::new(2, 1),
+];
+
 #[derive(Debug, Default, Clone, Copy, Hash, Eq, PartialEq)]
 pub struct Vector {
     pub x: i64,
