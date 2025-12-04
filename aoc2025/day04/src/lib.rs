@@ -7,7 +7,6 @@ pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     paper: VectorSet,
-    size: Vector,
 }
 
 const ADJACENT: [Vector; 8] = [
@@ -33,18 +32,8 @@ impl Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<Rc<str>>) -> Self {
-        let size = Vector::new_usize(raw[0].len(), raw.len());
-        let mut paper = VectorSet::new(size);
-
-        for (y, line) in raw.iter().enumerate() {
-            for (x, c) in line.chars().enumerate() {
-                if c == '@' {
-                    paper.insert(Vector::new_usize(x, y));
-                }
-            }
-        }
-
-        Self { raw, paper, size }
+        let paper = VectorSet::from_grid(&raw, '@');
+        Self { raw, paper }
     }
 
     fn part_a(&self) -> Option<i64> {

@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use super::Vector;
 
 #[derive(Debug, Clone)]
@@ -15,6 +17,22 @@ impl VectorSet {
             size,
             count: 0,
         }
+    }
+
+    #[allow(dead_code)]
+    pub fn from_grid(grid: &[Rc<str>], ch: char) -> VectorSet {
+        let size = Vector::new_usize(grid[0].len(), grid.len());
+        let mut set = VectorSet::new(size);
+
+        for (y, line) in grid.iter().enumerate() {
+            for (x, c) in line.chars().enumerate() {
+                if c == ch {
+                    set.insert(Vector::new_usize(x, y));
+                }
+            }
+        }
+
+        set
     }
 
     #[allow(dead_code)]
