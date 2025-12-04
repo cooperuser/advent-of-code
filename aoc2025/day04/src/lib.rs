@@ -10,6 +10,17 @@ pub struct Day {
     size: Vector,
 }
 
+const ADJACENT: [Vector; 8] = [
+    Vector::new(-1, -1),
+    Vector::new(-1, 0),
+    Vector::new(-1, 1),
+    Vector::new(0, -1),
+    Vector::new(0, 1),
+    Vector::new(1, -1),
+    Vector::new(1, 0),
+    Vector::new(1, 1),
+];
+
 impl Solution<i64, i64> for Day {
     fn meta() -> Meta<i64, i64> {
         Meta::<i64, i64> {
@@ -38,29 +49,18 @@ impl Solution<i64, i64> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut accessible = 0;
-        for y in 0..self.size.y {
-            for x in 0..self.size.x {
-                if !self.paper.contains(Vector::new(x, y)) {
-                    continue;
-                }
-                let mut neighbors = 0;
-                for i in -1..=1 {
-                    for j in -1..=1 {
-                        if i == 0 && j == 0 {
-                            continue;
-                        }
 
-                        if self.paper.contains(Vector::new(x + i, y + j)) {
-                            neighbors += 1;
-                        }
-                    }
-                }
+        for pos in self.paper.iter() {
+            let neighbors = ADJACENT
+                .iter()
+                .filter(|&&adj| self.paper.contains(pos + adj))
+                .count();
 
-                if neighbors < 4 {
-                    accessible += 1;
-                }
+            if neighbors < 4 {
+                accessible += 1;
             }
         }
+
         Some(accessible)
     }
 
