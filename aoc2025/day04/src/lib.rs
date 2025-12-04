@@ -17,7 +17,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 13,
-            answer_b: 0,
+            answer_b: 43,
         }
     }
 
@@ -65,7 +65,43 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut paper = self.paper.clone();
+        let mut removed = true;
+        let mut num_removed = 0;
+
+        while removed {
+            removed = false;
+            let mut next_paper = paper.clone();
+            for y in 0..self.size.y {
+                for x in 0..self.size.x {
+                    if !paper.contains(Vector::new(x, y)) {
+                        continue;
+                    }
+
+                    let mut neighbors = 0;
+                    for i in -1..=1 {
+                        for j in -1..=1 {
+                            if i == 0 && j == 0 {
+                                continue;
+                            }
+
+                            if paper.contains(Vector::new(x + i, y + j)) {
+                                neighbors += 1;
+                            }
+                        }
+                    }
+
+                    if neighbors < 4 {
+                        next_paper.remove(Vector::new(x, y));
+                        num_removed += 1;
+                        removed = true;
+                    }
+                }
+            }
+            paper = next_paper;
+        }
+
+        Some(num_removed)
     }
 }
 
