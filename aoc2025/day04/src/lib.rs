@@ -70,8 +70,8 @@ impl Solution<i64, i64> for Day {
 
                 if neighbors < 4 {
                     next_paper.remove(pos);
-                    removed += 1;
                     finished = false;
+                    removed += 1;
                 }
             }
 
