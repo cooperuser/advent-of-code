@@ -34,22 +34,22 @@ impl Solution<u64, u64> for Day {
         let mut total = 0;
 
         for bank in &self.banks {
-            let max = bank.iter().max().unwrap();
-            if bank.iter().filter(|&n| n == max).count() > 1 {
-                total += max * 10 + max;
-                continue;
+            let mut joltage = 0;
+            let mut last = 0;
+
+            for i in 0..2 {
+                let max = bank
+                    .iter()
+                    .enumerate()
+                    .skip(last)
+                    .take(bank.len() - last - (1 - i))
+                    .rev()
+                    .max_by_key(|m| m.1)
+                    .unwrap();
+
+                last = max.0 + 1;
+                joltage = joltage * 10 + max.1;
             }
-
-            let pos = bank.iter().position(|n| n == max).unwrap();
-            let left = bank.iter().take(pos);
-            let right = bank.iter().skip(pos + 1);
-
-            let joltage = match (left.max(), right.max()) {
-                (Some(a), Some(b)) => (a * 10 + max).max(max * 10 + b),
-                (Some(a), None) => a * 10 + max,
-                (None, Some(b)) => max * 10 + b,
-                _ => unreachable!(),
-            };
 
             total += joltage;
         }
