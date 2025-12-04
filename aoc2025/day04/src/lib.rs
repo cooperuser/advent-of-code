@@ -66,42 +66,30 @@ impl Solution<i64, i64> for Day {
 
     fn part_b(&self) -> Option<i64> {
         let mut paper = self.paper.clone();
-        let mut removed = true;
-        let mut num_removed = 0;
+        let mut finished = false;
+        let mut removed = 0;
 
-        while removed {
-            removed = false;
+        while !finished {
+            finished = true;
             let mut next_paper = paper.clone();
-            for y in 0..self.size.y {
-                for x in 0..self.size.x {
-                    if !paper.contains(Vector::new(x, y)) {
-                        continue;
-                    }
 
-                    let mut neighbors = 0;
-                    for i in -1..=1 {
-                        for j in -1..=1 {
-                            if i == 0 && j == 0 {
-                                continue;
-                            }
+            for pos in paper.iter() {
+                let neighbors = ADJACENT
+                    .iter()
+                    .filter(|&&adj| paper.contains(pos + adj))
+                    .count();
 
-                            if paper.contains(Vector::new(x + i, y + j)) {
-                                neighbors += 1;
-                            }
-                        }
-                    }
-
-                    if neighbors < 4 {
-                        next_paper.remove(Vector::new(x, y));
-                        num_removed += 1;
-                        removed = true;
-                    }
+                if neighbors < 4 {
+                    next_paper.remove(pos);
+                    removed += 1;
+                    finished = false;
                 }
             }
+
             paper = next_paper;
         }
 
-        Some(num_removed)
+        Some(removed)
     }
 }
 
