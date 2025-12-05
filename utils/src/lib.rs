@@ -1,3 +1,4 @@
+pub mod countable;
 pub mod direction;
 pub mod graph;
 pub mod prelude;
