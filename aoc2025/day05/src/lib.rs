@@ -1,18 +1,14 @@
 #![feature(slice_split_once)]
 
-use utils::prelude::*;
+use std::ops::Range;
+
+use utils::{prelude::*, ranges::merge};
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
-    fresh: Vec<Range>,
+    fresh: Vec<Range<i64>>,
     available: Vec<i64>,
-}
-
-#[derive(Clone, Copy)]
-struct Range {
-    start: i64,
-    end: i64,
 }
 
 impl Solution<i64, i64> for Day {
@@ -50,7 +46,7 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut ranges = Self::merge_ranges(&self.fresh).into_iter();
+        let mut ranges = merge(&self.fresh).into_iter();
         let mut available = self.available.clone();
         available.sort();
 
@@ -74,32 +70,8 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        let ranges = Self::merge_ranges(&self.fresh);
+        let ranges = merge(&self.fresh);
         Some(ranges.iter().map(|r| r.end - r.start).sum())
-    }
-}
-
-impl Day {
-    #[allow(clippy::ptr_arg)]
-    fn merge_ranges(fresh: &Vec<Range>) -> Vec<Range> {
-        let mut fresh = fresh.clone();
-        let mut ranges = vec![];
-        fresh.sort_by_key(|r| r.start);
-
-        for range in fresh {
-            let mut last = *ranges.last().unwrap_or(&range);
-
-            if range.start < last.end {
-                last.end = range.end.max(last.end);
-                ranges.pop();
-            } else {
-                last = range;
-            }
-
-            ranges.push(last);
-        }
-
-        ranges
     }
 }
 
