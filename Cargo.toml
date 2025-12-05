@@ -76,7 +76,7 @@ aoc2025_day02 = { path = "aoc2025/day02" }
 aoc2025_day03 = { path = "aoc2025/day03" }
 aoc2025_day04 = { path = "aoc2025/day04" }
 aoc2025_day05 = { path = "aoc2025/day05" }
-# aoc2025_day06 = { path = "aoc2025/day06" }
+aoc2025_day06 = { path = "aoc2025/day06" }
 # aoc2025_day07 = { path = "aoc2025/day07" }
 # aoc2025_day08 = { path = "aoc2025/day08" }
 # aoc2025_day09 = { path = "aoc2025/day09" }
