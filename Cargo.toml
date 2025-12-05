@@ -9,6 +9,7 @@ members = [
 	"utils",
 	"aoc2023/*",
 	"aoc2024/*",
+	"aoc2025/*",
 ]
 
 [dependencies]
