@@ -1,12 +1,13 @@
 use utils::{
     prelude::*,
-    vector::{KINGS, VectorSet},
+    vector::{KINGS, Vector, VectorSet},
 };
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     paper: VectorSet,
+    size: Vector,
 }
 
 impl Solution<i64, i64> for Day {
@@ -22,7 +23,8 @@ impl Solution<i64, i64> for Day {
 
     fn new(raw: Vec<Rc<str>>) -> Self {
         let paper = VectorSet::from_grid(&raw, '@');
-        Self { raw, paper }
+        let size = Vector::new_usize(raw[0].len(), raw.len());
+        Self { raw, paper, size }
     }
 
     fn part_a(&self) -> Option<i64> {
@@ -49,22 +51,23 @@ impl Solution<i64, i64> for Day {
 
         while !finished {
             finished = true;
-            let mut next_paper = paper.clone();
 
-            for pos in paper.iter() {
+            for pos in self.size.iter() {
+                if !paper.contains(pos) {
+                    continue;
+                }
+
                 let neighbors = KINGS
                     .iter()
                     .filter(|&&adj| paper.contains(pos + adj))
                     .count();
 
                 if neighbors < 4 {
-                    next_paper.remove(pos);
+                    paper.remove(pos);
                     finished = false;
                     removed += 1;
                 }
             }
-
-            paper = next_paper;
         }
 
         Some(removed)
