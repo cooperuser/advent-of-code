@@ -23,20 +23,17 @@ impl Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<Rc<str>>) -> Self {
-        let (raw_fresh, raw_available) = raw.split_once(|line| line.is_empty()).unwrap();
-        let mut fresh = Vec::new();
-        let mut available = Vec::new();
-
-        for line in raw_fresh {
-            let (start, end) = line.split_once('-').unwrap();
-            let start = start.parse().unwrap();
-            let end = end.parse::<i64>().unwrap() + 1;
-            fresh.push(Range { start, end });
-        }
-
-        for line in raw_available {
-            available.push(line.parse().unwrap());
-        }
+        let (fresh, available) = raw.split_once(|line| line.is_empty()).unwrap();
+        let available = available.iter().map(|line| line.parse().unwrap()).collect();
+        let fresh = fresh
+            .iter()
+            .map(|line| {
+                let (start, end) = line.split_once('-').unwrap();
+                let start = start.parse().unwrap();
+                let end = end.parse::<i64>().unwrap() + 1;
+                start..end
+            })
+            .collect();
 
         Self {
             raw,
