@@ -10,9 +10,9 @@ pub struct Day {
     size: Vector,
 }
 
-impl Solution<i64, i64> for Day {
-    fn meta() -> Meta<i64, i64> {
-        Meta::<i64, i64> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -27,24 +27,22 @@ impl Solution<i64, i64> for Day {
         Self { raw, paper, size }
     }
 
-    fn part_a(&self) -> Option<i64> {
-        let mut accessible = 0;
-
-        for pos in self.paper.iter() {
-            let neighbors = KINGS
+    fn part_a(&self) -> Option<usize> {
+        Some(
+            self.paper
                 .iter()
-                .filter(|&&adj| self.paper.contains(pos + adj))
-                .count();
-
-            if neighbors < 4 {
-                accessible += 1;
-            }
-        }
-
-        Some(accessible)
+                .map(|pos| {
+                    KINGS
+                        .iter()
+                        .filter(|&&adj| self.paper.contains(pos + adj))
+                        .count()
+                })
+                .filter(|&neighbors| neighbors < 4)
+                .count(),
+        )
     }
 
-    fn part_b(&self) -> Option<i64> {
+    fn part_b(&self) -> Option<usize> {
         let mut paper = self.paper.clone();
         let mut finished = false;
         let mut removed = 0;
