@@ -50,21 +50,40 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
+        let mut ranges = Self::merge_ranges(&self.fresh).into_iter();
+        let mut available = self.available.clone();
+        available.sort();
+
         let mut count = 0;
-        'outer: for &a in &self.available {
-            for r in &self.fresh {
-                if a >= r.start && a <= r.end {
-                    count += 1;
-                    continue 'outer;
+        let mut range = ranges.next().unwrap();
+
+        for a in available {
+            while a > range.end {
+                range = match ranges.next() {
+                    Some(r) => r,
+                    None => break,
                 }
             }
+
+            if a >= range.start && a <= range.end {
+                count += 1;
+            }
         }
+
         Some(count)
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut fresh: Vec<_> = self.fresh.clone();
-        let mut ranges: Vec<Range> = vec![];
+        let ranges = Self::merge_ranges(&self.fresh);
+        Some(ranges.iter().map(|r| r.end - r.start).sum())
+    }
+}
+
+impl Day {
+    #[allow(clippy::ptr_arg)]
+    fn merge_ranges(fresh: &Vec<Range>) -> Vec<Range> {
+        let mut fresh = fresh.clone();
+        let mut ranges = vec![];
         fresh.sort_by_key(|r| r.start);
 
         for range in fresh {
@@ -80,7 +99,7 @@ impl Solution<i64, i64> for Day {
             ranges.push(last);
         }
 
-        Some(ranges.iter().map(|r| r.end - r.start).sum())
+        ranges
     }
 }
 
