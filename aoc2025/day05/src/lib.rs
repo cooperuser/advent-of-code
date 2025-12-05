@@ -1,14 +1,18 @@
 #![feature(slice_split_once)]
 
-use std::ops::{Range, RangeInclusive};
-
 use utils::prelude::*;
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
-    fresh: Vec<RangeInclusive<i64>>,
+    fresh: Vec<Range>,
     available: Vec<i64>,
+}
+
+#[derive(Clone, Copy)]
+struct Range {
+    start: i64,
+    end: i64,
 }
 
 impl Solution<i64, i64> for Day {
@@ -18,7 +22,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 3,
-            answer_b: 0,
+            answer_b: 14,
         }
     }
 
@@ -30,8 +34,8 @@ impl Solution<i64, i64> for Day {
         for line in raw_fresh {
             let (start, end) = line.split_once('-').unwrap();
             let start = start.parse().unwrap();
-            let end = end.parse().unwrap();
-            fresh.push(start..=end);
+            let end = end.parse::<i64>().unwrap() + 1;
+            fresh.push(Range { start, end });
         }
 
         for line in raw_available {
@@ -47,9 +51,9 @@ impl Solution<i64, i64> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut count = 0;
-        'outer: for a in &self.available {
+        'outer: for &a in &self.available {
             for r in &self.fresh {
-                if r.contains(a) {
+                if a >= r.start && a <= r.end {
                     count += 1;
                     continue 'outer;
                 }
@@ -59,7 +63,24 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut fresh: Vec<_> = self.fresh.clone();
+        let mut ranges: Vec<Range> = vec![];
+        fresh.sort_by_key(|r| r.start);
+
+        for range in fresh {
+            let mut last = *ranges.last().unwrap_or(&range);
+
+            if range.start < last.end {
+                last.end = range.end.max(last.end);
+                ranges.pop();
+            } else {
+                last = range;
+            }
+
+            ranges.push(last);
+        }
+
+        Some(ranges.iter().map(|r| r.end - r.start).sum())
     }
 }
 
