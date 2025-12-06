@@ -4,19 +4,28 @@ pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     columns: Vec<Column>,
-    columns2: Vec<Column>,
+    numbers: Vec<Vec<Option<i64>>>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 enum Operation {
     Plus,
     Star,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 struct Column {
     operation: Operation,
     rows: Vec<i64>,
+}
+
+impl Column {
+    fn compute(&self) -> i64 {
+        match self.operation {
+            Operation::Plus => self.rows.iter().sum(),
+            Operation::Star => self.rows.iter().product(),
+        }
+    }
 }
 
 impl Solution<i64, i64> for Day {
@@ -33,17 +42,14 @@ impl Solution<i64, i64> for Day {
     fn new(raw: Vec<Rc<str>>) -> Self {
         let mut columns = Vec::new();
 
-        let numbers: Vec<Vec<_>> = raw
+        let numbers: Vec<Vec<Option<i64>>> = raw
             .iter()
             .take(raw.len() - 1)
             .map(|line| {
                 line.chars()
-                    .map(|c| {
-                        if c == ' ' {
-                            None
-                        } else {
-                            Some(c.to_string().parse::<i64>().unwrap())
-                        }
+                    .map(|c| match c != ' ' {
+                        true => Some(c.to_string().parse::<i64>().unwrap()),
+                        false => None,
                     })
                     .collect()
             })
@@ -61,62 +67,45 @@ impl Solution<i64, i64> for Day {
             })
         }
 
-        let mut columns2 = columns.clone();
+        Self {
+            raw,
+            columns,
+            numbers,
+        }
+    }
 
-        for line in raw.iter().take(raw.len() - 1) {
+    fn part_a(&self) -> Option<i64> {
+        let mut columns = self.columns.clone();
+
+        for line in self.raw.iter().take(self.raw.len() - 1) {
             let cs = line.split_whitespace();
             for (column, number) in cs.enumerate() {
                 columns[column].rows.push(number.parse().unwrap());
             }
         }
 
+        Some(columns.iter().map(Column::compute).sum())
+    }
+
+    fn part_b(&self) -> Option<i64> {
+        let mut columns = self.columns.clone();
+
         let mut column = 0;
-        for x in 0..raw[0].len() {
+        for c in 0..self.numbers[0].len() {
             let mut number = 0;
-            for y in 0..raw.len() - 1 {
-                if let Some(n) = numbers[y][x] {
+            for row in &self.numbers {
+                if let Some(n) = row[c] {
                     number = number * 10 + n;
                 }
             }
 
-            if number != 0 {
-                columns2[column].rows.push(number);
-            }
-
-            if number == 0 || x == raw[0].len() - 1 {
-                column += 1;
+            match number != 0 {
+                true => columns[column].rows.push(number),
+                false => column += 1,
             }
         }
 
-        Self {
-            raw,
-            columns,
-            columns2,
-        }
-    }
-
-    fn part_a(&self) -> Option<i64> {
-        Some(
-            self.columns
-                .iter()
-                .map(|column| match column.operation {
-                    Operation::Plus => column.rows.iter().sum::<i64>(),
-                    Operation::Star => column.rows.iter().product(),
-                })
-                .sum(),
-        )
-    }
-
-    fn part_b(&self) -> Option<i64> {
-        Some(
-            self.columns2
-                .iter()
-                .map(|column| match column.operation {
-                    Operation::Plus => column.rows.iter().sum::<i64>(),
-                    Operation::Star => column.rows.iter().product(),
-                })
-                .sum(),
-        )
+        Some(columns.iter().map(Column::compute).sum())
     }
 }
 
