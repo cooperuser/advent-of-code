@@ -11,9 +11,9 @@ pub struct Day {
     start: i64,
 }
 
-impl Solution<i64, usize> for Day {
-    fn meta() -> Meta<i64, usize> {
-        Meta::<i64, usize> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -34,7 +34,7 @@ impl Solution<i64, usize> for Day {
         }
     }
 
-    fn part_a(&self) -> Option<i64> {
+    fn part_a(&self) -> Option<usize> {
         let mut count = 0;
         let mut beams = VectorSet::new(self.size);
         beams.insert(Vector::new(self.start, 0));
