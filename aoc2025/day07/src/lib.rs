@@ -59,7 +59,7 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        let mut beams = VectorMap::<usize>::new(self.size);
+        let mut beams = VectorMap::new(self.size);
         beams.insert(Vector::new(self.start, 0), 1);
 
         for y in 0..self.size.y {
