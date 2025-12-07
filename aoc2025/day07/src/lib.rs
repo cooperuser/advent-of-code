@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use utils::{
     prelude::*,
@@ -20,7 +20,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 21,
-            answer_b: 0,
+            answer_b: 40,
         }
     }
 
@@ -37,13 +37,15 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let mut beams = HashSet::new();
         let mut count = 0;
+        let mut beams = HashSet::new();
         beams.insert(self.start);
+
         for y in 0..self.size.y {
             let mut next = HashSet::new();
+
             for &beam in &beams {
-                if self.map.contains(Vector::new(beam, y as i64)) {
+                if self.map.contains(Vector::new(beam, y)) {
                     next.insert(beam - 1);
                     next.insert(beam + 1);
                     count += 1;
@@ -51,13 +53,33 @@ impl Solution<i64, i64> for Day {
                     next.insert(beam);
                 }
             }
+
             beams = next;
         }
+
         Some(count)
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut beams = HashMap::new();
+        beams.insert(self.start, 1);
+
+        for y in 0..self.size.y {
+            let mut next = HashMap::new();
+
+            for (beam, c) in beams {
+                if self.map.contains(Vector::new(beam, y)) {
+                    *next.entry(beam - 1).or_default() += c;
+                    *next.entry(beam + 1).or_default() += c;
+                } else {
+                    *next.entry(beam).or_default() += c;
+                }
+            }
+
+            beams = next;
+        }
+
+        Some(beams.values().sum())
     }
 }
 
