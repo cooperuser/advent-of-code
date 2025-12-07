@@ -38,16 +38,14 @@ impl Solution<u64, u64> for Day {
             let mut last = 0;
 
             for i in 0..2 {
-                let max = bank
+                let max = bank[last..bank.len() - (1 - i)]
                     .iter()
                     .enumerate()
-                    .skip(last)
-                    .take(bank.len() - last - (1 - i))
                     .rev()
                     .max_by_key(|m| m.1)
                     .unwrap();
 
-                last = max.0 + 1;
+                last += max.0 + 1;
                 joltage = joltage * 10 + max.1;
             }
 
@@ -65,16 +63,14 @@ impl Solution<u64, u64> for Day {
             let mut last = 0;
 
             for i in 0..12 {
-                let max = bank
+                let max = bank[last..bank.len() - (11 - i)]
                     .iter()
                     .enumerate()
-                    .skip(last)
-                    .take(bank.len() - last - (11 - i))
                     .rev()
                     .max_by_key(|m| m.1)
                     .unwrap();
 
-                last = max.0 + 1;
+                last += max.0 + 1;
                 joltage = joltage * 10 + max.1;
             }
 
