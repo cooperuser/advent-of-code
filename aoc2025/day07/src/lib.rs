@@ -26,6 +26,7 @@ impl Solution<usize, usize> for Day {
         let map = VectorSet::from_grid(&raw, '^');
         let size = Vector::new_usize(raw[0].len(), raw.len());
         let start = raw[0].chars().position(|c| c == 'S').unwrap() as i64;
+
         Self {
             raw,
             map,
@@ -35,9 +36,9 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_a(&self) -> Option<usize> {
-        let mut count = 0;
         let mut beams = VectorSet::new(self.size);
         beams.insert(Vector::new(self.start, 0));
+        let mut count = 0;
 
         for y in 0..self.size.y {
             for x in 0..self.size.x {
