@@ -1,8 +1,6 @@
-use std::collections::{HashMap, HashSet};
-
 use utils::{
     prelude::*,
-    vector::{Vector, VectorSet},
+    vector::{Vector, VectorMap, VectorSet},
 };
 
 pub struct Day {
@@ -13,9 +11,9 @@ pub struct Day {
     start: i64,
 }
 
-impl Solution<i64, i64> for Day {
-    fn meta() -> Meta<i64, i64> {
-        Meta::<i64, i64> {
+impl Solution<i64, usize> for Day {
+    fn meta() -> Meta<i64, usize> {
+        Meta::<i64, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
@@ -38,48 +36,59 @@ impl Solution<i64, i64> for Day {
 
     fn part_a(&self) -> Option<i64> {
         let mut count = 0;
-        let mut beams = HashSet::new();
-        beams.insert(self.start);
+        let mut beams = VectorSet::new(self.size);
+        beams.insert(Vector::new(self.start, 0));
 
         for y in 0..self.size.y {
-            let mut next = HashSet::new();
+            for x in 0..self.size.x {
+                if !beams.contains(Vector::new(x, y)) {
+                    continue;
+                }
 
-            for &beam in &beams {
-                if self.map.contains(Vector::new(beam, y)) {
-                    next.insert(beam - 1);
-                    next.insert(beam + 1);
+                if self.map.contains(Vector::new(x, y)) {
+                    beams.insert(Vector::new(x - 1, y + 1));
+                    beams.insert(Vector::new(x + 1, y + 1));
                     count += 1;
                 } else {
-                    next.insert(beam);
+                    beams.insert(Vector::new(x, y + 1));
                 }
             }
-
-            beams = next;
         }
 
         Some(count)
     }
 
-    fn part_b(&self) -> Option<i64> {
-        let mut beams = HashMap::new();
-        beams.insert(self.start, 1);
+    fn part_b(&self) -> Option<usize> {
+        let mut beams = VectorMap::<usize>::new(self.size);
+        beams.insert(Vector::new(self.start, 0), 1);
 
         for y in 0..self.size.y {
-            let mut next = HashMap::new();
+            for x in 0..self.size.x {
+                let Some(c) = beams.get(Vector::new(x, y)) else {
+                    continue;
+                };
 
-            for (beam, c) in beams {
-                if self.map.contains(Vector::new(beam, y)) {
-                    *next.entry(beam - 1).or_default() += c;
-                    *next.entry(beam + 1).or_default() += c;
+                if self.map.contains(Vector::new(x, y)) {
+                    let pos = Vector::new(x - 1, y + 1);
+                    beams.insert(pos, beams.get(pos).unwrap_or_default() + c);
+                    let pos = Vector::new(x + 1, y + 1);
+                    beams.insert(pos, beams.get(pos).unwrap_or_default() + c);
                 } else {
-                    *next.entry(beam).or_default() += c;
+                    let pos = Vector::new(x, y + 1);
+                    beams.insert(pos, beams.get(pos).unwrap_or_default() + c);
                 }
             }
-
-            beams = next;
         }
 
-        Some(beams.values().sum())
+        Some(
+            (0..self.size.x)
+                .map(|x| {
+                    beams
+                        .get(Vector::new(x, self.size.y - 1))
+                        .unwrap_or_default()
+                })
+                .sum(),
+        )
     }
 }
 
