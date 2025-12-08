@@ -53,40 +53,54 @@ impl Solution<i64, i64> for Day {
         let mut distances: Vec<_> = self.distances.iter().collect();
         distances.sort_by_key(|a| a.1);
 
-        let mut graph: Vec<Vec<bool>> = vec![vec![false; length]; length];
-        #[allow(clippy::needless_range_loop)]
-        for i in 0..length {
-            graph[i][i] = true;
-        }
+        // let mut graph: Vec<Vec<bool>> = vec![vec![false; length]; length];
+        // #[allow(clippy::needless_range_loop)]
+        // for i in 0..length {
+        //     graph[i][i] = true;
+        // }
+
+        let mut labels: Vec<_> = (0..length).collect();
 
         let mut circuits = 0;
         for (a, b) in distances.iter().map(|&(&pair, _)| pair) {
-            let va = self.boxes[a];
-            let vb = self.boxes[b];
-            if graph[a][b] {
-                println!("Skipping {:?} and {:?}", va, vb);
+            let label_a = labels[a];
+            let label_b = labels[b];
+            if label_a == label_b {
                 continue;
             }
 
-            println!("Connecting {:?} and {:?}", va, vb);
-            graph[a][b] = true;
-            graph[b][a] = true;
+            let lowest = label_a.min(label_b);
+            println!("{label_a}, {label_b}, {lowest}");
+            labels = labels
+                .iter()
+                .map(|&label| {
+                    if label == label_a || label == label_b {
+                        lowest
+                    } else {
+                        label
+                    }
+                })
+                .collect();
 
-            #[allow(clippy::needless_range_loop)]
-            for c in 0..length {
-                if graph[a][c] || graph[b][c] {
-                    graph[a][c] = true;
-                    graph[c][a] = true;
-                    graph[b][c] = true;
-                    graph[c][b] = true;
-                }
+            // println!("{:?}", labels);
+            let mut map: HashMap<usize, i64> = HashMap::new();
+
+            for &label in &labels {
+                *map.entry(label).or_default() += 1;
             }
 
+            let mut values: Vec<_> = map.values().cloned().collect();
+            values.sort();
+            values.reverse();
+            println!("{:?}", values);
+
             circuits += 1;
-            if circuits >= connections {
+            if circuits >= connections - 1 {
                 break;
             }
         }
+
+        println!("{:?}", labels);
 
         // let mut sets = Vec::new();
         // let mut visited = HashSet::new();
@@ -116,22 +130,36 @@ impl Solution<i64, i64> for Day {
         //     sets.push(set.len() as i64);
         // }
 
-        let mut map: HashMap<Vec<usize>, i64> = HashMap::new();
-        for line in &graph {
-            let row: Vec<_> = line
-                .iter()
-                .enumerate()
-                .filter(|&(_, &linked)| linked)
-                .map(|(i, _)| i)
-                .collect();
-            *map.entry(row).or_default() += 1;
+        // let mut map: HashMap<Vec<usize>, i64> = HashMap::new();
+        // for line in &graph {
+        //     let row: Vec<_> = line
+        //         .iter()
+        //         .enumerate()
+        //         .filter(|&(_, &linked)| linked)
+        //         .map(|(i, _)| i)
+        //         .collect();
+        //     *map.entry(row).or_default() += 1;
+        // }
+        //
+        // for (k, v) in &map {
+        //     println!("{v}: {k:?}");
+        // }
+        //
+        // #[allow(clippy::needless_range_loop)]
+        // for y in 0..length {
+        //     #[allow(clippy::needless_range_loop)]
+        //     for x in 0..length {
+        //         assert_eq!(graph[y][x], graph[x][y]);
+        //     }
+        // }
+        //
+        // print_graph(&graph);
+        let mut map: HashMap<usize, i64> = HashMap::new();
+
+        for &label in &labels {
+            *map.entry(label).or_default() += 1;
         }
 
-        for (k, v) in &map {
-            println!("{v}: {k:?}");
-        }
-
-        print_graph(&graph);
         let mut values: Vec<_> = map.values().cloned().collect();
         values.sort();
         values.reverse();
