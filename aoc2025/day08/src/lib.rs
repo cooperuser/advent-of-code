@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashMap;
 
 use utils::{prelude::*, vector3::Vector3};
 
@@ -22,19 +22,11 @@ impl Solution<i64, i64> for Day {
 
     fn new(raw: Vec<Rc<str>>) -> Self {
         let mut boxes = Vec::new();
-        let mut min = Vector3::new(i64::MAX, i64::MAX, i64::MAX);
-        let mut max = Vector3::new(i64::MIN, i64::MIN, i64::MIN);
         for line in &raw {
             let mut parts = line.split(',');
             let x = parts.next().unwrap().parse().unwrap();
             let y = parts.next().unwrap().parse().unwrap();
             let z = parts.next().unwrap().parse().unwrap();
-            min.x = min.x.min(x);
-            min.y = min.y.min(y);
-            min.z = min.z.min(z);
-            max.x = max.x.max(x);
-            max.y = max.y.max(y);
-            max.z = max.z.max(z);
             boxes.push(Vector3::new(x, y, z));
         }
 
@@ -55,13 +47,15 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_a(&self) -> Option<i64> {
-        let connections = if self.boxes.len() < 30 { 10 } else { 1000 };
+        let length = self.boxes.len();
+        let connections = if length < 30 { 10 } else { 1000 };
 
         let mut distances: Vec<_> = self.distances.iter().collect();
         distances.sort_by_key(|a| a.1);
 
-        let mut graph: Vec<Vec<bool>> = vec![vec![false; self.boxes.len()]; self.boxes.len()];
-        for (i, _) in self.boxes.iter().enumerate() {
+        let mut graph: Vec<Vec<bool>> = vec![vec![false; length]; length];
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..length {
             graph[i][i] = true;
         }
 
@@ -79,20 +73,12 @@ impl Solution<i64, i64> for Day {
             graph[b][a] = true;
 
             #[allow(clippy::needless_range_loop)]
-            for c in 0..self.boxes.len() {
-                if graph[a][c] {
-                    // if !graph[b][c] {
-                    //     println!("{b} and {c}");
-                    // }
-                    graph[b][c] = true;
-                    graph[c][b] = true;
-                }
-                if graph[b][c] && !graph[a][c] {
-                    // if !graph[a][c] {
-                    //     println!("{a} and {c}");
-                    // }
+            for c in 0..length {
+                if graph[a][c] || graph[b][c] {
                     graph[a][c] = true;
                     graph[c][a] = true;
+                    graph[b][c] = true;
+                    graph[c][b] = true;
                 }
             }
 
@@ -104,7 +90,7 @@ impl Solution<i64, i64> for Day {
 
         // let mut sets = Vec::new();
         // let mut visited = HashSet::new();
-        // for b in 0..self.boxes.len() {
+        // for b in 0..length {
         //     if !visited.insert(b) {
         //         continue;
         //     }
@@ -120,7 +106,7 @@ impl Solution<i64, i64> for Day {
         //         }
         //
         //         #[allow(clippy::needless_range_loop)]
-        //         for c in 0..self.boxes.len() {
+        //         for c in 0..length {
         //             if graph[r#box][c] {
         //                 queue.push_back(c);
         //             }
@@ -130,16 +116,26 @@ impl Solution<i64, i64> for Day {
         //     sets.push(set.len() as i64);
         // }
 
-        let mut map: HashMap<Vec<bool>, i64> = HashMap::new();
+        let mut map: HashMap<Vec<usize>, i64> = HashMap::new();
         for line in &graph {
-            *map.entry(line.clone()).or_default() += 1;
+            let row: Vec<_> = line
+                .iter()
+                .enumerate()
+                .filter(|&(_, &linked)| linked)
+                .map(|(i, _)| i)
+                .collect();
+            *map.entry(row).or_default() += 1;
         }
-        println!("{:?}", map.values());
+
+        for (k, v) in &map {
+            println!("{v}: {k:?}");
+        }
 
         print_graph(&graph);
         let mut values: Vec<_> = map.values().cloned().collect();
         values.sort();
         values.reverse();
+        println!("{:?}", values);
 
         Some(values.iter().take(3).product())
     }
@@ -150,6 +146,7 @@ impl Solution<i64, i64> for Day {
 }
 
 fn print_graph(graph: &Vec<Vec<bool>>) {
+    let mut strings = Vec::new();
     for y in graph {
         let mut s = Vec::new();
         for x in y {
@@ -160,7 +157,13 @@ fn print_graph(graph: &Vec<Vec<bool>>) {
             }
         }
         println!("{}", s.join(" "));
+        strings.push(s.join(" "));
     }
+    // println!();
+    // strings.sort();
+    // for line in strings {
+    //     println!("{}", line);
+    // }
 }
 
 utils::solution::test_solution!(aoc2025, day08);
