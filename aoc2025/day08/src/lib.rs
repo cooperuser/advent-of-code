@@ -16,7 +16,7 @@ impl Solution<i64, i64> for Day {
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 40,
-            answer_b: 0,
+            answer_b: 25272,
         }
     }
 
@@ -35,7 +35,6 @@ impl Solution<i64, i64> for Day {
             for (j, &b) in boxes[i + 1..].iter().enumerate() {
                 let distance = (b - a).sqr_distance();
                 distances.insert((i, i + j + 1), distance);
-                // distance_map.insert((b, a), distance);
             }
         }
 
@@ -87,7 +86,25 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        None
+        let mut distances: Vec<_> = self.distances.iter().collect();
+        distances.sort_by_key(|a| a.1);
+
+        let mut seen: HashSet<usize> = HashSet::new();
+        let mut count = 0;
+        for (a, b) in distances.iter().map(|&(&pair, _)| pair) {
+            seen.insert(a);
+            seen.insert(b);
+            if seen.len() == self.boxes.len() {
+                break;
+            }
+            count += 1;
+        }
+
+        let &(a, b) = distances[count].0;
+        let a = self.boxes[a];
+        let b = self.boxes[b];
+
+        Some(a.x * b.x)
     }
 }
 
