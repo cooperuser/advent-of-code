@@ -68,12 +68,9 @@ impl Solution<i64, i64> for Day {
             let lowest = label_a.min(label_b);
             labels = labels
                 .iter()
-                .map(|&label| {
-                    if label == label_a || label == label_b {
-                        lowest
-                    } else {
-                        label
-                    }
+                .map(|&label| match label == label_a || label == label_b {
+                    true => lowest,
+                    false => label,
                 })
                 .collect();
         }
@@ -99,6 +96,7 @@ impl Solution<i64, i64> for Day {
             if seen.len() == self.boxes.len() {
                 break;
             }
+
             count += 1;
         }
 
