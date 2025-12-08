@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use utils::{prelude::*, vector3::Vector3};
 
@@ -53,16 +53,8 @@ impl Solution<i64, i64> for Day {
         let mut distances: Vec<_> = self.distances.iter().collect();
         distances.sort_by_key(|a| a.1);
 
-        // let mut graph: Vec<Vec<bool>> = vec![vec![false; length]; length];
-        // #[allow(clippy::needless_range_loop)]
-        // for i in 0..length {
-        //     graph[i][i] = true;
-        // }
-
         let mut labels: Vec<_> = (0..length).collect();
-
-        let mut circuits = 0;
-        for (a, b) in distances.iter().map(|&(&pair, _)| pair) {
+        for (a, b) in distances.iter().map(|&(&pair, _)| pair).take(connections) {
             let label_a = labels[a];
             let label_b = labels[b];
             if label_a == label_b {
@@ -70,7 +62,6 @@ impl Solution<i64, i64> for Day {
             }
 
             let lowest = label_a.min(label_b);
-            println!("{label_a}, {label_b}, {lowest}");
             labels = labels
                 .iter()
                 .map(|&label| {
@@ -81,81 +72,9 @@ impl Solution<i64, i64> for Day {
                     }
                 })
                 .collect();
-
-            // println!("{:?}", labels);
-            let mut map: HashMap<usize, i64> = HashMap::new();
-
-            for &label in &labels {
-                *map.entry(label).or_default() += 1;
-            }
-
-            let mut values: Vec<_> = map.values().cloned().collect();
-            values.sort();
-            values.reverse();
-            println!("{:?}", values);
-
-            circuits += 1;
-            if circuits >= connections - 1 {
-                break;
-            }
         }
 
-        println!("{:?}", labels);
-
-        // let mut sets = Vec::new();
-        // let mut visited = HashSet::new();
-        // for b in 0..length {
-        //     if !visited.insert(b) {
-        //         continue;
-        //     }
-        //     let mut set = HashSet::new();
-        //     let mut queue = VecDeque::from([b]);
-        //     while let Some(r#box) = queue.pop_front() {
-        //         visited.insert(r#box);
-        //         // if !visited.insert(r#box) {
-        //         //     continue;
-        //         // }
-        //         if !set.insert(r#box) {
-        //             continue;
-        //         }
-        //
-        //         #[allow(clippy::needless_range_loop)]
-        //         for c in 0..length {
-        //             if graph[r#box][c] {
-        //                 queue.push_back(c);
-        //             }
-        //         }
-        //     }
-        //     println!("{:?}", set);
-        //     sets.push(set.len() as i64);
-        // }
-
-        // let mut map: HashMap<Vec<usize>, i64> = HashMap::new();
-        // for line in &graph {
-        //     let row: Vec<_> = line
-        //         .iter()
-        //         .enumerate()
-        //         .filter(|&(_, &linked)| linked)
-        //         .map(|(i, _)| i)
-        //         .collect();
-        //     *map.entry(row).or_default() += 1;
-        // }
-        //
-        // for (k, v) in &map {
-        //     println!("{v}: {k:?}");
-        // }
-        //
-        // #[allow(clippy::needless_range_loop)]
-        // for y in 0..length {
-        //     #[allow(clippy::needless_range_loop)]
-        //     for x in 0..length {
-        //         assert_eq!(graph[y][x], graph[x][y]);
-        //     }
-        // }
-        //
-        // print_graph(&graph);
         let mut map: HashMap<usize, i64> = HashMap::new();
-
         for &label in &labels {
             *map.entry(label).or_default() += 1;
         }
@@ -163,7 +82,6 @@ impl Solution<i64, i64> for Day {
         let mut values: Vec<_> = map.values().cloned().collect();
         values.sort();
         values.reverse();
-        println!("{:?}", values);
 
         Some(values.iter().take(3).product())
     }
@@ -187,11 +105,6 @@ fn print_graph(graph: &Vec<Vec<bool>>) {
         println!("{}", s.join(" "));
         strings.push(s.join(" "));
     }
-    // println!();
-    // strings.sort();
-    // for line in strings {
-    //     println!("{}", line);
-    // }
 }
 
 utils::solution::test_solution!(aoc2025, day08);
