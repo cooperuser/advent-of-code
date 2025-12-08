@@ -85,6 +85,10 @@ impl Vector3 {
         }
     }
 
+    pub const fn sqr_distance(&self) -> i64 {
+        self.x * self.x + self.y * self.y + self.z * self.z
+    }
+
     pub const fn volume(&self) -> i64 {
         self.x * self.y * self.z
     }
