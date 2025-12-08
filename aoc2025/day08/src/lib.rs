@@ -6,7 +6,7 @@ pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     boxes: Vec<Vector3>,
-    distances: HashMap<(usize, usize), i64>,
+    distances: Vec<((usize, usize), i64)>,
 }
 
 impl Solution<i64, i64> for Day {
@@ -30,13 +30,16 @@ impl Solution<i64, i64> for Day {
             boxes.push(Vector3::new(x, y, z));
         }
 
-        let mut distances: HashMap<(usize, usize), i64> = HashMap::new();
+        let mut map: HashMap<(usize, usize), i64> = HashMap::new();
         for (i, &a) in boxes[..boxes.len() - 1].iter().enumerate() {
             for (j, &b) in boxes[i + 1..].iter().enumerate() {
                 let distance = (b - a).sqr_distance();
-                distances.insert((i, i + j + 1), distance);
+                map.insert((i, i + j + 1), distance);
             }
         }
+
+        let mut distances: Vec<((usize, usize), i64)> = map.into_iter().collect();
+        distances.sort_by_key(|&(_, distance)| distance);
 
         Self {
             raw,
@@ -49,11 +52,13 @@ impl Solution<i64, i64> for Day {
         let length = self.boxes.len();
         let connections = if length < 30 { 10 } else { 1000 };
 
-        let mut distances: Vec<_> = self.distances.iter().collect();
-        distances.sort_by_key(|a| a.1);
-
         let mut labels: Vec<_> = (0..length).collect();
-        for (a, b) in distances.iter().map(|&(&pair, _)| pair).take(connections) {
+        for (a, b) in self
+            .distances
+            .iter()
+            .map(|&(pair, _)| pair)
+            .take(connections)
+        {
             let label_a = labels[a];
             let label_b = labels[b];
             if label_a == label_b {
@@ -86,12 +91,9 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut distances: Vec<_> = self.distances.iter().collect();
-        distances.sort_by_key(|a| a.1);
-
         let mut seen: HashSet<usize> = HashSet::new();
         let mut count = 0;
-        for (a, b) in distances.iter().map(|&(&pair, _)| pair) {
+        for (a, b) in self.distances.iter().map(|&(pair, _)| pair) {
             seen.insert(a);
             seen.insert(b);
             if seen.len() == self.boxes.len() {
@@ -100,27 +102,11 @@ impl Solution<i64, i64> for Day {
             count += 1;
         }
 
-        let &(a, b) = distances[count].0;
+        let (a, b) = self.distances[count].0;
         let a = self.boxes[a];
         let b = self.boxes[b];
 
         Some(a.x * b.x)
-    }
-}
-
-fn print_graph(graph: &Vec<Vec<bool>>) {
-    let mut strings = Vec::new();
-    for y in graph {
-        let mut s = Vec::new();
-        for x in y {
-            if *x {
-                s.push("x");
-            } else {
-                s.push(".");
-            }
-        }
-        println!("{}", s.join(" "));
-        strings.push(s.join(" "));
     }
 }
 
