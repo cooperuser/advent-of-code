@@ -75,13 +75,13 @@ impl Day {
         let min = a.min(b);
         let max = a.max(b);
 
-        for &(seg_a, seg_b, dir) in &self.segments {
+        for &(a, b, dir) in &self.segments {
             match dir {
                 // Handle vertical edges
                 Direction::North | Direction::South => {
-                    if seg_a.x > min.x && seg_a.x < max.x {
-                        let min_y = seg_a.y.min(seg_b.y);
-                        let max_y = seg_a.y.max(seg_b.y);
+                    if a.x > min.x && a.x < max.x {
+                        let min_y = a.y.min(b.y);
+                        let max_y = a.y.max(b.y);
                         if min.y.max(min_y) < max.y.min(max_y) {
                             return false;
                         }
@@ -89,9 +89,9 @@ impl Day {
                 }
                 // Handle horizontal edges
                 Direction::East | Direction::West => {
-                    if seg_a.y > min.y && seg_a.y < max.y {
-                        let min_x = seg_a.x.min(seg_b.x);
-                        let max_x = seg_a.x.max(seg_b.x);
+                    if a.y > min.y && a.y < max.y {
+                        let min_x = a.x.min(b.x);
+                        let max_x = a.x.max(b.x);
                         if min.x.max(min_x) < max.x.min(max_x) {
                             return false;
                         }
@@ -103,14 +103,14 @@ impl Day {
         // Count intersections
         let center = (max + min) / 2;
         let mut intersections = 0;
-        for &(seg_a, seg_b, _) in &self.segments {
-            if seg_a.x != seg_b.x {
+        for &(a, b, _) in &self.segments {
+            if a.x != b.x {
                 continue;
             }
 
-            if seg_a.x > center.x {
-                let min_y = seg_a.y.min(seg_b.y);
-                let max_y = seg_a.y.max(seg_b.y);
+            if a.x > center.x {
+                let min_y = a.y.min(b.y);
+                let max_y = a.y.max(b.y);
                 if center.y > min_y && center.y < max_y {
                     intersections += 1;
                 }
