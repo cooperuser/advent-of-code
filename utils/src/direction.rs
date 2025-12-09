@@ -124,6 +124,7 @@ impl std::fmt::Display for Direction {
     }
 }
 
+#[derive(Debug)]
 pub struct NonCardinalVectorError;
 
 impl TryFrom<Vector> for Direction {
