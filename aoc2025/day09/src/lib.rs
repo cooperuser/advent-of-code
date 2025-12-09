@@ -106,13 +106,13 @@ impl Day {
         let center = (max + min) / 2;
         let mut intersections = 0;
         for &(a, b, edge) in &self.segments {
-            if edge == Edge::Horizontal || a.x <= center.x {
+            if edge == Edge::Vertical || a.y <= center.y {
                 continue;
             }
 
-            let min_y = a.y.min(b.y);
-            let max_y = a.y.max(b.y);
-            if center.y > min_y && center.y < max_y {
+            let min_x = a.x.min(b.x);
+            let max_x = a.x.max(b.x);
+            if min_x < center.x && max_x > center.x {
                 intersections += 1;
             }
         }
