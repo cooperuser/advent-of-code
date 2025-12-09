@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use utils::{prelude::*, vector3::Vector3};
+use utils::{disjointset::DisjointSet, prelude::*, vector3::Vector3};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -51,69 +51,31 @@ impl Solution<i64, i64> for Day {
     fn part_a(&self) -> Option<i64> {
         let length = self.boxes.len();
         let connections = if length < 30 { 10 } else { 1000 };
+        let mut set = DisjointSet::new(length);
 
-        let mut labels: Vec<_> = (0..length).collect();
         for &((a, b), _) in self.distances.iter().take(connections) {
-            let a = labels[a];
-            let b = labels[b];
-            if a == b {
-                continue;
-            }
-
-            let lowest = a.min(b);
-            labels = labels
-                .iter()
-                .map(|&label| match label == a || label == b {
-                    true => lowest,
-                    false => label,
-                })
-                .collect();
+            set.union(a, b);
         }
 
-        let mut map: HashMap<usize, i64> = HashMap::new();
-        for &label in &labels {
-            *map.entry(label).or_default() += 1;
-        }
+        let mut sizes = set.sizes();
+        sizes.sort();
 
-        let mut values: Vec<_> = map.values().cloned().collect();
-        values.sort();
-        values.reverse();
-
-        Some(values.iter().take(3).product())
+        Some(sizes.iter().rev().take(3).map(|&n| n as i64).product())
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut labels: Vec<_> = (0..self.boxes.len()).collect();
+        let length = self.boxes.len();
+        let mut set = DisjointSet::new(length);
         let mut count = 0;
 
-        for &((a, b), _) in &self.distances {
-            count += 1;
-
-            let a = labels[a];
-            let b = labels[b];
-            if a == b {
-                continue;
-            }
-
-            let lowest = a.min(b);
-            let mut single = true;
-            labels = labels
-                .iter()
-                .map(|&label| match label == a || label == b {
-                    true => lowest,
-                    false => {
-                        single = false;
-                        label
-                    }
-                })
-                .collect();
-
-            if single {
+        for &((a, b), _) in self.distances.iter() {
+            if set.union(a, b) == length {
                 break;
             }
+            count += 1;
         }
 
-        let (a, b) = self.distances[count - 1].0;
+        let (a, b) = self.distances[count].0;
         let a = self.boxes[a];
         let b = self.boxes[b];
 
