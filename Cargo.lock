@@ -77,6 +77,7 @@ dependencies = [
  "aoc2025_day07",
  "aoc2025_day08",
  "aoc2025_day09",
+ "aoc2025_day10",
  "clap",
  "utils",
 ]
@@ -224,6 +225,13 @@ dependencies = [
 
 [[package]]
 name = "aoc2025_day09"
+version = "0.1.0"
+dependencies = [
+ "utils",
+]
+
+[[package]]
+name = "aoc2025_day10"
 version = "0.1.0"
 dependencies = [
  "utils",
