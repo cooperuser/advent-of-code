@@ -137,6 +137,10 @@ impl Vector {
         let y = if self.y > other.y { self.y } else { other.y };
         Vector::new(x, y)
     }
+
+    pub const fn abs(&self) -> Vector {
+        Vector::new(self.x.abs(), self.y.abs())
+    }
 }
 
 impl std::ops::Add<Vector> for Vector {
