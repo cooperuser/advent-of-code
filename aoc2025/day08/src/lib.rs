@@ -53,22 +53,17 @@ impl Solution<i64, i64> for Day {
         let connections = if length < 30 { 10 } else { 1000 };
 
         let mut labels: Vec<_> = (0..length).collect();
-        for (a, b) in self
-            .distances
-            .iter()
-            .map(|&(pair, _)| pair)
-            .take(connections)
-        {
-            let label_a = labels[a];
-            let label_b = labels[b];
-            if label_a == label_b {
+        for &((a, b), _) in self.distances.iter().take(connections) {
+            let a = labels[a];
+            let b = labels[b];
+            if a == b {
                 continue;
             }
 
-            let lowest = label_a.min(label_b);
+            let lowest = a.min(b);
             labels = labels
                 .iter()
-                .map(|&label| match label == label_a || label == label_b {
+                .map(|&label| match label == a || label == b {
                     true => lowest,
                     false => label,
                 })
@@ -91,20 +86,20 @@ impl Solution<i64, i64> for Day {
         let mut labels: Vec<_> = (0..self.boxes.len()).collect();
         let mut count = 0;
 
-        for (a, b) in self.distances.iter().map(|&(pair, _)| pair) {
+        for &((a, b), _) in &self.distances {
             count += 1;
 
-            let label_a = labels[a];
-            let label_b = labels[b];
-            if label_a == label_b {
+            let a = labels[a];
+            let b = labels[b];
+            if a == b {
                 continue;
             }
 
-            let lowest = label_a.min(label_b);
+            let lowest = a.min(b);
             let mut single = true;
             labels = labels
                 .iter()
-                .map(|&label| match label == label_a || label == label_b {
+                .map(|&label| match label == a || label == b {
                     true => lowest,
                     false => {
                         single = false;
