@@ -1,10 +1,14 @@
-use utils::{direction::Direction, prelude::*, vector::Vector};
+use utils::{
+    direction::{Direction, Edge},
+    prelude::*,
+    vector::Vector,
+};
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
     tiles: Vec<Vector>,
-    segments: Vec<(Vector, Vector, Direction)>,
+    segments: Vec<(Vector, Vector, Edge)>,
 }
 
 impl Solution<i64, i64> for Day {
@@ -31,7 +35,7 @@ impl Solution<i64, i64> for Day {
             .windows(2)
             .map(|window| (window[0], window[1]))
             .chain([(*tiles.last().unwrap(), *tiles.first().unwrap())])
-            .map(|(a, b)| (a, b, Direction::try_from(b - a).unwrap()))
+            .map(|(a, b)| (a, b, Direction::try_from(b - a).unwrap().to_edge()))
             .collect();
 
         Self {
@@ -75,10 +79,9 @@ impl Day {
         let min = a.min(b);
         let max = a.max(b);
 
-        for &(a, b, dir) in &self.segments {
-            match dir {
-                // Handle vertical edges
-                Direction::North | Direction::South => {
+        for &(a, b, edge) in &self.segments {
+            match edge {
+                Edge::Vertical => {
                     if a.x > min.x && a.x < max.x {
                         let min_y = a.y.min(b.y);
                         let max_y = a.y.max(b.y);
@@ -87,8 +90,7 @@ impl Day {
                         }
                     }
                 }
-                // Handle horizontal edges
-                Direction::East | Direction::West => {
+                Edge::Horizontal => {
                     if a.y > min.y && a.y < max.y {
                         let min_x = a.x.min(b.x);
                         let max_x = a.x.max(b.x);
@@ -103,17 +105,15 @@ impl Day {
         // Count intersections
         let center = (max + min) / 2;
         let mut intersections = 0;
-        for &(a, b, _) in &self.segments {
-            if a.x != b.x {
+        for &(a, b, edge) in &self.segments {
+            if edge == Edge::Horizontal || a.x <= center.x {
                 continue;
             }
 
-            if a.x > center.x {
-                let min_y = a.y.min(b.y);
-                let max_y = a.y.max(b.y);
-                if center.y > min_y && center.y < max_y {
-                    intersections += 1;
-                }
+            let min_y = a.y.min(b.y);
+            let max_y = a.y.max(b.y);
+            if center.y > min_y && center.y < max_y {
+                intersections += 1;
             }
         }
 

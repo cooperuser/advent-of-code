@@ -17,6 +17,12 @@ pub enum Direction {
     West,
 }
 
+#[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
+pub enum Edge {
+    Vertical,
+    Horizontal,
+}
+
 impl Direction {
     #[allow(dead_code)]
     pub const fn rotate_right(&self) -> Self {
@@ -45,6 +51,13 @@ impl Direction {
             Self::South => Self::North,
             Self::East => Self::West,
             Self::West => Self::East,
+        }
+    }
+
+    pub const fn to_edge(&self) -> Edge {
+        match self {
+            Self::North | Self::South => Edge::Vertical,
+            Self::East | Self::West => Edge::Horizontal,
         }
     }
 
