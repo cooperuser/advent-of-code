@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use utils::{prelude::*, vector3::Vector3};
 
@@ -88,19 +88,37 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut seen: HashSet<usize> = HashSet::new();
+        let mut labels: Vec<_> = (0..self.boxes.len()).collect();
         let mut count = 0;
+
         for (a, b) in self.distances.iter().map(|&(pair, _)| pair) {
-            seen.insert(a);
-            seen.insert(b);
-            if seen.len() == self.boxes.len() {
-                break;
+            count += 1;
+
+            let label_a = labels[a];
+            let label_b = labels[b];
+            if label_a == label_b {
+                continue;
             }
 
-            count += 1;
+            let lowest = label_a.min(label_b);
+            let mut single = true;
+            labels = labels
+                .iter()
+                .map(|&label| match label == label_a || label == label_b {
+                    true => lowest,
+                    false => {
+                        single = false;
+                        label
+                    }
+                })
+                .collect();
+
+            if single {
+                break;
+            }
         }
 
-        let (a, b) = self.distances[count].0;
+        let (a, b) = self.distances[count - 1].0;
         let a = self.boxes[a];
         let b = self.boxes[b];
 
