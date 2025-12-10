@@ -12,17 +12,18 @@ pub struct Day {
 struct Machine {
     lights: usize,
     buttons: Vec<usize>,
-    requirements: Vec<i64>,
+    schematics: Vec<Vec<usize>>,
+    requirements: Vec<usize>,
 }
 
-impl Solution<i64, i64> for Day {
-    fn meta() -> Meta<i64, i64> {
-        Meta::<i64, i64> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample.txt").to_string(),
             answer_a: 7,
-            answer_b: 0,
+            answer_b: 33,
         }
     }
 
@@ -49,7 +50,8 @@ impl Solution<i64, i64> for Day {
                 requirements.push(requirement.parse().unwrap());
             }
 
-            let mut buttons: Vec<usize> = Vec::new();
+            let mut buttons = Vec::new();
+            let mut schematics = Vec::new();
             for button in raw_buttons {
                 buttons.push(
                     button[1..button.len() - 1]
@@ -58,11 +60,18 @@ impl Solution<i64, i64> for Day {
                         .map(|n| 2usize.pow(n))
                         .sum(),
                 );
+                schematics.push(
+                    button[1..button.len() - 1]
+                        .split(',')
+                        .map(|n| n.parse().unwrap())
+                        .collect(),
+                );
             }
 
             machines.push(Machine {
                 lights,
                 buttons,
+                schematics,
                 requirements,
             })
         }
@@ -70,27 +79,52 @@ impl Solution<i64, i64> for Day {
         Self { raw, machines }
     }
 
-    fn part_a(&self) -> Option<i64> {
-        let mut presses = 0;
+    fn part_a(&self) -> Option<usize> {
+        let mut total_presses = 0;
+
         for machine in &self.machines {
-            let mut queue = VecDeque::new();
-            queue.push_back((0, 0));
-            while let Some(state) = queue.pop_front() {
-                if state.1 == machine.lights {
-                    presses += state.0;
+            let mut queue = VecDeque::from([(0, 0, None)]);
+            while let Some((presses, lights, last)) = queue.pop_front() {
+                if lights == machine.lights {
+                    total_presses += presses;
                     break;
                 }
 
-                for button in &machine.buttons {
-                    queue.push_back((state.0 + 1, state.1 ^ button));
+                for (i, button) in machine.buttons.iter().enumerate() {
+                    if Some(i) == last {
+                        continue;
+                    }
+
+                    queue.push_back((presses + 1, lights ^ button, Some(i)));
                 }
             }
         }
-        Some(presses)
+
+        Some(total_presses)
     }
 
-    fn part_b(&self) -> Option<i64> {
-        None
+    fn part_b(&self) -> Option<usize> {
+        let mut total_presses = 0;
+
+        for machine in &self.machines {
+            let mut queue = VecDeque::from([(0, 0, vec![0; machine.requirements.len()])]);
+            while let Some((presses, lights, reqs)) = queue.pop_front() {
+                if lights == machine.lights && reqs == machine.requirements {
+                    total_presses += presses;
+                    break;
+                }
+
+                for (button, schematics) in machine.buttons.iter().zip(&machine.schematics) {
+                    let mut requirements = reqs.clone();
+                    for &i in schematics {
+                        requirements[i] += 1;
+                    }
+                    queue.push_back((presses + 1, lights ^ button, requirements));
+                }
+            }
+        }
+
+        Some(total_presses)
     }
 }
 
