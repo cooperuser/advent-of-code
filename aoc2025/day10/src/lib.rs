@@ -1,6 +1,4 @@
-use std::{collections::VecDeque, time::Instant};
-
-use utils::prelude::*;
+use utils::{gaussjordan::GaussJordan, prelude::*};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -80,81 +78,47 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_a(&self) -> Option<usize> {
-        let mut total_presses = 0;
-
-        for machine in &self.machines {
-            let mut queue = VecDeque::from([(0, 0, 0)]);
-            let mut seen = HashSet::new();
-            while let Some((presses, lights, pressed)) = queue.pop_front() {
-                if lights == machine.lights {
-                    total_presses += presses;
-                    break;
-                }
-
-                for (index, button) in machine.buttons.iter().enumerate() {
-                    let flag = 1 << index;
-                    if pressed & flag != 0 || !seen.insert(pressed | flag) {
-                        continue;
-                    }
-
-                    queue.push_back((presses + 1, lights ^ button, pressed | flag));
-                }
-            }
-        }
-
-        Some(total_presses)
+        Some(self.machines.iter().map(Machine::min_presses).sum())
     }
 
     fn part_b(&self) -> Option<usize> {
-        let start = Instant::now();
-        let mut total_presses = 0;
+        None
+    }
+}
 
-        for (m, machine) in self.machines.iter().enumerate() {
-            let mut queue = VecDeque::from([(
-                0,
-                vec![0; machine.buttons.len()],
-                vec![0; machine.requirements.len()],
-            )]);
-            let mut last_presses = 0;
-            while let Some((presses, pressed, reqs)) = queue.pop_front() {
-                if presses > last_presses {
-                    // println!("{presses} ({} in the queue)", queue.len());
-                    last_presses = presses;
-                } else if reqs == machine.requirements {
-                    // println!("Adding {presses}");
-                    total_presses += presses;
-                    break;
-                }
+impl Machine {
+    fn min_presses(&self) -> usize {
+        (1..(1 << self.buttons.len()))
+            .filter(|&pressed| {
+                let lights = self
+                    .buttons
+                    .iter()
+                    .enumerate()
+                    .filter_map(|(shift, button)| (pressed & (1 << shift) != 0).then_some(button))
+                    .fold(0, |lights, button| lights ^ button);
 
-                if reqs.iter().zip(&machine.requirements).any(|(a, b)| a > b) {
-                    continue;
-                }
+                lights == self.lights
+            })
+            .map(usize::count_ones)
+            .min()
+            .unwrap() as usize
+    }
 
-                for (index, schematic) in machine.schematics.iter().enumerate() {
-                    let offset = 1;
-                    let pressed = pressed
-                        .iter()
-                        .enumerate()
-                        .map(|(i, &n)| match i == index {
-                            true => n + offset,
-                            false => n,
-                        })
-                        .collect();
-
-                    let mut reqs = reqs.clone();
-                    for &l in schematic {
-                        reqs[l] += offset;
-                    }
-
-                    queue.push_back((presses + offset, pressed, reqs));
+    fn solve(&self) -> usize {
+        let mut gauss = GaussJordan::new(self.requirements.len(), self.schematics.len() + 1);
+        for (r, &requirement) in self.requirements.iter().enumerate() {
+            for (b, button) in self.schematics.iter().enumerate() {
+                if button.contains(&r) {
+                    gauss.insert(r, b, 1.0);
                 }
             }
-            println!("{}/{}", m + 1, self.machines.len());
+            gauss.insert(r, self.schematics.len(), requirement as f64);
         }
-
-        println!("{:?}", start.elapsed());
-
-        Some(total_presses)
+        gauss.pretty_print();
+        gauss.solve_reduce();
+        println!();
+        gauss.pretty_print();
+        0
     }
 }
 
