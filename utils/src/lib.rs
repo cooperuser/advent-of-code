@@ -1,6 +1,7 @@
 pub mod countable;
 pub mod direction;
 pub mod disjointset;
+pub mod gaussjordan;
 pub mod graph;
 pub mod prelude;
 pub mod ranges;
