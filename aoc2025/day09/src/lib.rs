@@ -59,18 +59,23 @@ impl Solution<i64, i64> for Day {
     }
 
     fn part_b(&self) -> Option<i64> {
-        let mut max = 0;
+        let mut rectanges = Vec::new();
 
         for (i, &a) in self.tiles.iter().enumerate() {
             for &b in self.tiles.iter().skip(i + 1) {
-                if self.is_in_path(a, b) {
-                    let diff = (b - a).abs() + Vector::new(1, 1);
-                    max = max.max(diff.area());
-                }
+                let diff = (b - a).abs() + Vector::new(1, 1);
+                rectanges.push((diff.area(), a, b));
             }
         }
 
-        Some(max)
+        rectanges.sort_by_key(|a| a.0);
+        for &(area, a, b) in rectanges.iter().rev() {
+            if self.is_in_path(a, b) {
+                return Some(area);
+            }
+        }
+
+        None
     }
 }
 
