@@ -83,7 +83,7 @@ impl Solution<usize, usize> for Day {
         let mut total_presses = 0;
 
         for machine in &self.machines {
-            let mut queue = VecDeque::from([(0, 0, vec![false; machine.buttons.len()])]);
+            let mut queue = VecDeque::from([(0, 0, 0)]);
             while let Some((presses, lights, pressed)) = queue.pop_front() {
                 if lights == machine.lights {
                     total_presses += presses;
@@ -91,20 +91,12 @@ impl Solution<usize, usize> for Day {
                 }
 
                 for (index, button) in machine.buttons.iter().enumerate() {
-                    if pressed[index] {
+                    let flag = 1 << index;
+                    if pressed & flag != 0 {
                         continue;
                     }
 
-                    let pressed = pressed
-                        .iter()
-                        .enumerate()
-                        .map(|(i, &p)| match i == index {
-                            true => true,
-                            false => p,
-                        })
-                        .collect();
-
-                    queue.push_back((presses + 1, lights ^ button, pressed));
+                    queue.push_back((presses + 1, lights ^ button, pressed | flag));
                 }
             }
         }
