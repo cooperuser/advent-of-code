@@ -10,8 +10,8 @@ pub struct Day {
 
 #[derive(Debug)]
 struct Machine {
-    lights: Vec<bool>,
-    buttons: Vec<Vec<usize>>,
+    lights: usize,
+    buttons: Vec<usize>,
     requirements: Vec<i64>,
 }
 
@@ -35,18 +35,29 @@ impl Solution<i64, i64> for Day {
             let raw_requirements = parts[parts.len() - 1];
             let raw_requirements = &raw_requirements[1..raw_requirements.len() - 1];
             let raw_buttons: Vec<_> = parts.iter().skip(1).take(parts.len() - 2).collect();
-            let mut lights = Vec::new();
-            for &light in &raw_lights[1..raw_lights.len() - 1] {
-                lights.push(light == '#');
+
+            let mut lights = 0;
+            for &light in raw_lights[1..raw_lights.len() - 1].iter().rev() {
+                lights <<= 1;
+                if light == '#' {
+                    lights += 1;
+                }
             }
+
             let mut requirements = Vec::new();
             for requirement in raw_requirements.split(',') {
                 requirements.push(requirement.parse().unwrap());
             }
-            let mut buttons: Vec<Vec<_>> = Vec::new();
-            for s in raw_buttons {
-                let s = &s[1..s.len() - 1];
-                buttons.push(s.split(',').map(|n| n.parse().unwrap()).collect());
+
+            let mut buttons: Vec<usize> = Vec::new();
+            for button in raw_buttons {
+                buttons.push(
+                    button[1..button.len() - 1]
+                        .split(',')
+                        .map(|n| n.parse().unwrap())
+                        .map(|n| 2usize.pow(n))
+                        .sum(),
+                );
             }
 
             machines.push(Machine {
@@ -63,7 +74,7 @@ impl Solution<i64, i64> for Day {
         let mut presses = 0;
         for machine in &self.machines {
             let mut queue = VecDeque::new();
-            queue.push_back((0, vec![false; machine.lights.len()]));
+            queue.push_back((0, 0));
             while let Some(state) = queue.pop_front() {
                 if state.1 == machine.lights {
                     presses += state.0;
@@ -71,11 +82,7 @@ impl Solution<i64, i64> for Day {
                 }
 
                 for button in &machine.buttons {
-                    let mut lights = state.1.clone();
-                    for &b in button {
-                        lights[b] ^= true;
-                    }
-                    queue.push_back((state.0 + 1, lights));
+                    queue.push_back((state.0 + 1, state.1 ^ button));
                 }
             }
         }
