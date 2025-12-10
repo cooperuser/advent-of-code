@@ -84,6 +84,7 @@ impl Solution<usize, usize> for Day {
 
         for machine in &self.machines {
             let mut queue = VecDeque::from([(0, 0, 0)]);
+            let mut seen = HashSet::new();
             while let Some((presses, lights, pressed)) = queue.pop_front() {
                 if lights == machine.lights {
                     total_presses += presses;
@@ -92,7 +93,7 @@ impl Solution<usize, usize> for Day {
 
                 for (index, button) in machine.buttons.iter().enumerate() {
                     let flag = 1 << index;
-                    if pressed & flag != 0 {
+                    if pressed & flag != 0 || !seen.insert(pressed | flag) {
                         continue;
                     }
 
