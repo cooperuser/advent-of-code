@@ -107,19 +107,54 @@ impl Solution<usize, usize> for Day {
         let mut total_presses = 0;
 
         for machine in &self.machines {
-            let mut queue = VecDeque::from([(0, 0, vec![0; machine.requirements.len()])]);
+            let mut queue = VecDeque::from([(
+                vec![0; machine.buttons.len()],
+                0,
+                vec![0; machine.requirements.len()],
+            )]);
+            let mut state: Option<(Vec<usize>, Vec<usize>)> = None;
             while let Some((presses, lights, reqs)) = queue.pop_front() {
-                if lights == machine.lights && reqs == machine.requirements {
-                    total_presses += presses;
+                if lights == machine.lights {
+                    state = Some((presses, reqs));
                     break;
                 }
 
-                for (button, schematics) in machine.buttons.iter().zip(&machine.schematics) {
+                for (index, (button, schematics)) in
+                    machine.buttons.iter().zip(&machine.schematics).enumerate()
+                {
                     let mut requirements = reqs.clone();
                     for &i in schematics {
                         requirements[i] += 1;
                     }
-                    queue.push_back((presses + 1, lights ^ button, requirements));
+                    let presses = presses
+                        .iter()
+                        .enumerate()
+                        .map(|(i, &b)| match i == index {
+                            true => b + 1,
+                            false => b,
+                        })
+                        .collect();
+                    queue.push_back((presses, lights ^ button, requirements));
+                }
+            }
+
+            let state = state.unwrap();
+            let presses = state.0.iter().filter(|&&n| n > 0).count();
+            let mut queue = VecDeque::from([(state.0, presses, state.1)]);
+            while let Some((pressed, presses, reqs)) = queue.pop_front() {
+                if reqs == machine.requirements {
+                    total_presses += presses;
+                    break;
+                }
+
+                for schematics in &machine.schematics {
+                    let mut pressed = pressed.clone();
+                    let mut reqs = reqs.clone();
+                    for (i, &s) in schematics.iter().enumerate() {
+                        pressed[i] += 2;
+                        reqs[s] += 2;
+                    }
+                    queue.push_back((pressed, presses + 2, reqs));
                 }
             }
         }
