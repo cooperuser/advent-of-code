@@ -81,7 +81,7 @@ aoc2025_day07 = { path = "aoc2025/day07" }
 aoc2025_day08 = { path = "aoc2025/day08" }
 aoc2025_day09 = { path = "aoc2025/day09" }
 aoc2025_day10 = { path = "aoc2025/day10" }
-# aoc2025_day11 = { path = "aoc2025/day11" }
+aoc2025_day11 = { path = "aoc2025/day11" }
 # aoc2025_day12 = { path = "aoc2025/day12" }
 
 # itertools = "0.13.0"
