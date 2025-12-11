@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 
 use utils::prelude::*;
 
@@ -8,9 +8,9 @@ pub struct Day {
     devices: HashMap<Rc<str>, HashSet<Rc<str>>>,
 }
 
-impl Solution<i64, i64> for Day {
-    fn meta() -> Meta<i64, i64> {
-        Meta::<i64, i64> {
+impl Solution<usize, usize> for Day {
+    fn meta() -> Meta<usize, usize> {
+        Meta::<usize, usize> {
             input: include_str!("input.txt").to_string(),
             sample_a: include_str!("input_sample.txt").to_string(),
             sample_b: include_str!("input_sample_b.txt").to_string(),
@@ -20,45 +20,57 @@ impl Solution<i64, i64> for Day {
     }
 
     fn new(raw: Vec<Rc<str>>) -> Self {
-        let mut devices = HashMap::new();
-        for line in &raw {
-            let (name, connections) = line.split_once(": ").unwrap();
-            devices.insert(
-                name.into(),
-                connections.split_whitespace().map(|s| s.into()).collect(),
-            );
-        }
+        let devices = raw
+            .iter()
+            .map(|line| {
+                let (name, connections) = line.split_once(": ").unwrap();
+                (
+                    name.into(),
+                    connections.split_whitespace().map(|s| s.into()).collect(),
+                )
+            })
+            .collect();
+
         Self { raw, devices }
     }
 
-    fn part_a(&self) -> Option<i64> {
-        let mut queue: VecDeque<(Rc<str>, HashSet<Rc<str>>)> =
-            VecDeque::from([("you".into(), HashSet::new())]);
-        let target: Rc<str> = "out".into();
-        let mut paths = 0;
-        while let Some((pos, seen)) = queue.pop_front() {
-            if pos == target {
-                paths += 1;
-                continue;
-            }
-
-            let Some(connections) = self.devices.get(&pos) else {
-                panic!("Not found: {pos}");
-            };
-            for c in connections {
-                if seen.contains(c) {
-                    continue;
-                }
-                let mut seen = seen.clone();
-                seen.insert(c.clone());
-                queue.push_back((c.clone(), seen));
-            }
-        }
-        Some(paths)
+    fn part_a(&self) -> Option<usize> {
+        Some(self.count_paths(&mut HashMap::new(), "you".into(), true, true))
     }
 
-    fn part_b(&self) -> Option<i64> {
-        None
+    fn part_b(&self) -> Option<usize> {
+        Some(self.count_paths(&mut HashMap::new(), "svr".into(), false, false))
+    }
+}
+
+impl Day {
+    fn count_paths(
+        &self,
+        cache: &mut HashMap<(Rc<str>, bool, bool), usize>,
+        pos: Rc<str>,
+        dac: bool,
+        fft: bool,
+    ) -> usize {
+        if let Some(&count) = cache.get(&(pos.clone(), dac, fft)) {
+            return count;
+        }
+
+        let (dac, fft) = match pos.to_string().as_str() {
+            "out" => return (dac && fft) as usize,
+            "dac" => (true, fft),
+            "fft" => (dac, true),
+            _ => (dac, fft),
+        };
+
+        let count = self
+            .devices
+            .get(&pos)
+            .unwrap()
+            .iter()
+            .map(|next| self.count_paths(cache, next.clone(), dac, fft))
+            .sum();
+        cache.insert((pos, dac, fft), count);
+        count
     }
 }
 
