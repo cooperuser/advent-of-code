@@ -8,3 +8,4 @@ doctest = false
 
 [dependencies]
 utils = { path = "../../utils" }
+z3 = "0.19.6"

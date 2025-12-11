@@ -1,4 +1,5 @@
-use utils::{gaussjordan::GaussJordan, prelude::*};
+use utils::prelude::*;
+use z3::{Solver, ast::Int};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -82,7 +83,15 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        None
+        let mut sum = 0;
+
+        for (m, machine) in self.machines.iter().enumerate() {
+            sum += machine.solve();
+            println!("{:?}", m);
+        }
+
+        Some(sum)
+        // Some(self.machines.iter().map(Machine::solve).sum())
     }
 }
 
@@ -105,20 +114,39 @@ impl Machine {
     }
 
     fn solve(&self) -> usize {
-        let mut gauss = GaussJordan::new(self.requirements.len(), self.schematics.len() + 1);
+        let solver = Solver::new();
+        let null = Int::fresh_const("null");
+        solver.assert(null.eq(0));
+        let mut buttons = Vec::new();
+
+        for b in 0..self.buttons.len() {
+            let button = Int::fresh_const(format!("button_{b}").as_str());
+            solver.assert(button.ge(0));
+            buttons.push(button);
+        }
+
         for (r, &requirement) in self.requirements.iter().enumerate() {
+            let mut equation = null.clone();
             for (b, button) in self.schematics.iter().enumerate() {
                 if button.contains(&r) {
-                    gauss.insert(r, b, 1.0);
+                    equation += &buttons[b];
                 }
             }
-            gauss.insert(r, self.schematics.len(), requirement as f64);
+            solver.assert(equation.eq(requirement as i64));
         }
-        gauss.pretty_print();
-        gauss.solve_reduce();
-        println!();
-        gauss.pretty_print();
-        0
+
+        let mut min: usize = usize::MAX;
+        for solution in solver.solutions(buttons, false) {
+            let sum = solution
+                .iter()
+                .map(Int::as_u64)
+                .map(Option::unwrap)
+                .sum::<u64>() as usize;
+
+            min = min.min(sum);
+        }
+
+        min
     }
 }
 
