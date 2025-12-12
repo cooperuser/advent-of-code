@@ -12,5 +12,5 @@ pub const DAYS: &[fn(bool) -> Run] = &[
     aoc2025_day09::Day::run,
     aoc2025_day10::Day::run,
     aoc2025_day11::Day::run,
-    // aoc2025_day12::Day::run,
+    aoc2025_day12::Day::run,
 ];
