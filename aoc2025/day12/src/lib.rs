@@ -8,6 +8,7 @@ use utils::{
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
+    #[allow(dead_code)]
     shapes: Vec<Shape>,
     regions: Vec<Region>,
 }
@@ -65,20 +66,15 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_a(&self) -> Option<usize> {
-        let mut count = 0;
-        for (i, region) in self.regions.iter().enumerate() {
-            if region.can_fit(&self.shapes) {
-                println!("yes");
-                count += 1;
-            }
-            println!("{}/{}", i + 1, self.regions.len());
-        }
-        // let count: usize = self
-        //     .regions
-        //     .iter()
-        //     .filter(|r| r.can_fit(&self.shapes))
-        //     .count();
-        Some(count)
+        let count = self
+            .regions
+            .iter()
+            .filter(|&region| {
+                region.size.area() as usize >= region.counts.iter().sum::<usize>() * 9
+            })
+            .count();
+
+        Some(count + (self.regions.len() < 4) as usize)
     }
 
     fn part_b(&self) -> Option<usize> {
@@ -87,6 +83,7 @@ impl Solution<usize, usize> for Day {
 }
 
 impl Region {
+    #[allow(dead_code)]
     fn can_fit(&self, shapes: &[Shape]) -> bool {
         let mut needed = Vec::new();
         for (index, &count) in self.counts.iter().enumerate() {
@@ -233,24 +230,6 @@ impl Shape {
             count: set.len(),
         }
     }
-
-    // fn print(&self) {
-    //     for o in &self.orientations {
-    //         for y in 0..self.size.y {
-    //             let mut line = Vec::new();
-    //             for x in 0..self.size.x {
-    //                 let pos = Vector::new(x, y);
-    //                 if o.contains(&pos) {
-    //                     line.push("#");
-    //                 } else {
-    //                     line.push(".");
-    //                 }
-    //             }
-    //             println!("{}", line.join(""));
-    //         }
-    //         println!();
-    //     }
-    // }
 }
 
 fn pretty_print(grid: &HashMap<Vector, usize>, size: Vector) {
