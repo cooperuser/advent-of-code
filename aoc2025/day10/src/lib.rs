@@ -1,5 +1,7 @@
+use std::collections::HashMap;
+
+use itertools::Itertools;
 use utils::prelude::*;
-use z3::{Solver, ast::Int};
 
 pub struct Day {
     #[allow(dead_code)]
@@ -83,15 +85,7 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        let mut sum = 0;
-
-        for (m, machine) in self.machines.iter().enumerate() {
-            sum += machine.solve();
-            println!("{:?}", m);
-        }
-
-        Some(sum)
-        // Some(self.machines.iter().map(Machine::solve).sum())
+        Some(self.machines.iter().map(Machine::solve).sum())
     }
 }
 
@@ -113,40 +107,75 @@ impl Machine {
             .unwrap() as usize
     }
 
-    fn solve(&self) -> usize {
-        let solver = Solver::new();
-        let null = Int::fresh_const("null");
-        solver.assert(null.eq(0));
-        let mut buttons = Vec::new();
+    fn coefficients(&self) -> Vec<Vec<isize>> {
+        self.schematics
+            .iter()
+            .map(|button| {
+                let mut coefficients = vec![0; self.requirements.len()];
+                for &light in button {
+                    coefficients[light] = 1;
+                }
+                coefficients
+            })
+            .collect()
+    }
 
-        for b in 0..self.buttons.len() {
-            let button = Int::fresh_const(format!("button_{b}").as_str());
-            solver.assert(button.ge(0));
-            buttons.push(button);
+    fn patterns(&self) -> HashMap<Vec<isize>, usize> {
+        let mut patterns = HashMap::new();
+        let coefficients = self.coefficients();
+
+        for pattern_len in 0..=self.buttons.len() {
+            for buttons in (0..self.buttons.len()).combinations(pattern_len) {
+                let mut pattern = vec![0; self.requirements.len()];
+
+                for &i in &buttons {
+                    for (p, &c) in pattern.iter_mut().zip(&coefficients[i]) {
+                        *p += c;
+                    }
+                }
+
+                patterns.entry(pattern).or_insert(pattern_len);
+            }
         }
 
-        for (r, &requirement) in self.requirements.iter().enumerate() {
-            let mut equation = null.clone();
-            for (b, button) in self.schematics.iter().enumerate() {
-                if button.contains(&r) {
-                    equation += &buttons[b];
+        patterns
+    }
+
+    fn solve(&self) -> usize {
+        fn helper(
+            cache: &mut HashMap<Vec<isize>, usize>,
+            costs: &HashMap<Vec<isize>, usize>,
+            goal: &[isize],
+        ) -> usize {
+            if let Some(&previous) = cache.get(goal) {
+                return previous;
+            }
+
+            if goal.iter().all(|&n| n == 0) {
+                return 0;
+            }
+
+            // For some reason, usize::MAX / 2 does not work, but 3 does.
+            // I use 4 to be safe, in case other input files don't work.
+            let mut answer = usize::MAX / 4;
+            for (pattern, &cost) in costs {
+                if pattern
+                    .iter()
+                    .zip(goal)
+                    .all(|(a, b)| a <= b && a % 2 == b % 2)
+                {
+                    let goal: Vec<_> = pattern.iter().zip(goal).map(|(a, b)| (b - a) / 2).collect();
+                    let sub = helper(cache, costs, &goal);
+                    answer = answer.min(cost + 2 * sub);
                 }
             }
-            solver.assert(equation.eq(requirement as i64));
+
+            cache.insert(goal.to_vec(), answer);
+            answer
         }
 
-        let mut min: usize = usize::MAX;
-        for solution in solver.solutions(buttons, false) {
-            let sum = solution
-                .iter()
-                .map(Int::as_u64)
-                .map(Option::unwrap)
-                .sum::<u64>() as usize;
-
-            min = min.min(sum);
-        }
-
-        min
+        let goal: Vec<_> = self.requirements.iter().map(|&n| n as isize).collect();
+        helper(&mut HashMap::new(), &self.patterns(), &goal)
     }
 }
 

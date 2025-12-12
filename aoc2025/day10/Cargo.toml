@@ -7,5 +7,6 @@ edition = "2024"
 doctest = false
 
 [dependencies]
+itertools = "0.14.0"
 utils = { path = "../../utils" }
-z3 = "0.19.6"
+# z3 = "0.19.6"
