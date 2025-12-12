@@ -45,7 +45,7 @@ impl Solution<i64, i64> for Day {
                 let right: Vec<_> = right.split(',').map(|n| n.parse().unwrap()).collect();
                 let left = Vector3::new(left[0], left[1], left[2]);
                 let right = Vector3::new(right[0], right[1], right[2]);
-                (left, Vector3::add(right, one))
+                (left, Vector3::raw_add(right, one))
             })
             .collect();
         blocks.sort_by_key(|block| block.0.z);

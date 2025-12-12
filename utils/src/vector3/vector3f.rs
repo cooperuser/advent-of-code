@@ -35,7 +35,7 @@ impl Vector3f {
         ZERO
     }
 
-    pub fn add(a: Vector3f, b: Vector3f) -> Self {
+    pub fn raw_add(a: Vector3f, b: Vector3f) -> Self {
         Self {
             x: a.x + b.x,
             y: a.y + b.y,
@@ -43,7 +43,7 @@ impl Vector3f {
         }
     }
 
-    pub fn sub(a: Vector3f, b: Vector3f) -> Self {
+    pub fn raw_sub(a: Vector3f, b: Vector3f) -> Self {
         Self {
             x: a.x - b.x,
             y: a.y - b.y,
@@ -174,7 +174,7 @@ impl std::ops::Add<Vector3f> for Vector3f {
     type Output = Vector3f;
 
     fn add(self, rhs: Vector3f) -> Self::Output {
-        Vector3f::add(self, rhs)
+        Vector3f::raw_add(self, rhs)
     }
 }
 
@@ -182,7 +182,7 @@ impl std::ops::Sub<Vector3f> for Vector3f {
     type Output = Vector3f;
 
     fn sub(self, rhs: Vector3f) -> Self::Output {
-        Vector3f::sub(self, rhs)
+        Vector3f::raw_sub(self, rhs)
     }
 }
 

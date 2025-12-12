@@ -86,6 +86,11 @@ impl VectorSet {
     }
 
     #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.count == 0
+    }
+
+    #[allow(dead_code)]
     pub fn extend(&mut self, other: &VectorSet) {
         for v in other.iter() {
             self.insert(v);

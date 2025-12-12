@@ -67,14 +67,14 @@ impl Vector {
         ZERO
     }
 
-    pub const fn add(a: Vector, b: Vector) -> Self {
+    pub const fn raw_add(a: Vector, b: Vector) -> Self {
         Self {
             x: a.x + b.x,
             y: a.y + b.y,
         }
     }
 
-    pub const fn sub(a: Vector, b: Vector) -> Self {
+    pub const fn raw_sub(a: Vector, b: Vector) -> Self {
         Self {
             x: a.x - b.x,
             y: a.y - b.y,
@@ -147,7 +147,7 @@ impl std::ops::Add<Vector> for Vector {
     type Output = Vector;
 
     fn add(self, rhs: Vector) -> Self::Output {
-        Vector::add(self, rhs)
+        Vector::raw_add(self, rhs)
     }
 }
 
@@ -155,7 +155,7 @@ impl std::ops::Sub<Vector> for Vector {
     type Output = Vector;
 
     fn sub(self, rhs: Vector) -> Self::Output {
-        Vector::sub(self, rhs)
+        Vector::raw_sub(self, rhs)
     }
 }
 
@@ -177,7 +177,7 @@ impl std::ops::Add<Direction> for Vector {
     type Output = Vector;
 
     fn add(self, rhs: Direction) -> Self::Output {
-        Vector::add(self, rhs.into())
+        Vector::raw_add(self, rhs.into())
     }
 }
 
@@ -196,7 +196,7 @@ impl std::ops::Sub<Direction> for Vector {
     type Output = Vector;
 
     fn sub(self, rhs: Direction) -> Self::Output {
-        Vector::sub(self, rhs.into())
+        Vector::raw_sub(self, rhs.into())
     }
 }
 

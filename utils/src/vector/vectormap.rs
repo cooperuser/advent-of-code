@@ -102,6 +102,11 @@ impl<T: Clone> VectorMap<T> {
     pub fn len(&self) -> usize {
         self.iter().count()
     }
+
+    #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.iter().count() == 0
+    }
 }
 
 pub struct VectorMapIterator<'a, T> {

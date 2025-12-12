@@ -7,7 +7,7 @@ use std::ops::Add;
 
 use itertools::Itertools;
 
-#[derive(Clone)]
+#[derive(Clone, Default)]
 pub struct Graph<V, E>
 where
     V: Clone + Eq + Hash,

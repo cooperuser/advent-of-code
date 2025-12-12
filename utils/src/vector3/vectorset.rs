@@ -4,6 +4,7 @@ use super::Vector3;
 pub struct Vector3Set {
     grid: Vec<Vec<Vec<bool>>>,
     size: Vector3,
+    count: usize,
 }
 
 impl Vector3Set {
@@ -12,6 +13,7 @@ impl Vector3Set {
         Self {
             grid: vec![vec![vec![false; size.x as usize]; size.y as usize]; size.z as usize],
             size,
+            count: 0,
         }
     }
 
@@ -23,6 +25,9 @@ impl Vector3Set {
 
         let old = self.grid[pos.z as usize][pos.y as usize][pos.x as usize];
         self.grid[pos.z as usize][pos.y as usize][pos.x as usize] = true;
+        if !old {
+            self.count += 1;
+        }
         Some(!old)
     }
 
@@ -34,6 +39,9 @@ impl Vector3Set {
 
         let old = self.grid[pos.z as usize][pos.y as usize][pos.x as usize];
         self.grid[pos.z as usize][pos.y as usize][pos.x as usize] = false;
+        if old {
+            self.count -= 1;
+        }
         Some(old)
     }
 
@@ -57,6 +65,11 @@ impl Vector3Set {
     #[allow(dead_code)]
     pub fn len(&self) -> usize {
         self.iter().count()
+    }
+
+    #[allow(dead_code)]
+    pub fn is_empty(&self) -> bool {
+        self.count == 0
     }
 }
 
