@@ -1,11 +1,11 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
 use utils::prelude::*;
 
 pub struct Day {
     #[allow(dead_code)]
     raw: Vec<Rc<str>>,
-    devices: HashMap<Rc<str>, HashSet<Rc<str>>>,
+    devices: HashMap<Rc<str>, Vec<Rc<str>>>,
 }
 
 impl Solution<usize, usize> for Day {
