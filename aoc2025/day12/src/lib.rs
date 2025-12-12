@@ -1,8 +1,8 @@
-use std::collections::{BTreeSet, HashSet, VecDeque};
+use std::collections::{BTreeSet, BinaryHeap, HashMap};
 
 use utils::{
     prelude::*,
-    vector::{Vector, VectorMap, VectorSet},
+    vector::{Vector, VectorSet},
 };
 
 pub struct Day {
@@ -99,42 +99,110 @@ impl Region {
             return false;
         }
 
-        let mut queue = VecDeque::from([(VectorMap::new(self.size), 0, 0, Vector::zero())]);
-        while let Some((grid, index, orientation, pos)) = queue.pop_front() {
-            pretty_print(&grid, self.size);
-            let Some(shape) = needed.get(index) else {
+        let mut queue = BinaryHeap::from([State {
+            grid: HashMap::new(),
+            index: 0,
+            orientation: 0,
+            pos: Vector::zero(),
+        }]);
+
+        while let Some(state) = queue.pop() {
+            let Some(shape) = needed.get(state.index) else {
+                pretty_print(&state.grid, self.size);
                 return true;
             };
             let max_pos = self.size - shape.size; //- Vector::new(1, 1);
-            let Some(shape) = shape.orientations.get(orientation) else {
-                queue.push_back((grid, index, 0, Vector::new(pos.x + 1, pos.y)));
+            let Some(shape) = shape.orientations.get(state.orientation) else {
+                queue.push(state.shift_right());
                 continue;
             };
 
-            if pos.y > max_pos.y {
+            if state.pos.y > max_pos.y {
                 // Hit the bottom of the grid, continue onto next state in BFS
                 continue;
-            } else if pos.x > max_pos.x {
+            } else if state.pos.x > max_pos.x {
                 // Hit the right edge of the grid, carriage return onto BFS
-                queue.push_back((grid, index, orientation, Vector::new(0, pos.y + 1)));
+                queue.push(state.shift_down());
                 continue;
-            } else if shape.iter().any(|&spot| grid.contains(pos + spot)) {
+            } else if shape
+                .iter()
+                .any(|&spot| state.grid.contains_key(&(state.pos + spot)))
+            {
                 // There was an overlap between the shape and the grid
-                queue.push_back((grid, index, orientation + 1, pos));
+                queue.push(state.inc_orientation());
                 continue;
             }
 
-            let mut new_grid = grid.clone();
+            let mut new_grid = state.grid.clone();
             for &spot in shape {
-                new_grid.insert(pos + spot, index);
+                new_grid.insert(state.pos + spot, state.index);
             }
-            // pretty_print(&new_grid, self.size);
-            queue.push_back((new_grid, index + 1, 0, Vector::zero()));
-            queue.push_back((grid.clone(), index, orientation + 1, pos));
-            queue.push_back((grid, index, orientation, Vector::new(pos.x + 1, pos.y)));
+
+            queue.push(state.inc_index(new_grid));
+            queue.push(State {
+                grid: state.grid.clone(),
+                index: state.index,
+                orientation: state.orientation + 1,
+                pos: state.pos,
+            });
+            queue.push(state.shift_right());
         }
 
         false
+    }
+}
+
+#[derive(Eq, PartialEq)]
+struct State {
+    grid: HashMap<Vector, usize>,
+    index: usize,
+    orientation: usize,
+    pos: Vector,
+}
+
+impl State {
+    fn shift_right(self) -> Self {
+        Self {
+            orientation: 0,
+            pos: Vector::new(self.pos.x + 1, self.pos.y),
+            ..self
+        }
+    }
+
+    fn shift_down(self) -> Self {
+        Self {
+            orientation: 0,
+            pos: Vector::new(0, self.pos.y + 1),
+            ..self
+        }
+    }
+
+    fn inc_index(&self, grid: HashMap<Vector, usize>) -> Self {
+        Self {
+            grid,
+            orientation: 0,
+            pos: Vector::zero(),
+            index: self.index + 1,
+        }
+    }
+
+    fn inc_orientation(self) -> Self {
+        Self {
+            orientation: self.orientation + 1,
+            ..self
+        }
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.index.cmp(&other.index)
     }
 }
 
@@ -185,11 +253,11 @@ impl Shape {
     // }
 }
 
-fn pretty_print(grid: &VectorMap<usize>, size: Vector) {
+fn pretty_print(grid: &HashMap<Vector, usize>, size: Vector) {
     for y in 0..size.y {
         let mut line = Vec::new();
         for x in 0..size.x {
-            if let Some(n) = grid.get(Vector::new(x, y)) {
+            if let Some(n) = grid.get(&Vector::new(x, y)) {
                 line.push(n.to_string());
             } else {
                 line.push(".".to_string());
