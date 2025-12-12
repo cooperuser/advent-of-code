@@ -173,6 +173,21 @@ impl std::ops::SubAssign<Vector> for Vector {
     }
 }
 
+impl PartialOrd for Vector {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for Vector {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.x.cmp(&other.x) {
+            std::cmp::Ordering::Equal => self.y.cmp(&other.y),
+            ord => ord,
+        }
+    }
+}
+
 impl std::ops::Add<Direction> for Vector {
     type Output = Vector;
 
