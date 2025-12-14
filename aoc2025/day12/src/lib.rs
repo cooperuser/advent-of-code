@@ -78,7 +78,7 @@ impl Solution<usize, usize> for Day {
     }
 
     fn part_b(&self) -> Option<usize> {
-        None
+        Some(0)
     }
 }
 
