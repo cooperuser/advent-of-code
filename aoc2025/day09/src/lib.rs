@@ -81,8 +81,7 @@ impl Solution<i64, i64> for Day {
 
 impl Day {
     fn is_in_path(&self, a: Vector, b: Vector) -> bool {
-        let min = a.min(b);
-        let max = a.max(b);
+        let (min, max) = Vector::minmax(a, b);
 
         for &(a, b, edge) in &self.segments {
             match edge {

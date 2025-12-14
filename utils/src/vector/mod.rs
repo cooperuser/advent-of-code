@@ -126,16 +126,10 @@ impl Vector {
         x && y
     }
 
-    pub const fn min(&self, other: Vector) -> Vector {
-        let x = if self.x < other.x { self.x } else { other.x };
-        let y = if self.y < other.y { self.y } else { other.y };
-        Vector::new(x, y)
-    }
-
-    pub const fn max(&self, other: Vector) -> Vector {
-        let x = if self.x > other.x { self.x } else { other.x };
-        let y = if self.y > other.y { self.y } else { other.y };
-        Vector::new(x, y)
+    pub const fn minmax(a: Vector, b: Vector) -> (Vector, Vector) {
+        let xs = if a.x < b.x { (a.x, b.x) } else { (b.x, a.x) };
+        let ys = if a.y < b.y { (a.y, b.y) } else { (b.y, a.y) };
+        (Vector::new(xs.0, ys.0), Vector::new(xs.1, ys.1))
     }
 
     pub const fn abs(&self) -> Vector {
