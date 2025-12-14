@@ -143,39 +143,43 @@ impl Machine {
 
     fn solve(&self) -> usize {
         fn helper(
-            cache: &mut HashMap<Vec<isize>, usize>,
+            cache: &mut HashMap<Vec<isize>, Option<usize>>,
             costs: &HashMap<Vec<isize>, usize>,
             goal: &[isize],
-        ) -> usize {
+        ) -> Option<usize> {
             if let Some(&previous) = cache.get(goal) {
                 return previous;
             }
 
             if goal.iter().all(|&n| n == 0) {
-                return 0;
+                cache.insert(goal.to_vec(), Some(0));
+                return Some(0);
             }
 
-            // For some reason, usize::MAX / 2 does not work, but 3 does.
-            // I use 4 to be safe, in case other input files don't work.
-            let mut answer = usize::MAX / 4;
-            for (pattern, &cost) in costs {
-                if pattern
-                    .iter()
-                    .zip(goal)
-                    .all(|(a, b)| a <= b && a % 2 == b % 2)
-                {
-                    let goal: Vec<_> = pattern.iter().zip(goal).map(|(a, b)| (b - a) / 2).collect();
-                    let sub = helper(cache, costs, &goal);
-                    answer = answer.min(cost + 2 * sub);
-                }
-            }
+            let answer = costs
+                .iter()
+                .filter(|&(pattern, _)| {
+                    pattern
+                        .iter()
+                        .zip(goal)
+                        .all(|(&a, &b)| a <= b && a % 2 == b % 2)
+                })
+                .filter_map(|(pattern, &cost)| {
+                    let goal: Vec<_> = pattern
+                        .iter()
+                        .zip(goal)
+                        .map(|(&a, &b)| (b - a) / 2)
+                        .collect();
+                    helper(cache, costs, &goal).map(|sub| cost + 2 * sub)
+                })
+                .min();
 
             cache.insert(goal.to_vec(), answer);
             answer
         }
 
         let goal: Vec<_> = self.requirements.iter().map(|&n| n as isize).collect();
-        helper(&mut HashMap::new(), &self.patterns(), &goal)
+        helper(&mut HashMap::new(), &self.patterns(), &goal).unwrap()
     }
 }
 
