@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{collections::BTreeSet, rc::Rc};
 
 use super::Vector;
 
@@ -95,6 +95,47 @@ impl VectorSet {
         for v in other.iter() {
             self.insert(v);
         }
+    }
+
+    pub fn get_orientations(&self) -> Vec<VectorSet> {
+        let s = self.size - Vector::new(1, 1);
+        let a = self.clone();
+        let mut b = VectorSet::new(self.size);
+        let mut c = VectorSet::new(self.size);
+        let mut d = VectorSet::new(self.size);
+        let mut e = VectorSet::new(self.size.flip());
+        let mut f = VectorSet::new(self.size.flip());
+        let mut g = VectorSet::new(self.size.flip());
+        let mut h = VectorSet::new(self.size.flip());
+        for p in self.iter() {
+            b.insert(Vector::new(s.x - p.x, p.y));
+            c.insert(Vector::new(p.x, s.y - p.y));
+            d.insert(Vector::new(s.x - p.x, s.y - p.y));
+            e.insert(Vector::new(p.y, p.x));
+            f.insert(Vector::new(s.y - p.y, p.x));
+            g.insert(Vector::new(p.y, s.x - p.x));
+            h.insert(Vector::new(s.y - p.y, s.x - p.x));
+        }
+
+        let mut set: BTreeSet<(BTreeSet<Vector>, Vector)> = BTreeSet::new();
+        set.insert((a.iter().collect(), self.size));
+        set.insert((b.iter().collect(), self.size));
+        set.insert((c.iter().collect(), self.size));
+        set.insert((d.iter().collect(), self.size));
+        set.insert((e.iter().collect(), self.size.flip()));
+        set.insert((f.iter().collect(), self.size.flip()));
+        set.insert((g.iter().collect(), self.size.flip()));
+        set.insert((h.iter().collect(), self.size.flip()));
+
+        set.into_iter()
+            .map(|(s, size)| {
+                let mut set = VectorSet::new(size);
+                for pos in s {
+                    set.insert(pos);
+                }
+                set
+            })
+            .collect()
     }
 }
 
@@ -315,5 +356,31 @@ mod test {
         assert_eq!(iter.next(), Some(Vector::new(0, 1)));
         assert_eq!(iter.next(), Some(Vector::new(1, 1)));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn orientations_all_8() {
+        let mut set = VectorSet::new(Vector::new(3, 3));
+        set.insert(Vector::new(0, 0));
+        set.insert(Vector::new(1, 0));
+        let orientations = set.get_orientations();
+        assert_eq!(orientations.len(), 8);
+    }
+
+    #[test]
+    fn orientations_only_4() {
+        let mut set = VectorSet::new(Vector::new(3, 3));
+        set.insert(Vector::new(0, 0));
+        let orientations = set.get_orientations();
+        assert_eq!(orientations.len(), 4);
+    }
+
+    #[test]
+    fn orientations_only_2() {
+        let mut set = VectorSet::new(Vector::new(3, 3));
+        set.insert(Vector::new(0, 0));
+        set.insert(Vector::new(2, 2));
+        let orientations = set.get_orientations();
+        assert_eq!(orientations.len(), 2);
     }
 }

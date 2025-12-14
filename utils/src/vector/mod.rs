@@ -81,6 +81,13 @@ impl Vector {
         }
     }
 
+    pub const fn flip(&self) -> Self {
+        Self {
+            x: self.y,
+            y: self.x,
+        }
+    }
+
     #[allow(dead_code)]
     pub fn range(a: Vector, b: Vector) -> impl Iterator<Item = Vector> {
         (a.y..b.y).flat_map(move |y| (a.x..b.x).map(move |x| Vector::new(x, y)))
